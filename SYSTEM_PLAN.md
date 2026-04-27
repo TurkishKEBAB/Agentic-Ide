@@ -118,7 +118,7 @@ Tüm repo context göndermek: küçük projelerde çalışır, büyük projelerd
 
 Güvenlik modeli "ne yasak" değil "ne izinli" sorusuna dayanır. Varsayılan her şey yasaklıdır; izinler açıkça tanımlanır.
 
-#### Katman 1 — Sandbox (Çalışma Dizini Kısıtlaması)
+#### Katman 1 — Workspace Boundary + Path Normalization (Çalışma Dizini Kısıtlaması ve Traversal Koruması)
 - Ajan yalnızca kullanıcının açtığı proje dizini içindeki dosyaları okuyabilir ve yazabilir
 - Proje dizini dışına çıkmak için hiçbir araç yoktur
 - `../` traversal girişimleri path normalizasyonu ile önlenir
@@ -362,7 +362,7 @@ Ay 16–18 │ Tez ve Final (Thesis & Final)
 
 **Yapılacaklar:**
 - [ ] Tool sistemi: `read_file`, `write_file`, `search_symbols`, `list_files`
-- [ ] `write_file` güvenlik katmanları (sandbox, gizli dosya filtresi)
+- [ ] `write_file` güvenlik katmanları (workspace boundary, path normalization, write boundary / gizli dosya filtresi)
 - [ ] Diff üretimi (unified diff → Monaco'da görsel diff)
 - [ ] Onay akışı: tek dosya ve çok dosya senaryoları
 - [ ] Undo stack: son 10 değişiklik seti
@@ -432,7 +432,7 @@ Bu özet bölümü, tüm belgeden çıkan en kritik kararlardır.
 3. Kullanıcı tetiklemeli ajan döngüsü (ReAct: gözlemle → planla → onay al → uygula)
 4. Çok dosyalı diff önizleme + onay akışı
 5. Undo stack (son 10 değişiklik)
-6. Güvenlik katmanları (sandbox + gizli dosya filtresi + audit log)
+6. Güvenlik katmanları (workspace boundary + path normalization + write boundary + reactive safety warnings + audit log)
 7. 2 model sağlayıcısı (Claude + Ollama) soyutlama katmanı üzerinden
 
 ---

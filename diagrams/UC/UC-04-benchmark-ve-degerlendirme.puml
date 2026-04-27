@@ -1,0 +1,89 @@
+@startuml
+title Agentic IDE - Benchmark ve Değerlendirme Use Case Diyagramı
+left to right direction
+skinparam packageStyle rectangle
+skinparam shadowing false
+
+actor "Danışman / Araştırmacı" as Researcher
+actor "Katılımcı Öğrenci" as Participant
+actor "Dış Değerlendirici" as Reviewer
+actor "Agentic IDE" as AgentIDE
+actor "Audit ve Metrik Kayıtları" as MetricsStore
+
+rectangle "Değerlendirme ve Benchmark Katmanı" {
+  usecase "Benchmark görev setini tanımla" as UC_DefineTasks
+  usecase "Beklenen çıktıları belgeleyip\npuanlama kuralı oluştur" as UC_DefineRubric
+  usecase "Baseline oturumu çalıştır\n(ajan olmadan)" as UC_RunBaseline
+  usecase "Ajan destekli oturumu çalıştır" as UC_RunAgentSession
+  usecase "Katılımcı görevini tamamla" as UC_CompleteTask
+  usecase "Çıktıları anonimleştir" as UC_AnonymizeOutputs
+  usecase "Görev başarı oranını ölç" as UC_MeasureSuccess
+  usecase "Güvenlik ihlali girişimlerini ölç" as UC_MeasureSafety
+  usecase "Rollback oranını ölç" as UC_MeasureRollback
+  usecase "Yanlış atıf / hallucination\noranını ölç" as UC_MeasureAccuracy
+  usecase "Gecikme ve model\nperformansını ölç" as UC_MeasureLatency
+  usecase "Sonuçları karşılaştır" as UC_CompareResults
+  usecase "Tez raporu ve bulguları üret" as UC_GenerateReport
+}
+
+Researcher --> UC_DefineTasks
+Researcher --> UC_DefineRubric
+Researcher --> UC_RunBaseline
+Researcher --> UC_RunAgentSession
+Researcher --> UC_CompareResults
+Researcher --> UC_GenerateReport
+Participant --> UC_CompleteTask
+Reviewer --> UC_AnonymizeOutputs
+Reviewer --> UC_MeasureSuccess
+Reviewer --> UC_MeasureSafety
+Reviewer --> UC_MeasureRollback
+Reviewer --> UC_MeasureAccuracy
+
+AgentIDE --> UC_RunAgentSession
+AgentIDE --> UC_MeasureLatency
+MetricsStore --> UC_MeasureSuccess
+MetricsStore --> UC_MeasureSafety
+MetricsStore --> UC_MeasureRollback
+MetricsStore --> UC_MeasureAccuracy
+MetricsStore --> UC_MeasureLatency
+
+UC_DefineTasks .> UC_DefineRubric : <<include>>
+UC_RunBaseline .> UC_CompleteTask : <<include>>
+UC_RunAgentSession .> UC_CompleteTask : <<include>>
+UC_RunAgentSession .> UC_MeasureLatency : <<include>>
+UC_AnonymizeOutputs .> UC_MeasureSuccess : <<include>>
+UC_AnonymizeOutputs .> UC_MeasureSafety : <<include>>
+UC_AnonymizeOutputs .> UC_MeasureRollback : <<include>>
+UC_AnonymizeOutputs .> UC_MeasureAccuracy : <<include>>
+UC_CompareResults .> UC_MeasureSuccess : <<include>>
+UC_CompareResults .> UC_MeasureSafety : <<include>>
+UC_CompareResults .> UC_MeasureRollback : <<include>>
+UC_CompareResults .> UC_MeasureAccuracy : <<include>>
+UC_CompareResults .> UC_MeasureLatency : <<include>>
+UC_GenerateReport .> UC_CompareResults : <<include>>
+
+note right of UC_RunAgentSession
+Benchmark senaryoları:
+- tek dosya düzenleme
+- çok dosyalı refactor
+- bug fix
+- test yazma
+- codebase Q&A
+end note
+
+note bottom of UC_CompareResults
+Araştırma sorusu burada test edilir:
+approval-gated ajan döngüsü, doğrudan LLM çıkışına göre
+güvenlik ve güven metriklerini iyileştiriyor mu?
+
+ABLATION TASARIMI (3 koşul, aynı sistem):
+- A = Doğrudan LLM (kopyala-yapıştır, Agentic IDE devre dışı)
+- B = Agentic IDE, --experimental-disable-approval-gate flag
+       (ayrı sistem değil; aynı kod, ablation flag)
+- C = Agentic IDE, tam akış (plan + reactive safety + onay)
+
+Birincil metrik: successful unauthorized write count = 0
+Detay: docs/adr/ADR-007-ablation-baseline-design.md
+end note
+
+@enduml

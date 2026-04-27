@@ -1,0 +1,104 @@
+@startuml
+title Agentic IDE - Genel Sistem Use Case Görünümü
+left to right direction
+skinparam packageStyle rectangle
+skinparam shadowing false
+
+actor "Geliştirici" as Developer
+actor "Bulut Model Sağlayıcı\n(Claude API)" as CloudModel
+actor "Yerel Model Sağlayıcı\n(Ollama)" as LocalModel
+actor "Dosya Sistemi" as FileSystem
+actor "Bağlam ve İndeks Servisi\n(Embedding + Symbol Retrieval)" as ContextService
+actor "Tercih Deposu\n(preferences.json)" as PreferenceStore
+actor "Audit Log\n(audit.jsonl)" as AuditLog
+
+rectangle "Agentic IDE" {
+  usecase "Proje klasörü aç" as UC_OpenProject
+  usecase "Çalışma alanını indeksle" as UC_IndexWorkspace
+  usecase "Dosya görüntüle ve düzenle" as UC_EditFiles
+  usecase "Doğal dil ile görev başlat" as UC_StartTask
+  usecase "Kod tabanını açıkla\n(Q&A)" as UC_CodebaseQA
+  usecase "Hata tespiti ve\ndüzeltme planı iste" as UC_BugFix
+  usecase "Çok dosyalı refactor iste" as UC_Refactor
+  usecase "Test oluşturma iste" as UC_TestGen
+  usecase "Güvenli tek dosya\ndüzenleme iste" as UC_SafeEdit
+  usecase "Bağlam kaynaklarını göster" as UC_ShowSources
+  usecase "Diff incele" as UC_ReviewDiff
+  usecase "Değişikliği onayla / reddet" as UC_ApproveReject
+  usecase "Seçerek uygula" as UC_PartialApply
+  usecase "Rollback yap" as UC_Rollback
+  usecase "Model tercihini ayarla" as UC_SelectModel
+  usecase "Gizlilik tercihini ayarla" as UC_PrivacyPreference
+  usecase "Reactive safety warning göster\n(apply öncesi)" as UC_ReactiveSafetyWarning
+  usecase "Audit geçmişini incele" as UC_ViewAudit
+  usecase "İlgili dosyaları retrieve et" as UC_RetrieveContext
+  usecase "Değişiklik planı oluştur" as UC_CreatePlan
+}
+
+Developer --> UC_OpenProject
+Developer --> UC_EditFiles
+Developer --> UC_StartTask
+Developer --> UC_ReviewDiff
+Developer --> UC_ApproveReject
+Developer --> UC_Rollback
+Developer --> UC_SelectModel
+Developer --> UC_PrivacyPreference
+Developer --> UC_ViewAudit
+
+UC_OpenProject .> UC_IndexWorkspace : <<include>>
+UC_StartTask .> UC_RetrieveContext : <<include>>
+UC_StartTask .> UC_CreatePlan : <<include>>
+UC_StartTask .> UC_ShowSources : <<include>>
+UC_StartTask .> UC_ReactiveSafetyWarning : <<include>>
+UC_BugFix -|> UC_StartTask
+UC_Refactor -|> UC_StartTask
+UC_TestGen -|> UC_StartTask
+UC_CodebaseQA -|> UC_StartTask
+UC_SafeEdit -|> UC_StartTask
+UC_ApproveReject .> UC_ReviewDiff : <<include>>
+UC_PartialApply .> UC_ApproveReject : <<extend>>
+UC_Rollback .> UC_ViewAudit : <<include>>
+
+ContextService --> UC_IndexWorkspace
+ContextService --> UC_RetrieveContext
+CloudModel --> UC_CreatePlan
+LocalModel --> UC_CreatePlan
+FileSystem --> UC_OpenProject
+FileSystem --> UC_EditFiles
+FileSystem --> UC_ReviewDiff
+FileSystem --> UC_Rollback
+PreferenceStore --> UC_SelectModel
+PreferenceStore --> UC_PrivacyPreference
+AuditLog --> UC_ViewAudit
+AuditLog --> UC_ApproveReject
+AuditLog --> UC_Rollback
+AuditLog --> UC_ReactiveSafetyWarning
+
+note right of UC_StartTask
+MVP görev ailesi:
+- bug fix
+- refactor
+- test oluşturma
+- Q&A
+- tek dosya güvenli edit
+end note
+
+note bottom of UC_ApproveReject
+Plan-first, approval-gated model:
+Kullanıcı onayı olmadan hiçbir dosya yazılmaz.
+end note
+
+note bottom of UC_PrivacyPreference
+Kullanıcı bulut modeli veya yalnızca yerel modeli
+tercih ederek veri çıkışını kontrol eder.
+end note
+
+note bottom of UC_ReactiveSafetyWarning
+MVP içi reactive safety: yalnızca apply öncesi.
+Tetikleyiciler: workspace boundary violation,
+protected file write, large edit threshold,
+secret-in-diff. Detay: UC-03A.
+Background scanning MVP DIŞIDIR (UC-03B).
+end note
+
+@enduml

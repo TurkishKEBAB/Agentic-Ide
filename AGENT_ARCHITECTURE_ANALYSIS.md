@@ -289,11 +289,11 @@ Pratik uygulama:
 │                                                                  │
 │  FAZ 2 — SAFETY CHECK (Safety Guard rolü)                        │
 │  System prompt: "Planı güvenlik açısından gözden geçir.          │
-│   Korumalı dosya var mı? Sandbox dışı erişim var mı?"            │
+│   Korumalı dosya var mı? Workspace boundary dışı erişim var mı?" │
 │  → İhlal varsa: kullanıcıya bildir, döngüyü durdur               │
 │                                                                  │
 │  FAZ 3 — EXECUTE (Executor rolü)                                 │
-│  Tool calls: read_file, write_file (sandbox içi)                 │
+│  Tool calls: read_file, write_file (workspace boundary içi)      │
 │  Her write_file öncesi güvenlik katmanından geçer                │
 │                                                                  │
 │  FAZ 4 — REVIEW (Reviewer rolü)                                  │

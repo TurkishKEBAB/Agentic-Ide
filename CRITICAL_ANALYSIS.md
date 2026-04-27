@@ -97,7 +97,7 @@ Belgeler, TypeScript ve Electron'un daha önce kullanılmadığını açıkça b
 
 ## 6. Güvenlik Problemleri
 
-- **Principle of Least Privilege ihlali:** Ajana file system üzerinde geniş erişim vermek yerine, yalnızca izin verilen dizinleri (sandbox) tanımlanmış bir manifest üzerinden erişilebilir kılmak gerekir.
+- **Principle of Least Privilege ihlali:** Ajana file system üzerinde geniş erişim vermek yerine, yalnızca izin verilen dizinleri (workspace boundary) tanımlanmış bir manifest üzerinden erişilebilir kılmak gerekir.
 - **Shell injection riski:** Ajan, kullanıcının isteğinden türetilen bir komutu doğrudan terminale yazarsa, kötü niyetli bir girdi (ya da modelin ürettiği beklenmedik bir çıktı) shell injection açığına yol açabilir. Komutlar parametrize edilmeli, `eval()` veya shell string interpolation'dan kaçınılmalıdır.
 - **Hassas veri sızıntısı:** `.env`, `.pem`, `id_rsa` gibi dosyaların içeriğinin yanlışlıkla bulut modeline gönderilmesi, API anahtarları ve sertifikaların sızmasına neden olabilir. Context pipeline'ına bir gizli veri filtresi eklenmesi zorunludur.
 - **API anahtar yönetimi:** Kullanıcının model API anahtarları nerede saklanıyor? Electron ana sürecinde clear-text mi? Sistem keychain entegrasyonu gereklidir.

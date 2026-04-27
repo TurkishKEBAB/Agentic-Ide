@@ -1,0 +1,96 @@
+@startuml
+title Agentic IDE - UC-03B Proactive Background Monitoring (Future Work — MVP Dışı; former UC-03)
+left to right direction
+skinparam packageStyle rectangle
+skinparam shadowing false
+
+' NOT: Bu use case MVP DIŞIDIR. Background (arka plan) proaktif analiz
+' ve alert sistemi gelecek çalışma kapsamındadır.
+' Apply-öncesi reactive safety warnings için bkz. UC-03A.
+
+actor "Geliştirici" as Developer
+actor "Dil Sunucusu" as LanguageServer
+actor "Secret / Pattern Detector" as SecretDetector
+actor "Değişiklik Planlayıcı" as ChangePlanner
+actor "Tercih Deposu\n(preferences.json)" as PreferenceStore
+actor "Audit Log" as AuditLog
+
+rectangle "Agentic IDE - Proactive Background Layer (Future Work)" {
+  usecase "Proaktif uyarı al" as UC_ReceiveAlert
+  usecase "Kritik secret uyarısını göster" as UC_ShowSecretAlert
+  usecase "Korumalı dosya açılış uyarısını göster" as UC_ShowProtectedFileAlert
+  usecase "Syntax hatası uyarısını göster" as UC_ShowSyntaxAlert
+  usecase "Büyük değişiklik öncesi\nuyarı göster" as UC_ShowLargeEditAlert
+  usecase "Rollback halen mümkün\nbildirimini göster" as UC_ShowRollbackAlert
+  usecase "Uyarı için neden açıklamasını göster" as UC_ShowWhy
+  usecase "Uyarıyı ertele" as UC_SnoozeAlert
+  usecase "Tetikleyiciyi sustur" as UC_MuteTrigger
+  usecase "Tercihleri düzenle" as UC_EditPreferences
+  usecase "Güven eşiğini ayarla" as UC_SetConfidence
+  usecase "Birincil aksiyonu başlat" as UC_StartPrimaryAction
+  usecase "Debounce / throttle uygula" as UC_Debounce
+  usecase "Tek uyarı kuyruğu yönet" as UC_QueueAlert
+  usecase "Güven eşiğini doğrula" as UC_CheckConfidence
+  usecase "Kullanıcı tepkisini kaydet" as UC_LogReaction
+}
+
+Developer --> UC_ReceiveAlert
+Developer --> UC_EditPreferences
+Developer --> UC_SetConfidence
+Developer --> UC_SnoozeAlert
+Developer --> UC_MuteTrigger
+Developer --> UC_StartPrimaryAction
+
+LanguageServer --> UC_ShowSyntaxAlert
+SecretDetector --> UC_ShowSecretAlert
+SecretDetector --> UC_ShowProtectedFileAlert
+ChangePlanner --> UC_ShowLargeEditAlert
+ChangePlanner --> UC_ShowRollbackAlert
+PreferenceStore --> UC_EditPreferences
+PreferenceStore --> UC_SetConfidence
+AuditLog --> UC_LogReaction
+
+UC_ReceiveAlert .> UC_Debounce : <<include>>
+UC_ReceiveAlert .> UC_QueueAlert : <<include>>
+UC_ReceiveAlert .> UC_CheckConfidence : <<include>>
+UC_ShowSecretAlert -|> UC_ReceiveAlert
+UC_ShowProtectedFileAlert -|> UC_ReceiveAlert
+UC_ShowSyntaxAlert -|> UC_ReceiveAlert
+UC_ShowLargeEditAlert -|> UC_ReceiveAlert
+UC_ShowRollbackAlert -|> UC_ReceiveAlert
+UC_ReceiveAlert .> UC_ShowWhy : <<include>>
+UC_SnoozeAlert .> UC_LogReaction : <<include>>
+UC_MuteTrigger .> UC_EditPreferences : <<include>>
+UC_MuteTrigger .> UC_LogReaction : <<include>>
+UC_StartPrimaryAction .> UC_LogReaction : <<include>>
+
+note top of UC_ReceiveAlert
+FUTURE WORK — MVP DIŞI.
+Background scanning, save-time / idle-time tetikleyiciler,
+debounce/throttle, alert queue, snooze ve mute davranışı
+gelecek çalışma kapsamındadır.
+
+MVP içindeki apply-öncesi reactive safety warnings
+için bkz. UC-03A ve SAFETY_AND_GUARDRAILS §2.6.
+end note
+
+note right of UC_ReceiveAlert
+Genel kurallar (gelecek çalışma):
+- kullanıcı chat yazarken sessiz kal
+- son 2 dakikada uyarı verildiyse bekle
+- aynı anda en fazla bir uyarı göster
+end note
+
+note bottom of UC_ShowSecretAlert
+SECRET_DETECTED ve PROTECTED_FILE_OPEN
+kritik seviyededir; gelecek çalışmada
+varsayılan olarak kapatılamaz.
+end note
+
+note bottom of UC_EditPreferences
+Kullanıcı kalite odaklı tetikleyicileri
+açıp kapatabilir; güvenlik odaklı kritik uyarılar
+her zaman aktif tutulur.
+end note
+
+@enduml

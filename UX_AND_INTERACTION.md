@@ -1,147 +1,185 @@
-# KULLANICI DENEYİMİ TASARIMI (UX_AND_INTERACTION)
+# KULLANICI DENEYİMİ VE ETKİLEŞİM TASARIMI (UX_AND_INTERACTION)
 
-> **Belge amacı:** Bu belge, Agentic IDE'de kullanıcı ile ajan arasındaki her etkileşim
-> noktasını tanımlar: kullanıcı tetiklemeli görev akışı, diff-onay döngüsü ve
-> proaktif davranış katmanı.  
-> Proaktif davranış detayları için → `PROACTIVE_BEHAVIOR_DESIGN.md`  
-> Mimari bağlam için → `SYSTEM_PLAN.md § 7`
+> **Belge amacı:** Kullanıcı akışlarını, arayüz bileşenlerini ve etkileşim kararlarını belgeler.  
+> Ürün tanımı için → `PRODUCT_PLAN.md`
 
 ---
 
-## 1. Kullanıcı Tetiklemeli Görev Akışı
+## 1. Tasarım İlkeleri
 
-### Öneri
-Kullanıcı, sağ panel chat arayüzünden ajana doğal dil ile görev verir.
-Ajan hiçbir zaman izinsiz değişiklik yapmaz.
+### 1.1 Güven Öncelikli (Trust-First)
 
-```
-[Kullanıcı] → Chat paneline yazar: "Bu fonksiyondaki hatayı düzelt"
-                    │
-                    ▼
-            [Ajan: PLANLA]
-            Hangi dosyalar? Hangi satırlar? Neden?
-            Planı kullanıcıya sunar.
-                    │
-                    ▼
-            [Kullanıcı: ONAY]
-            "Uygula" veya "İptal" veya "Düzenle"
-                    │ (yalnızca onay sonrası)
-                    ▼
-            [Ajan: UYGULA]
-            Dosyaları atomik olarak yazar.
-                    │
-                    ▼
-            [Diff Ekranı]
-            Kullanıcı değişikliği satır satır görür.
-            "Geri Al" tek tuş ile mümkün (10 adım undo stack).
-```
+- Her değişiklik öncesinde diff önizleme gösterilir
+- Kullanıcı neyin değişeceğini bilmeden onay vermez
+- "Ne yaptığımı göstereyim, sonra sen karar ver" yaklaşımı
+- Bağlam kaynakları her zaman görünür: "Şu dosyalardan bilgi aldım"
 
-### Gerekçe
-Onay kapısı (approval gate) olmadan ajan kod değiştirebilirse, kullanıcı güveni
-asla tam anlamıyla inşa edilemez. Kullanıcı her zaman "ne olduğunu" görmeli,
-onaylamalı ve geri alabilmelidir.
+### 1.2 Minimum Sürtüşme (Low Friction)
 
-### Trade-off
-Onay adımı, kullanıcının "çok adım var" hissine yol açabilir. Çözüm: görev türüne
-göre onay seviyesi ayarlanabilir (gelecek versiyon). MVP'de tüm görevler onay gerektirir.
+- Basit görevlerde kısa diff, hızlı onay
+- Tek tuşla undo (rollback)
+- Sohbet paneli her zaman erişilebilir
+- Modeller arası geçiş tek tıkla
 
-### Yanlış yapılırsa ne bozulur?
-Onay atlanırsa veya opsiyonel yapılırsa: güvenlik modeli mantıksal bütünlüğünü kaybeder.
-Bir yanlış değişiklik gözden kaçar ve güven zedelenir.
+### 1.3 Şeffaflık (Transparency)
+
+- Ajan hangi dosyaları okuduğunu gösterir
+- Token kullanımı görünür (maliyet farkındalığı)
+- Model seçimi açık: yerel mi, bulut mu?
+- Audit log kullanıcı tarafından incelenebilir
 
 ---
 
-## 2. Diff ve Değişiklik İnceleme Ekranı
+## 2. Ana Ekran Düzeni
 
-### Öneri
-Ajan her dosya değişikliği için yan yana (before / after) diff gösterimi sunar.
+### 2.1 Düzen
 
 ```
-┌─────────────────────────────┬─────────────────────────────┐
-│  ÖNCE                       │  SONRA                      │
-│  ─────────────────────────  │  ─────────────────────────  │
-│  function add(a, b) {       │  function add(a, b) {       │
-│    return a - b;  ← hata    │    return a + b;  ← düzeltme│
-│  }                          │  }                          │
-└─────────────────────────────┴─────────────────────────────┘
-  [✓ Onayla]  [✗ Reddet]  [← Geri Al]  [? Neden?]
+┌─────────────────────────────────────────────────────────┐
+│  Üst Çubuk: dosya adı / model / durum                   │
+├─────────────┬───────────────────────┬───────────────────┤
+│             │                       │                   │
+│  Dosya      │   Editör              │   Sohbet Paneli   │
+│  Ağacı      │   (Monaco)            │   (Chat)          │
+│             │                       │                   │
+│  [sidebar]  │   [merkez]            │   [sağ panel]     │
+│             │                       │                   │
+├─────────────┴───────────────────────┴───────────────────┤
+│  Alt Çubuk: satır/sütun | encoding | model | token      │
+└─────────────────────────────────────────────────────────┘
 ```
 
-Kullanıcı her değişikliği satır düzeyinde görebilir ve "Neden?" butonu ile
-ajanın gerekçesini okuyabilir.
+### 2.2 Panel Boyutları (Varsayılan)
 
-### Gerekçe
-Diff ekranı olmadan kullanıcı "AI ne yaptı?" sorusunun yanıtını göremez.
-Bu görünürlük, hem güven inşası hem de araştırma sorusunun ölçülmesi için zorunludur.
-
-### Trade-off
-Küçük değişiklikler (tek satır düzeltme) için diff ekranı fazla adım gibi görünebilir.
-Gelecekte "hızlı onay" modu (inline diff) eklenebilir. MVP'de her değişiklik
-tam diff ekranından geçer.
-
-### Yanlış yapılırsa ne bozulur?
-Diff gösterimi inline veya küçültülmüş yapılırsa: kullanıcı değişikliği gerçekten
-incelemez, onay bir formaliteye dönüşür ve güvenlik modeli kâğıt üzerinde kalır.
-
----
-
-## 3. Proaktif Davranış Katmanı
-
-### Öneri
-Kullanıcı prompt yazmadan da ajan, belirli durumlarda sessiz bildirimler üretir.
-Bu davranış **non-blocking** ve **kullanıcı kontrolünde** tasarlanmıştır.
-
-MVP'de yalnızca üç tetikleyici aktiftir:
-
-| Tetikleyici | Seviye | Davranış |
+| Panel | Genişlik | Yeniden boyutlandırılabilir |
 |---|---|---|
-| **SECRET_DETECTED** | Kritik (kırmızı banner) | Kapatılamaz; API key / token tespiti |
-| **PROTECTED_FILE_OPEN** | Kritik (kırmızı banner) | Kapatılamaz; `.env` / `id_rsa` açıldığında |
-| **SYNTAX_ERROR** | Orta (sarı inline) | 8 sn sonra solar; dil sunucusu syntax hatası |
-
-Tüm diğer proaktif öneriler (uzun fonksiyon, test eksikliği, duplike kod) **varsayılan olarak pasiftir**.
-Kullanıcı Tercihler panelinden istediğini açabilir.
-
-Detaylı tasarım → `PROACTIVE_BEHAVIOR_DESIGN.md`
-
-### Gerekçe
-Proaktif davranış, araç güvenini hem inşa edebilir hem yıkabilir. Minimum güvenli
-set ile başlamak, ilk kullanıcı testlerinde güven metriklerini ölçmeyi mümkün kılar.
-
-### Trade-off
-Az tetikleyici ile başlamak bazı gerçek kalite sorunlarını kaçırmak anlamına gelir.
-Bu kabul edilebilir: güven önce inşa edilir, ek uyarılar güven yerleştikten sonra açılır.
-
-### Yanlış yapılırsa ne bozulur?
-Tüm tetikleyiciler varsayılan açık olarak başlarsa: kullanıcı ilk 30 dakikada
-kalite önerilerini kapatır ve güvenlik uyarıları da aynı kapatma davranışıyla
-susturulur.
+| Dosya ağacı | 250px | ✅ |
+| Editör | Kalan alan | ✅ |
+| Sohbet paneli | 400px | ✅ (gizlenebilir) |
 
 ---
 
-## 4. Kullanıcı Kontrol Noktaları
+## 3. Kullanıcı Akışları
 
-### Öneri
-Kullanıcı her etkileşim seviyesinde kontrolü elinde tutar:
+### 3.1 İlk Açılış Akışı
 
-| Seviye | Kontrol noktası | Kullanıcı eylemi |
+```
+1. Uygulama açılır → Hoş geldin ekranı
+2. "Klasör Aç" butonu → sistem dosya seçici
+3. Klasör seçilir → dosya ağacı yüklenir + indeksleme başlar
+4. İndeksleme tamamlanır → durum çubuğunda "Hazır" gösterilir
+5. Sohbet paneli aktif → kullanıcı ilk sorusunu yazabilir
+```
+
+### 3.2 Sohbet + Değişiklik Akışı
+
+```
+1. Kullanıcı doğal dilde istek yazar
+2. Ajan düşünüyor göstergesi (streaming response)
+3. Ajan bağlam kaynaklarını gösterir: "3 dosya incelendi"
+4. Ajan yanıt verir:
+   a. Yalnızca açıklama → metin gösterilir
+   b. Değişiklik planı → diff önizleme paneli açılır
+5. Diff paneli:
+   ┌─────────────────────────────────────┐
+   │ Değişiklik Planı                     │
+   │ 📁 src/auth/login.ts (+5, -2)       │
+   │ 📁 src/utils/jwt.ts (+3, -1)        │
+   │                                     │
+   │ [Tümünü Uygula] [Seçerek Uygula]    │
+   │ [Düzenle] [İptal]                   │
+   └─────────────────────────────────────┘
+6. Kullanıcı onaylar → değişiklik uygulanır
+7. Durum çubuğunda "✅ 2 dosya değiştirildi — Geri al" gösterilir
+```
+
+### 3.3 Rollback Akışı
+
+```
+1. Kullanıcı "Geri Al" tıklar (veya Ctrl+Z x2)
+2. Geri alınacak değişiklik özeti gösterilir
+3. "Geri Al" onayı → dosyalar önceki haline döner
+4. Çakışma varsa → uyarı: "Bu dosya sonra değiştirilmiş, yine de geri alınsın mı?"
+```
+
+### 3.4 Q&A (Yalnızca Soru-Cevap) Akışı
+
+```
+1. Kullanıcı soru sorar: "Bu projede auth nasıl çalışıyor?"
+2. Ajan retrieval ile ilgili dosyaları bulur
+3. Yanıt render edilir + altında bağlam kaynakları gösterilir:
+   "Kaynaklar: src/auth/login.ts, src/auth/types.ts, src/middleware/session.ts"
+4. Kullanıcı kaynağa tıklarsa → dosya editörde açılır
+```
+
+---
+
+## 4. Mevcut AI IDE'lerle UX Karşılaştırması
+
+### 4.1 Cursor UX
+
+| Özellik | Cursor | Agentic IDE |
 |---|---|---|
-| Görev başlangıcı | Plan sunuldu | Onayla / Reddet / Düzenle |
-| Değişiklik uygulaması | Diff gösterildi | Onayla / Reddet / Satır seç |
-| Uygulama sonrası | Undo stack | "Geri Al" (10 adım) |
-| Proaktif uyarı | Bildirim | Aksiyon / Ertele / Sustur |
-| Uzun vadeli tercih | Ayarlar paneli | Tetikleyici aç/kapat, güven eşiği |
+| Değişiklik önerisi | Tab ile kabul, inline diff | Ayrı diff panelinde detaylı görünüm |
+| Çok dosya düzenleme | Composer panelinde | Dosya listesi + adım adım diff |
+| Onay mekanizması | "Accept" / "Reject" (hızlı) | "Tümünü Uygula" / "Seçerek Uygula" |
+| Rollback | Yok | ✅ Son 10 değişiklik |
+| Bağlam kaynakları | Kısıtlı görünürlük | Tam şeffaflık |
+| Model seçimi | Ayarlar menüsünde | Alt çubukta tek tıkla |
 
-### Gerekçe
-Her adımda çıkış noktası olan bir sistem, kullanıcıya "ben hâlâ kontroldeyim"
-hissini verir. Bu his, AI araçlarına güvenin temel bileşenidir.
+### 4.2 Windsurf UX
 
-### Trade-off
-Çok fazla kontrol noktası kullanıcıyı yavaşlatabilir. Denge: kritik noktalarda
-(plan onayı, diff) zorunlu kontrol; ikincil noktalarda (uyarı kapatma, ertele)
-isteğe bağlı kontrol.
+| Özellik | Windsurf | Agentic IDE |
+|---|---|---|
+| Ajan döngüsü | Cascade (otomatik) | ReAct (kullanıcı tetiklemeli) |
+| Bağlam yönetimi | Otomatik akış takibi | Katmanlı retrieval + manual pin |
+| Onay | Bazı işlemler otomatik | Her değişiklik onay zorunlu |
+| Güvenlik | Temel | Çok katmanlı (workspace boundary, write boundary, reactive safety, audit) |
 
-### Yanlış yapılırsa ne bozulur?
-Kontrol noktaları yeterince açık değilse: kullanıcı "AI değiştiriyor, ben bakıyorum"
-moduna girer ve aslında ne olduğunu takip etmez. İlk yanlış değişiklikte
-"bu araç güvenilmez" kararı verilir.
+---
+
+## 5. UX Sorunları ve Çözüm Önerileri
+
+### 5.1 Onay Yorgunluğu (Approval Fatigue)
+
+**Risk:** Her değişiklik için onay istemek kullanıcıyı "her şeyi kabul eden robot"a dönüştürebilir.
+
+**Azaltma stratejileri:**
+- Basit değişikliklerde (yorum, formatlama) kısa diff göster
+- Kritik değişikliklerde (dosya silme, çok dosya) detaylı uyarı
+- Gelecekte: güven seviyesine göre otomatik onay seçeneği
+- Trend takibi: kullanıcı ardışık hızla onay veriyorsa → uyarı göster
+
+### 5.2 İlk Kullanıcı Deneyimi (Onboarding)
+
+**Tasarım:**
+- Hoş geldin ekranı: "Klasör Aç" + "Son Projeler" + kısa demo videosu
+- İlk görev önerisi: "Bir soru sorun veya dosya üzerinde değişiklik isteyin"
+- Tooltip'ler: ilk 3 kullanımda sohbet paneli, diff paneli, rollback açıklaması
+
+### 5.3 Hata Durumu İletişimi
+
+| Hata Türü | Gösterim |
+|---|---|
+| Model yanıt vermedi | "Model yanıt veremedi. Tekrar deneyin veya model değiştirin." |
+| Güvenlik ihlali girişimi | "⚠ Bu dosya güvenlik sebebiyle erişilemez: .env" |
+| Diff uygulama hatası | "Dosya değiştirilmiş. Güncel versiyonu görmek ister misiniz?" |
+| Bağlantı hatası (bulut model) | "İnternet bağlantısı yok. Yerel modele geçmek ister misiniz?" |
+
+---
+
+## 6. Erişilebilirlik (Temel)
+
+| Özellik | Durum |
+|---|---|
+| Klavye navigasyonu | ✅ (Monaco sağlar) |
+| Screen reader desteği | ⚠ Temel (Monaco desteği) |
+| Yüksek kontrast tema | ❌ (MVP'de yok, Monaco varsayılan) |
+| Özelleştirilebilir yazı boyutu | ✅ (Monaco sağlar) |
+| Kısayol tuşları | ✅ Özelleştirilebilir |
+
+---
+
+*UX tasarımı için → bu belge.*  
+*Ürün kararları için → `PRODUCT_PLAN.md`*  
+*Güvenlik UX'i için → `SAFETY_AND_GUARDRAILS.md`*

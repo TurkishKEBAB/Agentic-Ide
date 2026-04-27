@@ -1,0 +1,1433 @@
+{
+  "project": {
+    "title": "Agentic IDE - Requirements Analysis",
+    "fields": [
+      {
+        "name": "Requirement Status",
+        "dataType": "SINGLE_SELECT",
+        "options": [
+          "Draft",
+          "Advisor Review",
+          "Approved",
+          "Planned",
+          "In Progress",
+          "Done",
+          "Deferred"
+        ]
+      },
+      {
+        "name": "Area",
+        "dataType": "SINGLE_SELECT",
+        "options": [
+          "Research",
+          "Editor",
+          "Agent",
+          "Retrieval",
+          "Safety",
+          "UX",
+          "Model",
+          "Testing",
+          "Evaluation",
+          "Thesis"
+        ]
+      },
+      {
+        "name": "Requirement Type",
+        "dataType": "SINGLE_SELECT",
+        "options": [
+          "Functional",
+          "Non-Functional",
+          "Research",
+          "Risk"
+        ]
+      },
+      {
+        "name": "Phase",
+        "dataType": "SINGLE_SELECT",
+        "options": [
+          "Faz 1",
+          "Faz 2",
+          "Faz 3"
+        ]
+      },
+      {
+        "name": "Priority",
+        "dataType": "SINGLE_SELECT",
+        "options": [
+          "P0",
+          "P1",
+          "P2"
+        ]
+      },
+      {
+        "name": "Source Doc",
+        "dataType": "TEXT"
+      },
+      {
+        "name": "Acceptance Criteria",
+        "dataType": "TEXT"
+      },
+      {
+        "name": "Target Date",
+        "dataType": "DATE"
+      },
+      {
+        "name": "Parent Epic",
+        "dataType": "TEXT"
+      }
+    ],
+    "views": [
+      {
+        "name": "Requirements Master",
+        "layout": "table"
+      },
+      {
+        "name": "Advisor Review",
+        "layout": "board"
+      },
+      {
+        "name": "By Phase",
+        "layout": "board"
+      },
+      {
+        "name": "Roadmap",
+        "layout": "roadmap"
+      }
+    ]
+  },
+  "labels": [
+    {
+      "name": "epic",
+      "color": "5319E7",
+      "description": "Top-level requirement epic"
+    },
+    {
+      "name": "req:functional",
+      "color": "0E8A16",
+      "description": "Functional requirement"
+    },
+    {
+      "name": "req:non-functional",
+      "color": "FBCA04",
+      "description": "Non-functional requirement"
+    },
+    {
+      "name": "req:research",
+      "color": "1D76DB",
+      "description": "Research or evaluation requirement"
+    },
+    {
+      "name": "req:risk",
+      "color": "D73A4A",
+      "description": "Risk or mitigation tracking item"
+    }
+  ],
+  "issues": [
+    {
+      "key": "epic-research-scope",
+      "kind": "epic",
+      "title": "Epic: Research Scope and Success Criteria",
+      "status": "Advisor Review",
+      "area": "Research",
+      "requirementType": "Research",
+      "phase": "Faz 1",
+      "priority": "P0",
+      "labels": [
+        "epic"
+      ],
+      "requirement": "Arastirma sorusu, kapsam sinirlari ve tamamlanma olcutleri tek bir resmi backlog grubu altinda izlenebilir olmalidir.",
+      "rationale": "Danismanla yapilan requirements analysis gorusmesinde temel kararlarin daginik kalmasi kapsam kaymasina neden olur.",
+      "acceptanceSummary": "Arastirma sorusu, kapsam disi kararlar ve tamamlanma kriterleri backlogda kayitli.",
+      "acceptanceCriteria": [
+        "Bu epic altinda arastirma sorusu, kapsam disi kararlar ve tamamlanma kriterlerini kapsayan child issue'lar bulunur.",
+        "Epic en az PRODUCT_PLAN.md, PROJECT_ROADMAP.md ve EVALUATION_PLAN.md ile iliskilendirilir."
+      ],
+      "outOfScope": [
+        "Deney sonuclarini simdiden dogrulamak.",
+        "Tez yazim detaylarinin tamamini bu issue icinde cozmek."
+      ],
+      "sourceDocuments": [
+        "PRODUCT_PLAN.md",
+        "PROJECT_ROADMAP.md",
+        "EVALUATION_PLAN.md",
+        "SUPERVISOR_BRIEF.md"
+      ]
+    },
+    {
+      "key": "epic-editor-foundation",
+      "kind": "epic",
+      "title": "Epic: Editor Foundation",
+      "status": "Advisor Review",
+      "area": "Editor",
+      "requirementType": "Functional",
+      "phase": "Faz 1",
+      "priority": "P0",
+      "labels": [
+        "epic"
+      ],
+      "requirement": "Minimal editor zemini, ajan deneyimini tasiyacak kadar stabil ama tez kapsaminda kalacak kadar dar olmalidir.",
+      "rationale": "Calisan bir editor kabugu olmadan retrieval, diff ve ajan akisi gercek ortamda degerlendirilemez.",
+      "acceptanceSummary": "Editor kabugu ve dosya yonetimi gereksinimleri baglandi.",
+      "acceptanceCriteria": [
+        "Bu epic altindaki issue'lar editor iskeleti, dosya akisi ve temel durum bilgisini kapsar.",
+        "Kapsam tam IDE ozelliklerine genislemez."
+      ],
+      "outOfScope": [
+        "VS Code extension uyumlulugu.",
+        "Tema veya kozmetik ozellestirme."
+      ],
+      "sourceDocuments": [
+        "PRODUCT_PLAN.md",
+        "PROJECT_ROADMAP.md",
+        "ARCHITECTURE_OPTIONS.md"
+      ]
+    },
+    {
+      "key": "epic-context-retrieval",
+      "kind": "epic",
+      "title": "Epic: Context and Retrieval",
+      "status": "Advisor Review",
+      "area": "Retrieval",
+      "requirementType": "Functional",
+      "phase": "Faz 1",
+      "priority": "P0",
+      "labels": [
+        "epic"
+      ],
+      "requirement": "Ajan, tum repo'yu modele gondermek yerine katmanli retrieval yaklasimi ile ilgili baglami secmelidir.",
+      "rationale": "Arastirma sorusunun alt parcalarindan biri retrieval kalitesi ve token verimliligidir.",
+      "acceptanceSummary": "Always-on ve on-demand retrieval gereksinimleri backlogda var.",
+      "acceptanceCriteria": [
+        "Always-on context, on-demand retrieval ve indeksleme gereksinimleri child issue olarak acilir.",
+        "Gizlilik ve ignore kurallari bu epic icinde temsil edilir."
+      ],
+      "outOfScope": [
+        "Tum repo'nun tek seferde context olarak modele verilmesi.",
+        "MVP disinda buyuk olcekli arama optimizasyonlari."
+      ],
+      "sourceDocuments": [
+        "SYSTEM_PLAN.md",
+        "PRODUCT_PLAN.md",
+        "EVALUATION_PLAN.md"
+      ]
+    },
+    {
+      "key": "epic-agent-loop",
+      "kind": "epic",
+      "title": "Epic: Agent Loop",
+      "status": "Advisor Review",
+      "area": "Agent",
+      "requirementType": "Functional",
+      "phase": "Faz 2",
+      "priority": "P0",
+      "labels": [
+        "epic"
+      ],
+      "requirement": "Single-agent observe-plan-approve-execute dongusu kullanici tetiklemeli olarak calismalidir.",
+      "rationale": "Tezin ana iddiasi plan-once onay-sonra akisi uzerine kurulu.",
+      "acceptanceSummary": "Chat, plan-first ve tool whitelist gereksinimleri tanimli.",
+      "acceptanceCriteria": [
+        "Chat paneli, plan sunumu ve arac kisitlari child issue olarak temsil edilir.",
+        "Multi-agent yaklasim bu epic altinda MVP kapsamina alinmaz."
+      ],
+      "outOfScope": [
+        "Multi-agent koordinasyon protokolleri.",
+        "Terminal veya shell tabanli tool kullanimi."
+      ],
+      "sourceDocuments": [
+        "SYSTEM_PLAN.md",
+        "PRODUCT_PLAN.md",
+        "AGENT_ARCHITECTURE_ANALYSIS.md"
+      ]
+    },
+    {
+      "key": "epic-diff-approval",
+      "kind": "epic",
+      "title": "Epic: Diff Approval and Rollback",
+      "status": "Advisor Review",
+      "area": "UX",
+      "requirementType": "Functional",
+      "phase": "Faz 2",
+      "priority": "P0",
+      "labels": [
+        "epic"
+      ],
+      "requirement": "Tum degisiklikler diff uzerinden incelenmeli, kullanici onayi olmadan uygulanmamali ve geri alinabilmelidir.",
+      "rationale": "Kullanici guveni ve guvenlik modelinin en gorunur kisimi diff-onay-rollback akisidir.",
+      "acceptanceSummary": "Diff, secmeli onay ve rollback gereksinimleri tanimli.",
+      "acceptanceCriteria": [
+        "Diff gosterimi, secmeli onay ve rollback child issue'lari acilir.",
+        "Bu epic kapsamindaki hicbir requirement onaysiz dosya yazimini kabul etmez."
+      ],
+      "outOfScope": [
+        "Onaysiz hizli uygulama modu.",
+        "Git commit veya push entegrasyonu."
+      ],
+      "sourceDocuments": [
+        "SYSTEM_PLAN.md",
+        "UX_AND_INTERACTION.md",
+        "PRODUCT_PLAN.md"
+      ]
+    },
+    {
+      "key": "epic-safety-privacy",
+      "kind": "epic",
+      "title": "Epic: Safety and Privacy",
+      "status": "Advisor Review",
+      "area": "Safety",
+      "requirementType": "Non-Functional",
+      "phase": "Faz 2",
+      "priority": "P0",
+      "labels": [
+        "epic"
+      ],
+      "requirement": "Ajanin dosya erisimi ve degisiklik davranisi defense-in-depth mantigiyla kisitlanmalidir.",
+      "rationale": "Tez, yalnizca calisan degil guvenli bir ajan dongusunu savunuyor.",
+      "acceptanceSummary": "Workspace boundary, write boundary, reactive safety ve audit log gereksinimleri tanimli.",
+      "acceptanceCriteria": [
+        "Workspace boundary, path normalization, write boundary, reactive safety, audit log ve risk azaltma maddeleri child issue olarak bulunur.",
+        "Basarili guvenlik ihlali hedefi sifir olarak backlogda temsil edilir."
+      ],
+      "outOfScope": [
+        "Shell komutlarini guvenli hale getirip MVP'ye alma.",
+        "Kurumsal seviyede IAM veya hesap sistemi."
+      ],
+      "sourceDocuments": [
+        "SYSTEM_PLAN.md",
+        "DATA_AND_PRIVACY.md",
+        "RISK_REGISTER.md",
+        "EVALUATION_PLAN.md"
+      ]
+    },
+    {
+      "key": "epic-ux-interaction",
+      "kind": "epic",
+      "title": "Epic: UX and Interaction",
+      "status": "Advisor Review",
+      "area": "UX",
+      "requirementType": "Functional",
+      "phase": "Faz 2",
+      "priority": "P1",
+      "labels": [
+        "epic"
+      ],
+      "requirement": "Kullanici, ajanin ne yaptigini anlayip kontrol edebildigi bir etkilesim modeli icinde kalmalidir.",
+      "rationale": "Guven sadece teknik onlemle degil, anlasilir arayuz ve kontrol noktalariyla insa edilir.",
+      "acceptanceSummary": "Neden aciklamasi, kontrol noktalari ve proaktif uyari siniri tanimli.",
+      "acceptanceCriteria": [
+        "Kritik UX kontrol noktalari child issue'lara dagitilir.",
+        "MVP proaktif davranis kapsam siniri belirlenir."
+      ],
+      "outOfScope": [
+        "Tam ozellestirilebilir bildirim sistemi.",
+        "MVP disi genis proaktif kalite onerileri."
+      ],
+      "sourceDocuments": [
+        "UX_AND_INTERACTION.md",
+        "PROACTIVE_BEHAVIOR_DESIGN.md",
+        "PRODUCT_PLAN.md"
+      ]
+    },
+    {
+      "key": "epic-model-cost",
+      "kind": "epic",
+      "title": "Epic: Model and Cost Strategy",
+      "status": "Advisor Review",
+      "area": "Model",
+      "requirementType": "Non-Functional",
+      "phase": "Faz 2",
+      "priority": "P1",
+      "labels": [
+        "epic"
+      ],
+      "requirement": "Model saglayici secimi esnek ama tez kapsaminda kontrol edilebilir bir soyutlama ile ele alinmalidir.",
+      "rationale": "Maliyet, gecikme ve kalite trade-off'lari tez boyunca aktif bir karar alani olacak.",
+      "acceptanceSummary": "Saglayici soyutlamasi, secim ilkesi ve maliyet riskleri kayitli.",
+      "acceptanceCriteria": [
+        "Bulut-yerel saglayici yapisi ve maliyet/performans takibi child issue'lara ayrilir.",
+        "Teknik kapsam 1 bulut + 1 yerel saglayici ile sinirli tutulur."
+      ],
+      "outOfScope": [
+        "Uc veya daha fazla saglayici entegrasyonu.",
+        "MVP icinde otomatik ticari optimizasyon motoru."
+      ],
+      "sourceDocuments": [
+        "PRODUCT_PLAN.md",
+        "TECH_STACK_AND_AI.md",
+        "COST_AND_PERFORMANCE.md",
+        "RISK_REGISTER.md"
+      ]
+    },
+    {
+      "key": "epic-testing-evaluation",
+      "kind": "epic",
+      "title": "Epic: Testing and Evaluation",
+      "status": "Advisor Review",
+      "area": "Evaluation",
+      "requirementType": "Research",
+      "phase": "Faz 3",
+      "priority": "P0",
+      "labels": [
+        "epic"
+      ],
+      "requirement": "Teknik kalite guvencesi ile akademik degerlendirme ayni backlog catisi altinda planlanmalidir.",
+      "rationale": "Proje yalnizca calisiyor mu sorusuna degil, arastirma sorusunu destekleyen olculebilir veriye de cevap vermeli.",
+      "acceptanceSummary": "Test katmanlari ve benchmark/evaluation gereksinimleri tanimli.",
+      "acceptanceCriteria": [
+        "Birim, entegrasyon, E2E ve benchmark issue'lari bu epic altinda bulunur.",
+        "Metrikler ve baseline yaklasimi resmi issue olarak acilir."
+      ],
+      "outOfScope": [
+        "Kurumsal olcekte tam test platformu kurmak.",
+        "Tezden bagimsiz ek benchmark arastirmalari."
+      ],
+      "sourceDocuments": [
+        "TESTING_AND_CI.md",
+        "EVALUATION_PLAN.md",
+        "PROJECT_ROADMAP.md"
+      ]
+    },
+    {
+      "key": "epic-thesis-roadmap",
+      "kind": "epic",
+      "title": "Epic: Thesis Roadmap and Final Deliverables",
+      "status": "Advisor Review",
+      "area": "Thesis",
+      "requirementType": "Research",
+      "phase": "Faz 3",
+      "priority": "P0",
+      "labels": [
+        "epic"
+      ],
+      "requirement": "Faz kapilari, final teslimler ve kapsam dondurma kurallari GitHub Project uzerinde izlenebilir olmalidir.",
+      "rationale": "Roadmap dokumani ancak backlog ve karar kapilariyla baglandiginda operasyonel deger uretir.",
+      "acceptanceSummary": "Faz kapilari ve final teslimler backloga tasindi.",
+      "acceptanceCriteria": [
+        "Faz kapilari, feature freeze ve final teslimleri child issue olarak bulunur.",
+        "Project, danisman gorusmesinden sonra planlama aracina donusebilir."
+      ],
+      "outOfScope": [
+        "Gunluk sprint planlamasi.",
+        "Tez sonrasi urun roadmap'i."
+      ],
+      "sourceDocuments": [
+        "PROJECT_ROADMAP.md",
+        "SUPERVISOR_BRIEF.md",
+        "THESIS_OUTLINE.md"
+      ]
+    },
+    {
+      "key": "req-research-question",
+      "parentKey": "epic-research-scope",
+      "kind": "issue",
+      "title": "REQ: Ana ve alt arastirma sorulari resmi backlogda kayit altina alinsin",
+      "status": "Draft",
+      "area": "Research",
+      "requirementType": "Research",
+      "phase": "Faz 1",
+      "priority": "P0",
+      "labels": [
+        "req:research"
+      ],
+      "requirement": "Backlog, ana arastirma sorusunu ve retrieval ile kullanici guveni alt sorularini resmi issue olarak tasimalidir.",
+      "rationale": "Danisman geri bildirimi once neyin arastirildigi net olmadan backlog anlamli degerlendirme araci olamaz.",
+      "acceptanceSummary": "Ana arastirma sorusu ve alt sorular issue body icinde net.",
+      "acceptanceCriteria": [
+        "Issue body ana arastirma sorusunu acik ve alintilanabilir sekilde yazar.",
+        "En az iki alt arastirma sorusu backlog maddesine dahil edilir."
+      ],
+      "outOfScope": [
+        "Bu sorularin deneysel cevabini simdiden vermek."
+      ],
+      "sourceDocuments": [
+        "PRODUCT_PLAN.md",
+        "EVALUATION_PLAN.md",
+        "SUPERVISOR_BRIEF.md"
+      ]
+    },
+    {
+      "key": "req-scope-guardrails",
+      "parentKey": "epic-research-scope",
+      "kind": "issue",
+      "title": "REQ: MVP disi ve kapsam disi kararlar sabitlensin",
+      "status": "Draft",
+      "area": "Research",
+      "requirementType": "Research",
+      "phase": "Faz 1",
+      "priority": "P0",
+      "labels": [
+        "req:research"
+      ],
+      "requirement": "Multi-agent, terminal entegrasyonu, VS Code uyumlulugu ve tam repo context gibi kapsam disi kararlar resmi olarak backlogda isaretlenmelidir.",
+      "rationale": "Kapsam kaymasi en cok erken mimari tartismalarda olur; bu kararlar savunulabilir sekilde sabitlenmeli.",
+      "acceptanceSummary": "Kapsam disi maddeler acik ve tekrar referanslanabilir.",
+      "acceptanceCriteria": [
+        "Issue body en az dort kapsam disi ozelligi listeler.",
+        "Her kapsam disi karar icin bir gerekce verilir."
+      ],
+      "outOfScope": [
+        "Kapsam disi ozellikler icin ayrintili uygulama plani cikarmak."
+      ],
+      "sourceDocuments": [
+        "PRODUCT_PLAN.md",
+        "PROJECT_ROADMAP.md",
+        "ARCHITECTURE_OPTIONS.md"
+      ]
+    },
+    {
+      "key": "req-completion-criteria",
+      "parentKey": "epic-research-scope",
+      "kind": "issue",
+      "title": "REQ: Tez basari ve tamamlanma kriterleri olculebilir olsun",
+      "status": "Draft",
+      "area": "Research",
+      "requirementType": "Research",
+      "phase": "Faz 1",
+      "priority": "P0",
+      "labels": [
+        "req:research"
+      ],
+      "requirement": "Proje tamamlanmis sayilmadan once ajan dongusu, diff-onay, rollback, benchmark ve tez teslimleri dogrulanabilir maddeler halinde backlogda yer almalidir.",
+      "rationale": "Basari kriteri soyut kalirsa finalde ne tamamlandi tartismasi acik kalir.",
+      "acceptanceSummary": "Tamamlanma kriterleri benchmark ve tez teslimlerini kapsiyor.",
+      "acceptanceCriteria": [
+        "Issue body en az bes tamamlanma kriteri listeler.",
+        "Bu kriterler roadmap ve evaluation plan ile tutarlidir."
+      ],
+      "outOfScope": [
+        "Her kriter icin kesin takvim tarihi vermek."
+      ],
+      "sourceDocuments": [
+        "PROJECT_ROADMAP.md",
+        "EVALUATION_PLAN.md",
+        "SUPERVISOR_BRIEF.md"
+      ]
+    },
+    {
+      "key": "req-editor-shell",
+      "parentKey": "epic-editor-foundation",
+      "kind": "issue",
+      "title": "REQ: Electron + Monaco tabanli editor kabugu kurulmalı",
+      "status": "Draft",
+      "area": "Editor",
+      "requirementType": "Functional",
+      "phase": "Faz 1",
+      "priority": "P0",
+      "labels": [
+        "req:functional"
+      ],
+      "requirement": "MVP, Electron penceresi icinde Monaco editoru barindiran minimal bir masaustu uygulamasi olarak baslamalidir.",
+      "rationale": "Bitirilebilirlik ve ajan entegrasyonu esnekligi icin secilen mimari budur.",
+      "acceptanceSummary": "Electron ve Monaco bazli editor zemini net.",
+      "acceptanceCriteria": [
+        "Issue body Electron + Monaco tercihinin MVP standardi oldugunu belirtir.",
+        "Bu requirement, VS Code fork ya da sifirdan IDE motoru yazma seceneklerini kapsama almaz."
+      ],
+      "outOfScope": [
+        "VS Code cekirdegini fork etmek.",
+        "Rust veya C++ ile sifirdan editor motoru yazmak."
+      ],
+      "sourceDocuments": [
+        "ARCHITECTURE_OPTIONS.md",
+        "PRODUCT_PLAN.md",
+        "PROJECT_ROADMAP.md"
+      ]
+    },
+    {
+      "key": "req-editor-file-management",
+      "parentKey": "epic-editor-foundation",
+      "kind": "issue",
+      "title": "REQ: Proje klasoru acma, dosya agaci, dosya ac-kaydet ve 5 sekme desteklensin",
+      "status": "Draft",
+      "area": "Editor",
+      "requirementType": "Functional",
+      "phase": "Faz 1",
+      "priority": "P0",
+      "labels": [
+        "req:functional"
+      ],
+      "requirement": "Editor zemini, proje klasoru acma, dosya agaci gosterme, dosya acma-kaydetme ve en fazla 5 es zamanli sekme yonetimini desteklemelidir.",
+      "rationale": "Ajan deneyimi icin gereken asgari editor kullanilabilirligi budur.",
+      "acceptanceSummary": "Temel dosya akisi ve sekme siniri backloga tasindi.",
+      "acceptanceCriteria": [
+        "Issue body dosya agaci ve ac-kaydet akisini kapsar.",
+        "Sekme sayisi ust siniri olarak 5 belirtilir."
+      ],
+      "outOfScope": [
+        "Coklu panel layout.",
+        "Gelistirmis workspace yonetimi."
+      ],
+      "sourceDocuments": [
+        "PRODUCT_PLAN.md",
+        "PROJECT_ROADMAP.md"
+      ]
+    },
+    {
+      "key": "req-editor-status-bar",
+      "parentKey": "epic-editor-foundation",
+      "kind": "issue",
+      "title": "REQ: Durum cubugu aktif dosya ve ajan durumunu gostermeli",
+      "status": "Draft",
+      "area": "Editor",
+      "requirementType": "Functional",
+      "phase": "Faz 1",
+      "priority": "P1",
+      "labels": [
+        "req:functional"
+      ],
+      "requirement": "Editor arayuzu, aktif dosya ve ajan durumunu her an gorunur kilan bir durum cubugu sunmalidir.",
+      "rationale": "Kullanici hangi baglamda calistigini kaybetmemeli.",
+      "acceptanceSummary": "Aktif dosya ve ajan durumu gorunur gereksinim olarak kayitli.",
+      "acceptanceCriteria": [
+        "Issue body aktif dosya bilgisini ve ajan statusu alanini birlikte tanimlar.",
+        "Bu bilgi arayuzde kalici ve kolay fark edilir sekilde sunulur."
+      ],
+      "outOfScope": [
+        "Zengin telemetri paneli.",
+        "Tema bazli durum cubugu ozellestirmeleri."
+      ],
+      "sourceDocuments": [
+        "PRODUCT_PLAN.md",
+        "UX_AND_INTERACTION.md"
+      ]
+    },
+    {
+      "key": "req-context-always-on",
+      "parentKey": "epic-context-retrieval",
+      "kind": "issue",
+      "title": "REQ: Always-on context aktif dosya, ilgili sembol ve proje agacini icermeli",
+      "status": "Draft",
+      "area": "Retrieval",
+      "requirementType": "Functional",
+      "phase": "Faz 1",
+      "priority": "P0",
+      "labels": [
+        "req:functional"
+      ],
+      "requirement": "Her ajan isteginde aktif dosyanin tam icerigi, cursor etrafindaki sembol ve proje kok yapisi varsayilan baglam olarak hazir olmalidir.",
+      "rationale": "Bu katman retrieval olmadan bile minimum anlamli calisma baglamini saglar.",
+      "acceptanceSummary": "Always-on context kapsami net.",
+      "acceptanceCriteria": [
+        "Issue body aktif dosya, ilgili sembol ve proje yapisini birlikte sayar.",
+        "Bu baglam katmani her gorevde varsayilan olarak dahil edilir."
+      ],
+      "outOfScope": [
+        "Tum repo dosya iceriklerinin varsayilan olarak gonderilmesi."
+      ],
+      "sourceDocuments": [
+        "SYSTEM_PLAN.md",
+        "PRODUCT_PLAN.md"
+      ]
+    },
+    {
+      "key": "req-context-on-demand",
+      "parentKey": "epic-context-retrieval",
+      "kind": "issue",
+      "title": "REQ: On-demand retrieval import-export, sembol arama ve benzer parca bulmayi desteklemeli",
+      "status": "Draft",
+      "area": "Retrieval",
+      "requirementType": "Functional",
+      "phase": "Faz 2",
+      "priority": "P0",
+      "labels": [
+        "req:functional"
+      ],
+      "requirement": "Talep uzerine retrieval, import edilen moduller, sembolik eslesmeler ve embedding tabanli benzer parcalari getirebilmelidir.",
+      "rationale": "Cok dosyali degisiklik ve kod tabani Q&A senaryolari icin always-on context tek basina yeterli degil.",
+      "acceptanceSummary": "On-demand retrieval kaynaklari uc kanalli olarak tanimli.",
+      "acceptanceCriteria": [
+        "Issue body import/export, symbol search ve semantic similarity kaynaklarini listeler.",
+        "Bu retrieval kaynaklari ayni requirement altinda semantik baglam bulma amacina baglanir."
+      ],
+      "outOfScope": [
+        "MVP disi gelismis ranking algoritmalari."
+      ],
+      "sourceDocuments": [
+        "SYSTEM_PLAN.md",
+        "EVALUATION_PLAN.md",
+        "PRODUCT_PLAN.md"
+      ]
+    },
+    {
+      "key": "req-context-index-and-ignore",
+      "parentKey": "epic-context-retrieval",
+      "kind": "issue",
+      "title": "REQ: Arka planda embedding index guncellensin ve .agentignore ile gizli dosyalar dislansin",
+      "status": "Draft",
+      "area": "Retrieval",
+      "requirementType": "Non-Functional",
+      "phase": "Faz 1",
+      "priority": "P0",
+      "labels": [
+        "req:non-functional"
+      ],
+      "requirement": "Dosya indeksleme arka planda yapilmali; `.agentignore`, gizli anahtar dosyalari ve uretilmis klasorler indeks disinda kalmalidir.",
+      "rationale": "Baglam motoru performansli ve gizlilik uyumlu olmadikca retrieval faydasi gercek kullanima tasinmaz.",
+      "acceptanceSummary": "Index ve ignore politikalari ayni requirement'ta sabitlendi.",
+      "acceptanceCriteria": [
+        "Issue body sqlite-vec veya benzeri hafif indeks stratejisini referanslar.",
+        "Issue body `.agentignore`, `.env`, `.pem`, `*.key`, `node_modules`, `.git`, `dist` ve `build` gibi dislama ornekleri verir."
+      ],
+      "outOfScope": [
+        "Harici managed vector database kullanimi."
+      ],
+      "sourceDocuments": [
+        "SYSTEM_PLAN.md",
+        "DATA_AND_PRIVACY.md",
+        "TECH_STACK_AND_AI.md"
+      ]
+    },
+    {
+      "key": "req-agent-chat",
+      "parentKey": "epic-agent-loop",
+      "kind": "issue",
+      "title": "REQ: Kullanici tetiklemeli sohbet paneli gorev girisi saglamali",
+      "status": "Draft",
+      "area": "Agent",
+      "requirementType": "Functional",
+      "phase": "Faz 2",
+      "priority": "P0",
+      "labels": [
+        "req:functional"
+      ],
+      "requirement": "Kullanici, sag panel chat arayuzunden ajana dogal dil ile gorev verebilmelidir.",
+      "rationale": "MVP'nin ana giris noktasi kullanici tetiklemeli sohbet panelidir.",
+      "acceptanceSummary": "Dogal dil gorev girisi resmi requirement oldu.",
+      "acceptanceCriteria": [
+        "Issue body chat panelini ajan tetikleme giris noktasi olarak tanimlar.",
+        "Requirement, kullanici prompt yazmadan otomatik degisiklik baslatmaz."
+      ],
+      "outOfScope": [
+        "Tam proaktif otonom gorev baslatma."
+      ],
+      "sourceDocuments": [
+        "UX_AND_INTERACTION.md",
+        "PRODUCT_PLAN.md",
+        "SYSTEM_PLAN.md"
+      ]
+    },
+    {
+      "key": "req-agent-plan-first",
+      "parentKey": "epic-agent-loop",
+      "kind": "issue",
+      "title": "REQ: Ajan plani dosya bazli degisiklik ozeti ve gerekce ile sunmali",
+      "status": "Draft",
+      "area": "Agent",
+      "requirementType": "Functional",
+      "phase": "Faz 2",
+      "priority": "P0",
+      "labels": [
+        "req:functional"
+      ],
+      "requirement": "Ajan, hangi dosyalari neden degistirecegini uygulama oncesi plan seklinde gostermelidir.",
+      "rationale": "Plan-first kismi tez hipotezinin merkezindeki guven mekanizmasidir.",
+      "acceptanceSummary": "Dosya bazli plan ve gerekce zorunlulugu tanimli.",
+      "acceptanceCriteria": [
+        "Issue body planin dosya listesi ve gerekce icerdigini aciklar.",
+        "Kullanici onayi olmadan execute asamasina gecis kabul edilmez."
+      ],
+      "outOfScope": [
+        "Arka planda sessiz plan yurutmek."
+      ],
+      "sourceDocuments": [
+        "SYSTEM_PLAN.md",
+        "UX_AND_INTERACTION.md",
+        "PRODUCT_PLAN.md"
+      ]
+    },
+    {
+      "key": "req-agent-tool-whitelist",
+      "parentKey": "epic-agent-loop",
+      "kind": "issue",
+      "title": "REQ: Ajan araclari whitelist yaklasimiyla sinirlansin ve explain-only akis desteklensin",
+      "status": "Draft",
+      "area": "Agent",
+      "requirementType": "Non-Functional",
+      "phase": "Faz 2",
+      "priority": "P0",
+      "labels": [
+        "req:non-functional"
+      ],
+      "requirement": "Ajan yalnizca read, write, search, list ve explain benzeri izinli araclardan yararlanmali; explain-only modunda dosya degisikligi yapmamalidir.",
+      "rationale": "Whitelisting, shell veya eval tabanli tehlikeli genislemeleri MVP disinda tutar.",
+      "acceptanceSummary": "Tool whitelist ve explain-only modu ayni requirement'ta sabit.",
+      "acceptanceCriteria": [
+        "Issue body shell, exec ve eval benzeri araclarn MVP disi oldugunu belirtir.",
+        "Explain-only modu icin dosya yazmayan yanit akisi tanimlanir."
+      ],
+      "outOfScope": [
+        "Terminal komutu calistirma.",
+        "Multi-agent tool routing."
+      ],
+      "sourceDocuments": [
+        "SYSTEM_PLAN.md",
+        "PRODUCT_PLAN.md",
+        "RISK_REGISTER.md"
+      ]
+    },
+    {
+      "key": "req-diff-views",
+      "parentKey": "epic-diff-approval",
+      "kind": "issue",
+      "title": "REQ: Diff ekrani side-by-side ve unified gorunum sunmali",
+      "status": "Draft",
+      "area": "UX",
+      "requirementType": "Functional",
+      "phase": "Faz 2",
+      "priority": "P0",
+      "labels": [
+        "req:functional"
+      ],
+      "requirement": "Her degisiklik icin kullaniciya side-by-side varsayilanli ve unified diff secenekli inceleme ekrani gosterilmelidir.",
+      "rationale": "Diff gorunurlugu olmadan onay anlamli olmaz.",
+      "acceptanceSummary": "Iki farkli diff gorunumu backloga yazildi.",
+      "acceptanceCriteria": [
+        "Issue body side-by-side gorunumu varsayilan olarak tanimlar.",
+        "Unified diff'e gecis secenegi acikca belirtilir."
+      ],
+      "outOfScope": [
+        "Onaysiz inline uygulama."
+      ],
+      "sourceDocuments": [
+        "SYSTEM_PLAN.md",
+        "UX_AND_INTERACTION.md"
+      ]
+    },
+    {
+      "key": "req-diff-selective-approval",
+      "parentKey": "epic-diff-approval",
+      "kind": "issue",
+      "title": "REQ: Cok dosyali degisikliklerde secmeli onay desteklenmeli",
+      "status": "Draft",
+      "area": "UX",
+      "requirementType": "Functional",
+      "phase": "Faz 2",
+      "priority": "P0",
+      "labels": [
+        "req:functional"
+      ],
+      "requirement": "Cok dosyali planlarda kullanici tumunu uygulama, secerek uygulama veya iptal seceneklerine sahip olmalidir.",
+      "rationale": "Gercek guven, kismi ret ve kismi kabul davranislarini destekleyen arayuzle olusur.",
+      "acceptanceSummary": "Secmeli onay requirement olarak acildi.",
+      "acceptanceCriteria": [
+        "Issue body toplu uygula, secerek uygula ve iptal akisini listeler.",
+        "Kismi uygulama sonrasi sistem kalan degisiklikler icin kullanicidan devam karari ister."
+      ],
+      "outOfScope": [
+        "Satir seviyesinde tam patch editoru."
+      ],
+      "sourceDocuments": [
+        "SYSTEM_PLAN.md",
+        "UX_AND_INTERACTION.md",
+        "PRODUCT_PLAN.md"
+      ]
+    },
+    {
+      "key": "req-diff-atomic-rollback",
+      "parentKey": "epic-diff-approval",
+      "kind": "issue",
+      "title": "REQ: Dosya uygulama atomik olmali ve son 10 degisiklik geri alinabilmeli",
+      "status": "Draft",
+      "area": "UX",
+      "requirementType": "Non-Functional",
+      "phase": "Faz 2",
+      "priority": "P0",
+      "labels": [
+        "req:non-functional"
+      ],
+      "requirement": "Yazma islemi atomik backup-renaming mantigiyla calismali ve son 10 degisiklik seti undo stack'te tutulmalidir.",
+      "rationale": "Rollback olmadan onay mekanizmasi tek yonlu kalir.",
+      "acceptanceSummary": "Atomik yazma ve 10 adimli rollback sabit.",
+      "acceptanceCriteria": [
+        "Issue body `.agentbackup` veya esdeger gecici yedek mantigini aciklar.",
+        "Undo stack kapasitesi 10 degisiklik seti olarak belirtilir."
+      ],
+      "outOfScope": [
+        "Git commit tabanli geri alma."
+      ],
+      "sourceDocuments": [
+        "SYSTEM_PLAN.md",
+        "PRODUCT_PLAN.md",
+        "TESTING_AND_CI.md"
+      ]
+    },
+    {
+      "key": "req-safety-sandbox",
+      "parentKey": "epic-safety-privacy",
+      "kind": "issue",
+      "title": "REQ: Workspace boundary + path normalization yalnizca proje dizini icinde calismali",
+      "status": "Draft",
+      "area": "Safety",
+      "requirementType": "Non-Functional",
+      "phase": "Faz 2",
+      "priority": "P0",
+      "labels": [
+        "req:non-functional"
+      ],
+      "requirement": "Ajan erisimi yalnizca acilan proje diziniyle sinirli olmali ve `../` benzeri traversal denemeleri path normalization ile engellenmelidir.",
+      "rationale": "Guvenlik modeli once neyin izinli oldugunu tanimlamalidir.",
+      "acceptanceSummary": "Workspace boundary ve path normalization net.",
+      "acceptanceCriteria": [
+        "Issue body proje dizini disina cikisin engellendigini yazar.",
+        "Traversal veya normalize edilmemis path denemeleri reddedilen durumlar olarak tanimlanir."
+      ],
+      "outOfScope": [
+        "MVP icinde shell isolation / process sandbox."
+      ],
+      "sourceDocuments": [
+        "SYSTEM_PLAN.md",
+        "TESTING_AND_CI.md",
+        "EVALUATION_PLAN.md"
+      ]
+    },
+    {
+      "key": "req-safety-protected-files",
+      "parentKey": "epic-safety-privacy",
+      "kind": "issue",
+      "title": "REQ: Protected file kurallari gizli anahtar dosyalarinda indeksleme ve yazmayi engellemeli",
+      "status": "Draft",
+      "area": "Safety",
+      "requirementType": "Non-Functional",
+      "phase": "Faz 2",
+      "priority": "P0",
+      "labels": [
+        "req:non-functional"
+      ],
+      "requirement": "`.env`, `.pem`, `*.key`, `id_rsa`, `*.secret`, `*.p12` ve `*.pfx` gibi dosyalar indeksleme ve yazma akislarindan dislanmalidir.",
+      "rationale": "Hassas dosyalarda ajan davranisinin sinirlanmasi arastirma icin zorunlu bir guvenlik kosuludur.",
+      "acceptanceSummary": "Protected file denylist acikca kayitli.",
+      "acceptanceCriteria": [
+        "Issue body engellenen dosya pattern'lerini listeler.",
+        "Kural ihlali denemelerinin kullaniciya bildirilmesi ve loglanmasi belirtilir."
+      ],
+      "outOfScope": [
+        "Kullanici tarafindan denylist'i daraltmak."
+      ],
+      "sourceDocuments": [
+        "SYSTEM_PLAN.md",
+        "DATA_AND_PRIVACY.md",
+        "PRODUCT_PLAN.md"
+      ]
+    },
+    {
+      "key": "req-safety-audit-log",
+      "parentKey": "epic-safety-privacy",
+      "kind": "issue",
+      "title": "REQ: Audit log okuma, retrieval, yazma, onay ve rollback kararlarini kaydetmeli",
+      "status": "Draft",
+      "area": "Safety",
+      "requirementType": "Non-Functional",
+      "phase": "Faz 2",
+      "priority": "P1",
+      "labels": [
+        "req:non-functional"
+      ],
+      "requirement": "Ajanin kritik eylemleri zaman damgasi ve kullanici karariyla birlikte audit log'da tutulmalidir.",
+      "rationale": "Sonradan inceleme ve deneysel analiz icin olay kaydi gerekir.",
+      "acceptanceSummary": "Audit log kapsami resmi backlog maddesi oldu.",
+      "acceptanceCriteria": [
+        "Issue body en az dosya okuma, retrieval, yazma, onay ve rollback olaylarini sayar.",
+        "Log formatinin metin veya JSONL tabanli oldugu belirtilir."
+      ],
+      "outOfScope": [
+        "Kriptografik imzali denetim kayit sistemi."
+      ],
+      "sourceDocuments": [
+        "SYSTEM_PLAN.md",
+        "TESTING_AND_CI.md",
+        "EVALUATION_PLAN.md"
+      ]
+    },
+    {
+      "key": "risk-safety-readonly-fallback",
+      "parentKey": "epic-safety-privacy",
+      "kind": "issue",
+      "title": "Risk: Kalite veya guvenlik esikleri bozulursa ajan explain-only moda dusurulebilmeli",
+      "status": "Draft",
+      "area": "Safety",
+      "requirementType": "Risk",
+      "phase": "Faz 2",
+      "priority": "P1",
+      "labels": [
+        "req:risk"
+      ],
+      "requirement": "Tekrarlayan reddedilme, hatali degisiklik veya guvenlik ihlali denemelerinde ajan yetkisi gecici olarak explain-only moda cekilebilmelidir.",
+      "rationale": "Risk kaydi yalnizca sorunlari degil, pratik B planini da icermeli.",
+      "acceptanceSummary": "Read-only fallback B plani acikca kayitli.",
+      "acceptanceCriteria": [
+        "Issue body fallback davranisini ve tetikleyici sinyalleri aciklar.",
+        "Bu fallback, proje hedefini tamamen durdurmak yerine otonomlugu kisitlar."
+      ],
+      "outOfScope": [
+        "Bu modun otomatik olarak her senaryoda devreye alinmasi."
+      ],
+      "sourceDocuments": [
+        "RISK_REGISTER.md",
+        "SYSTEM_PLAN.md",
+        "UX_AND_INTERACTION.md"
+      ]
+    },
+    {
+      "key": "req-ux-why-explanation",
+      "parentKey": "epic-ux-interaction",
+      "kind": "issue",
+      "title": "REQ: Kullanici diff ekraninda neden aciklamasini gorebilmeli",
+      "status": "Draft",
+      "area": "UX",
+      "requirementType": "Functional",
+      "phase": "Faz 2",
+      "priority": "P1",
+      "labels": [
+        "req:functional"
+      ],
+      "requirement": "Diff ekraninda kullanici, ajan degisikliginin gerekcesini ayri bir aciklama alani veya neden eylemi ile gorebilmelidir.",
+      "rationale": "Sadece neyin degistigini gormek degil, neden degistigini anlamak da guveni etkiler.",
+      "acceptanceSummary": "Why aciklamasi backloga yazildi.",
+      "acceptanceCriteria": [
+        "Issue body diff ekraninda aciklama erisim noktasini tanimlar.",
+        "Aciklama, degisiklik planinin baglam ve amacina bagli kalir."
+      ],
+      "outOfScope": [
+        "Uzun teknik rapor uretmek."
+      ],
+      "sourceDocuments": [
+        "UX_AND_INTERACTION.md",
+        "PRODUCT_PLAN.md"
+      ]
+    },
+    {
+      "key": "req-ux-control-points",
+      "parentKey": "epic-ux-interaction",
+      "kind": "issue",
+      "title": "REQ: Her kritik adimda kontrol noktalari approve-reject-edit-undo olarak sunulmali",
+      "status": "Draft",
+      "area": "UX",
+      "requirementType": "Functional",
+      "phase": "Faz 2",
+      "priority": "P0",
+      "labels": [
+        "req:functional"
+      ],
+      "requirement": "Kullanici, gorev baslangici, diff inceleme ve uygulama sonrasi asamalarda acik kontrol noktalarina sahip olmalidir.",
+      "rationale": "Kontrol hissi kaybolursa kullanici araci denetleyemez hale gelir.",
+      "acceptanceSummary": "Approve, reject, edit ve undo kontrol noktalarina baglandi.",
+      "acceptanceCriteria": [
+        "Issue body plan onayi, diff onayi ve geri alma kontrol noktalarini listeler.",
+        "Kritik adimlarda kullaniciya cikis veya iptal secenegi sunulur."
+      ],
+      "outOfScope": [
+        "Tam ozellestirilebilir workflow editoru."
+      ],
+      "sourceDocuments": [
+        "UX_AND_INTERACTION.md",
+        "SYSTEM_PLAN.md"
+      ]
+    },
+    {
+      "key": "req-ux-proactive-guards",
+      "parentKey": "epic-ux-interaction",
+      "kind": "issue",
+      "title": "REQ: Reactive safety warnings yalnizca apply oncesi tetiklensin (background analiz MVP disi)",
+      "status": "Draft",
+      "area": "UX",
+      "requirementType": "Functional",
+      "phase": "Faz 2",
+      "priority": "P0",
+      "labels": [
+        "req:functional"
+      ],
+      "requirement": "MVP icinde uyari kumesi yalnizca plan uretildikten sonra apply oncesi tetiklenen reactive safety warnings ile sinirlidir: workspace boundary violation, protected file write, large edit threshold (>20 dosya VEYA >500 satir) ve diff icinde secret pattern.",
+      "rationale": "Background scanning ve save-time / idle-time tetikleyiciler alert fatigue uretir ve arastirma sorusunun disindadir. Reactive safety, kullanici tetiklemeli akisin guvenlik katmanidir.",
+      "acceptanceSummary": "Reactive safety warning kapsami ve tetikleme kosulu MVP icinde sabit; background analiz MVP disi.",
+      "acceptanceCriteria": [
+        "Issue body apply-oncesi 4 reactive trigger'i listeler: workspace boundary violation, protected file write, large edit threshold, secret-in-diff.",
+        "Tetikleyiciler yalnizca kullanici tetiklemeli plan akisi icinde calisir; arka plan tarama yapmaz.",
+        "Her uyari audit log'a yazilir."
+      ],
+      "outOfScope": [
+        "Save-time veya idle-time background analiz.",
+        "Alert queue, debounce, throttle, snooze, mute davranisi.",
+        "Confidence threshold tuning.",
+        "Syntax error / kod kokusu / duplike kod bildirimlerini varsayilan acik yapmak."
+      ],
+      "sourceDocuments": [
+        "UX_AND_INTERACTION.md",
+        "PROACTIVE_BEHAVIOR_DESIGN.md",
+        "SAFETY_AND_GUARDRAILS.md",
+        "diagrams/UC/UC-03A-reactive-safety-warnings.puml"
+      ]
+    },
+    {
+      "key": "req-safety-reactive-warnings",
+      "parentKey": "epic-safety-privacy",
+      "kind": "issue",
+      "title": "REQ: Apply oncesi reactive safety check 4 trigger'i zorunlu calistirmali",
+      "status": "Draft",
+      "area": "Safety",
+      "requirementType": "Functional",
+      "phase": "Faz 2",
+      "priority": "P0",
+      "labels": [
+        "req:functional"
+      ],
+      "requirement": "Plan uretildikten sonra apply baslamadan once dort reactive trigger zorunlu olarak calismalidir: workspace boundary violation, protected file write, large edit threshold ve diff icinde secret pattern.",
+      "rationale": "Approval-gated mimarinin guvenlik kismi yalnizca diff onayi degil, plan uzerinde otomatik kontrol noktalarinin da calismasini gerektirir.",
+      "acceptanceSummary": "Reactive safety check'in 4 zorunlu trigger'i ve audit log baglantisi tanimli.",
+      "acceptanceCriteria": [
+        "Issue body 4 reactive trigger'i ve esik degerlerini listeler.",
+        "Trigger calismasi zorunludur; kullanici tarafindan kapatilamaz.",
+        "Her trigger sonucu (devam / duzelt / iptal) audit log'a yazilir."
+      ],
+      "outOfScope": [
+        "Background scanning tetikleyicileri.",
+        "Kullaniciya trigger kapatma secenegi sunmak."
+      ],
+      "sourceDocuments": [
+        "SAFETY_AND_GUARDRAILS.md",
+        "SYSTEM_PLAN.md",
+        "diagrams/UC/UC-03A-reactive-safety-warnings.puml",
+        "diagrams/UC/UC-02-kod-degisikligi-yasam-dongusu.puml"
+      ]
+    },
+    {
+      "key": "req-model-provider-abstraction",
+      "parentKey": "epic-model-cost",
+      "kind": "issue",
+      "title": "REQ: Bir bulut ve bir yerel model saglayicisi ortak adaptor katmaniyla desteklenmeli",
+      "status": "Draft",
+      "area": "Model",
+      "requirementType": "Functional",
+      "phase": "Faz 2",
+      "priority": "P1",
+      "labels": [
+        "req:functional"
+      ],
+      "requirement": "MVP, bir bulut ve bir yerel model saglayicisini ortak arayuzle desteklemelidir.",
+      "rationale": "Arastirma, maliyet ve performans farklarini gormek icin en az iki calisma modu gerektirir.",
+      "acceptanceSummary": "1 bulut + 1 yerel saglayici yapisi resmi requirement oldu.",
+      "acceptanceCriteria": [
+        "Issue body tek dosya degisikligiyle yeni saglayici eklenebilecek soyutlama hedefini not eder.",
+        "Saglayici sayisi MVP icin 2 ile sinirli tutulur."
+      ],
+      "outOfScope": [
+        "Uc veya daha fazla saglayici ile genis entegrasyon."
+      ],
+      "sourceDocuments": [
+        "PRODUCT_PLAN.md",
+        "TECH_STACK_AND_AI.md"
+      ]
+    },
+    {
+      "key": "req-model-user-selection",
+      "parentKey": "epic-model-cost",
+      "kind": "issue",
+      "title": "REQ: Model secimi kullanici tercihine birakilmali",
+      "status": "Draft",
+      "area": "Model",
+      "requirementType": "Functional",
+      "phase": "Faz 2",
+      "priority": "P1",
+      "labels": [
+        "req:functional"
+      ],
+      "requirement": "Kullanici, gorevin gereksinimine gore yerel veya bulut modeli secme kontrolune sahip olmalidir.",
+      "rationale": "Maliyet ve kalite trade-off'u kullanici deneyiminin parcasi olacak.",
+      "acceptanceSummary": "Saglayici secimi kullanici kontrolunde tanimli.",
+      "acceptanceCriteria": [
+        "Issue body kullanici tercihine birakilan model secimini belirtir.",
+        "Secim mantigi zorunlu otomatik yonlendirme gerektirmez."
+      ],
+      "outOfScope": [
+        "Dinamik otomatik model router."
+      ],
+      "sourceDocuments": [
+        "PRODUCT_PLAN.md",
+        "TECH_STACK_AND_AI.md",
+        "COST_AND_PERFORMANCE.md"
+      ]
+    },
+    {
+      "key": "req-model-cost-metrics",
+      "parentKey": "epic-model-cost",
+      "kind": "issue",
+      "title": "REQ: Gecikme ve maliyet yerel-bulut ayrimiyla raporlanmali",
+      "status": "Draft",
+      "area": "Model",
+      "requirementType": "Non-Functional",
+      "phase": "Faz 3",
+      "priority": "P1",
+      "labels": [
+        "req:non-functional"
+      ],
+      "requirement": "Task bazli gecikme ve maliyet verileri yerel model ve bulut model kullanimi icin ayri raporlanmalidir.",
+      "rationale": "Bu veri olmadan retrieval ve ajan dongusu degerlendirmesi eksik kalir.",
+      "acceptanceSummary": "Latency ve cost reporting ayrik bir requirement olarak acildi.",
+      "acceptanceCriteria": [
+        "Issue body plan suresi, diff hazirlama suresi ve toplam gorev suresi gibi olcumleri referanslar.",
+        "Yerel ve bulut kullanimlari ayni tabloda ayri gosterilir."
+      ],
+      "outOfScope": [
+        "Kusursuz finansal muhasebe sistemi."
+      ],
+      "sourceDocuments": [
+        "EVALUATION_PLAN.md",
+        "COST_AND_PERFORMANCE.md",
+        "TECH_STACK_AND_AI.md"
+      ]
+    },
+    {
+      "key": "risk-model-local-fallback",
+      "parentKey": "epic-model-cost",
+      "kind": "issue",
+      "title": "Risk: Bulut maliyeti kritikse local-only fallback plani hazir olmali",
+      "status": "Draft",
+      "area": "Model",
+      "requirementType": "Risk",
+      "phase": "Faz 2",
+      "priority": "P1",
+      "labels": [
+        "req:risk"
+      ],
+      "requirement": "API maliyetleri beklenenden yuksek kalirsa sistemin yerel modele donerek temel deneyi surdurebilecegi B plani kayit altinda olmalidir.",
+      "rationale": "Maliyet riski tez projesinde dogrudan takvim ve uygulanabilirligi etkiler.",
+      "acceptanceSummary": "Local-only fallback bir risk maddesi olarak olusturuldu.",
+      "acceptanceCriteria": [
+        "Issue body fallback stratejisinin kalite pahasina maliyet kontrolu sagladigini belirtir.",
+        "Bu fallback, projenin tamamen durmasi yerine kapsami koruyan bir plan olarak yazilir."
+      ],
+      "outOfScope": [
+        "Yuksek maliyet durumunu otomatik finansal kurallarla yonetmek."
+      ],
+      "sourceDocuments": [
+        "RISK_REGISTER.md",
+        "COST_AND_PERFORMANCE.md",
+        "TECH_STACK_AND_AI.md"
+      ]
+    },
+    {
+      "key": "req-test-unit",
+      "parentKey": "epic-testing-evaluation",
+      "kind": "issue",
+      "title": "REQ: Birim testleri diff, workspace boundary, retrieval ve audit modullerini kapsamali",
+      "status": "Draft",
+      "area": "Testing",
+      "requirementType": "Non-Functional",
+      "phase": "Faz 2",
+      "priority": "P0",
+      "labels": [
+        "req:non-functional"
+      ],
+      "requirement": "Yuksek riskli cekirdek moduller icin deterministik birim testleri bulunmalidir.",
+      "rationale": "Bu moduller bozulursa ajan davranisinin en kritik garantileri kaybolur.",
+      "acceptanceSummary": "Birim test kapsam oncelikleri belirli.",
+      "acceptanceCriteria": [
+        "Issue body diff, guvenlik filtresi, workspace boundary / path normalization, retrieval yardimcilari ve audit log yazimini listeler.",
+        "Bu maddeler test onceligi olarak yuksek riskle iliskilendirilir."
+      ],
+      "outOfScope": [
+        "Dusuk riskli tum UI ayrintilarini birim testlerle kaplamak."
+      ],
+      "sourceDocuments": [
+        "TESTING_AND_CI.md"
+      ]
+    },
+    {
+      "key": "req-test-integration",
+      "parentKey": "epic-testing-evaluation",
+      "kind": "issue",
+      "title": "REQ: Entegrasyon testleri plan-diff-apply-rollback-safety akislarini dogrulamali",
+      "status": "Draft",
+      "area": "Testing",
+      "requirementType": "Non-Functional",
+      "phase": "Faz 2",
+      "priority": "P0",
+      "labels": [
+        "req:non-functional"
+      ],
+      "requirement": "Birden fazla bilesenin birlikte calistigi kritik ajan akislari entegrasyon testleriyle korunmalidir.",
+      "rationale": "Gercek hata siniflarinin cogu moduller arasi entegrasyonda gorulur.",
+      "acceptanceSummary": "Kritik agent flow entegrasyon testleri tanimli.",
+      "acceptanceCriteria": [
+        "Issue body plan uretimi, diff olusumu, uygulama, rollback ve hassas dosya korumasini sayar.",
+        "Bu akislardan en az biri bozuldugunda feature tamamlandi sayilmaz."
+      ],
+      "outOfScope": [
+        "Tam benchmark calismasinin entegrasyon testi yerine gecmesi."
+      ],
+      "sourceDocuments": [
+        "TESTING_AND_CI.md",
+        "SYSTEM_PLAN.md"
+      ]
+    },
+    {
+      "key": "req-test-e2e",
+      "parentKey": "epic-testing-evaluation",
+      "kind": "issue",
+      "title": "REQ: Uctan uca testler partial approval, safety stop ve gercek kullanici akislarini simule etmeli",
+      "status": "Draft",
+      "area": "Testing",
+      "requirementType": "Non-Functional",
+      "phase": "Faz 2",
+      "priority": "P1",
+      "labels": [
+        "req:non-functional"
+      ],
+      "requirement": "E2E testler, kullanicinin dosya acip gorev vererek diff inceledigi ve secmeli onay verdigi tam akisleri simule etmelidir.",
+      "rationale": "UI ve ajan akisi bir araya geldiginde ortaya cikacak davranisi ancak uctan uca testler gosterir.",
+      "acceptanceSummary": "E2E kapsaminda partial approval ve safety stop var.",
+      "acceptanceCriteria": [
+        "Issue body dosya ac, gorev ver, diff incele, onayla, geri al senaryosunu referanslar.",
+        "Cok dosyali degisiklikte bazi dosyalari reddetme ve guvenlik uyarisiyle durdurma senaryolari listelenir."
+      ],
+      "outOfScope": [
+        "Her commit'te tum E2E setini calistirmak."
+      ],
+      "sourceDocuments": [
+        "TESTING_AND_CI.md",
+        "UX_AND_INTERACTION.md"
+      ]
+    },
+    {
+      "key": "req-evaluation-benchmark",
+      "parentKey": "epic-testing-evaluation",
+      "kind": "issue",
+      "title": "REQ: Benchmark 20 gorev, ablation tasarimi (A/B/C) ile tanimlanmali",
+      "status": "Draft",
+      "area": "Evaluation",
+      "requirementType": "Research",
+      "phase": "Faz 3",
+      "priority": "P0",
+      "labels": [
+        "req:research"
+      ],
+      "requirement": "Degerlendirme seti en az 20 gorev icermeli ve ablation tasarimi olarak A (direct LLM), B (Agentic IDE approval-gate-disabled flag) ve C (Agentic IDE tam akis) kosullarini ayni gorevler uzerinden karsilastirmalidir.",
+      "rationale": "B kosulu ayri bir sistem degil, ayni kod tabaninin ablation flag ile calistirilan halidir. Bu sayede onay mekanizmasi tek bagimsiz degisken olur.",
+      "acceptanceSummary": "20 gorev ve uclu ablation tasarimi backlog maddesi olarak acildi.",
+      "acceptanceCriteria": [
+        "Issue body gorev kategorilerini ve hedef adetlerini listeler.",
+        "Uclu ablation tasarimi (A: direct LLM, B: gate-disabled flag, C: full) ayni issue icinde sabitlenir.",
+        "B kosulu ayri sistem degil, --experimental-disable-approval-gate flag oldugu belirtilir."
+      ],
+      "outOfScope": [
+        "Buyuk olcekli sanayi benchmark'larini MVP kapsamina almak."
+      ],
+      "sourceDocuments": [
+        "EVALUATION_PLAN.md",
+        "PRODUCT_PLAN.md"
+      ]
+    },
+    {
+      "key": "req-evaluation-metrics",
+      "parentKey": "epic-testing-evaluation",
+      "kind": "issue",
+      "title": "REQ: Basari, guvenlik, rollback, halusinasyon, gecikme ve guven metrikleri toplanmali",
+      "status": "Draft",
+      "area": "Evaluation",
+      "requirementType": "Research",
+      "phase": "Faz 3",
+      "priority": "P0",
+      "labels": [
+        "req:research"
+      ],
+      "requirement": "Benchmark raporlari, tam basari orani, agirlikli puan, guvenlik ihlali, rollback, yanlis atif, gecikme ve kullanici guveni sinyallerini birlikte icermelidir.",
+      "rationale": "Tez, yalnizca dogruluk degil guvenlik ve guven boyutlarini da savunuyor.",
+      "acceptanceSummary": "Ana metrik seti ve trust sinyalleri ayni maddede tanimli.",
+      "acceptanceCriteria": [
+        "Issue body tam basari oranini, agirlikli puani ve basarili guvenlik ihlali hedefini referanslar.",
+        "Davranissal guven sinyalleri ve kisa gorev sonrasi anketler ayni requirement'a baglanir."
+      ],
+      "outOfScope": [
+        "Istatistiksel tez analizi metodunun tamamini burada tanimlamak."
+      ],
+      "sourceDocuments": [
+        "EVALUATION_PLAN.md",
+        "TESTING_AND_CI.md"
+      ]
+    },
+    {
+      "key": "req-thesis-phase-gates",
+      "parentKey": "epic-thesis-roadmap",
+      "kind": "issue",
+      "title": "REQ: Faz 1, Faz 2 ve Faz 3 cikti kapilari Project icinde izlenmeli",
+      "status": "Draft",
+      "area": "Thesis",
+      "requirementType": "Research",
+      "phase": "Faz 1",
+      "priority": "P0",
+      "labels": [
+        "req:research"
+      ],
+      "requirement": "Roadmap'teki faz kapilari ve kritik kontrol noktalarinin her biri backlog yapisinda temsil edilmelidir.",
+      "rationale": "Project yalnizca fikir listesi degil, tez ilerleme panosu olarak da kullanilacak.",
+      "acceptanceSummary": "Faz kapilari ve checkpoint mantigi backloga yazildi.",
+      "acceptanceCriteria": [
+        "Issue body Faz 1, Faz 2 ve Faz 3 ana ciktilarini listeler.",
+        "Kritik karar noktalari en az roadmap referansiyla baglanir."
+      ],
+      "outOfScope": [
+        "Her ay icin detayli sprint plani."
+      ],
+      "sourceDocuments": [
+        "PROJECT_ROADMAP.md",
+        "SUPERVISOR_BRIEF.md"
+      ]
+    },
+    {
+      "key": "req-thesis-freeze",
+      "parentKey": "epic-thesis-roadmap",
+      "kind": "issue",
+      "title": "REQ: Degerlendirme fazi basladiktan sonra yeni ana ozellik alinmamali",
+      "status": "Draft",
+      "area": "Thesis",
+      "requirementType": "Research",
+      "phase": "Faz 3",
+      "priority": "P0",
+      "labels": [
+        "req:research"
+      ],
+      "requirement": "Degerlendirme ve tez yazim fazina gecildiginde backlog yeni ana urun ozellikleriyle sisirilmemelidir.",
+      "rationale": "Feature freeze olmadan benchmark ve tez bulgulari surekli hareketli hedefe doner.",
+      "acceptanceSummary": "Feature freeze kurali resmi takip maddesi oldu.",
+      "acceptanceCriteria": [
+        "Issue body evaluation fazi sonrasi ana ozellik eklenmeyecegini belirtir.",
+        "Bu kurala istisna ancak stabilizasyon ve kritik bug duzeltmeleri olarak not edilir."
+      ],
+      "outOfScope": [
+        "Kucuk belge duzeltmelerini yasaklamak."
+      ],
+      "sourceDocuments": [
+        "PROJECT_ROADMAP.md",
+        "PRODUCT_PLAN.md"
+      ]
+    },
+    {
+      "key": "req-thesis-final-deliverables",
+      "parentKey": "epic-thesis-roadmap",
+      "kind": "issue",
+      "title": "REQ: Final teslimler demo, tez metni, sunum ve savunma paketi olarak takip edilmeli",
+      "status": "Draft",
+      "area": "Thesis",
+      "requirementType": "Research",
+      "phase": "Faz 3",
+      "priority": "P0",
+      "labels": [
+        "req:research"
+      ],
+      "requirement": "Projenin final ciktilari demo, tez metni, sunum ve savunma hazirligi olarak ayrik ama baglantili backlog maddeleriyle izlenmelidir.",
+      "rationale": "Teknik teslim tamam olsa bile tez ve savunma ciktilari izlenmezse final riski devam eder.",
+      "acceptanceSummary": "Final teslim seti backlog maddesi olarak acildi.",
+      "acceptanceCriteria": [
+        "Issue body demo, tez taslagi veya final metin ve savunma paketi kalemlerini listeler.",
+        "Bu deliverable seti resmi tamamlanma kriteriyle tutarli olur."
+      ],
+      "outOfScope": [
+        "Tez iceriginin tum bolumlerini burada yazmak."
+      ],
+      "sourceDocuments": [
+        "PROJECT_ROADMAP.md",
+        "THESIS_OUTLINE.md",
+        "SUPERVISOR_BRIEF.md"
+      ]
+    }
+  ]
+}
