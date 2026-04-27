@@ -587,7 +587,7 @@ function Get-ProjectItemIdForIssue {
   )
 
   $query = @'
-query($owner: String!, $repo: String!, $issueNumber: Int!, $projectNumber: Int!) {
+query($owner: String!, $repo: String!, $issueNumber: Int!) {
   repository(owner: $owner, name: $repo) {
     issue(number: $issueNumber) {
       projectItems(first: 50) {
@@ -607,7 +607,6 @@ query($owner: String!, $repo: String!, $issueNumber: Int!, $projectNumber: Int!)
     owner = $RepoOwner
     repo = $RepoName
     issueNumber = $IssueNumber
-    projectNumber = $ProjectNumber
   }
 
   $issue = Get-PropertyValue -Object (Get-PropertyValue -Object $response.data -Name 'repository') -Name 'issue'
