@@ -513,8 +513,9 @@ function New-IssueBody {
     "- Requirement Type: $($IssueDefinition.requirementType)"
   )
 
-  if (-not [string]::IsNullOrWhiteSpace($IssueDefinition.parentKey)) {
-    $parentDefinition = $IssueDefinitionsByKey[$IssueDefinition.parentKey]
+  $parentKey = Get-PropertyValue -Object $IssueDefinition -Name 'parentKey'
+  if (-not [string]::IsNullOrWhiteSpace($parentKey)) {
+    $parentDefinition = $IssueDefinitionsByKey[$parentKey]
     $phaseLines += "- Parent Epic: $($parentDefinition.title)"
   }
 
