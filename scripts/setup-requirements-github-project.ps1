@@ -224,11 +224,8 @@ function Get-OwnerNodeId {
 
   $query = @'
 query($login: String!) {
-  user(login: $login) {
-    id
-    login
-  }
-  organization(login: $login) {
+  repositoryOwner(login: $login) {
+    __typename
     id
     login
   }
@@ -236,14 +233,9 @@ query($login: String!) {
 '@
 
   $response = Invoke-GhGraphQL -Query $query -Variables @{ login = $OwnerLogin }
-  $user = Get-PropertyValue -Object $response.data -Name 'user'
-  if ($null -ne $user) {
-    return Get-PropertyValue -Object $user -Name 'id'
-  }
-
-  $org = Get-PropertyValue -Object $response.data -Name 'organization'
-  if ($null -ne $org) {
-    return Get-PropertyValue -Object $org -Name 'id'
+  $owner = Get-PropertyValue -Object $response.data -Name 'repositoryOwner'
+  if ($null -ne $owner) {
+    return Get-PropertyValue -Object $owner -Name 'id'
   }
 
   throw "Could not resolve a GitHub user or organization id for owner $OwnerLogin."
@@ -385,44 +377,46 @@ function Get-ProjectMetadata {
 
   $query = @'
 query($owner: String!, $number: Int!) {
-  user(login: $owner) {
-    projectV2(number: $number) {
-      id
-      title
-      fields(first: 100) {
-        nodes {
-          __typename
-          ... on ProjectV2FieldCommon {
-            id
-            name
-            dataType
-          }
-          ... on ProjectV2SingleSelectField {
-            options {
+  repositoryOwner(login: $owner) {
+    ... on User {
+      projectV2(number: $number) {
+        id
+        title
+        fields(first: 100) {
+          nodes {
+            __typename
+            ... on ProjectV2FieldCommon {
               id
               name
+              dataType
+            }
+            ... on ProjectV2SingleSelectField {
+              options {
+                id
+                name
+              }
             }
           }
         }
       }
     }
-  }
-  organization(login: $owner) {
-    projectV2(number: $number) {
-      id
-      title
-      fields(first: 100) {
-        nodes {
-          __typename
-          ... on ProjectV2FieldCommon {
-            id
-            name
-            dataType
-          }
-          ... on ProjectV2SingleSelectField {
-            options {
+    ... on Organization {
+      projectV2(number: $number) {
+        id
+        title
+        fields(first: 100) {
+          nodes {
+            __typename
+            ... on ProjectV2FieldCommon {
               id
               name
+              dataType
+            }
+            ... on ProjectV2SingleSelectField {
+              options {
+                id
+                name
+              }
             }
           }
         }
@@ -437,14 +431,10 @@ query($owner: String!, $number: Int!) {
     number = $ProjectNumber
   }
 
-  $userProject = Get-PropertyValue -Object (Get-PropertyValue -Object $response.data -Name 'user') -Name 'projectV2'
-  if ($null -ne $userProject) {
-    return $userProject
-  }
-
-  $orgProject = Get-PropertyValue -Object (Get-PropertyValue -Object $response.data -Name 'organization') -Name 'projectV2'
-  if ($null -ne $orgProject) {
-    return $orgProject
+  $owner = Get-PropertyValue -Object $response.data -Name 'repositoryOwner'
+  $project = Get-PropertyValue -Object $owner -Name 'projectV2'
+  if ($null -ne $project) {
+    return $project
   }
 
   throw "Could not resolve project metadata for owner $OwnerLogin and project #$ProjectNumber."
