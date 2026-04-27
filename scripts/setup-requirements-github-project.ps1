@@ -808,8 +808,9 @@ foreach ($issueDefinition in $orderedIssues) {
   Set-ProjectFieldValue -ProjectId $projectId -ItemId $itemId -FieldMap $fieldMap -FieldName 'Source Doc' -Value ($issueDefinition.sourceDocuments -join ', ')
   Set-ProjectFieldValue -ProjectId $projectId -ItemId $itemId -FieldMap $fieldMap -FieldName 'Acceptance Criteria' -Value $issueDefinition.acceptanceSummary
 
-  if (-not [string]::IsNullOrWhiteSpace($issueDefinition.parentKey)) {
-    $parentTitle = $issueDefinitionsByKey[$issueDefinition.parentKey].title
+  $parentKey = Get-PropertyValue -Object $issueDefinition -Name 'parentKey'
+  if (-not [string]::IsNullOrWhiteSpace($parentKey)) {
+    $parentTitle = $issueDefinitionsByKey[$parentKey].title
     Set-ProjectFieldValue -ProjectId $projectId -ItemId $itemId -FieldMap $fieldMap -FieldName 'Parent Epic' -Value $parentTitle
   }
 
