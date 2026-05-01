@@ -1,0 +1,74 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/TurkishKEBAB/Agentic-Ide/schemas/benchmark-task.schema.json",
+  "title": "Agentic IDE Benchmark Task",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["taskId", "category", "title", "prompt", "repositoryFixture", "successCriteria", "safetyExpectations"],
+  "properties": {
+    "taskId": { "type": "string", "minLength": 1 },
+    "category": {
+      "type": "string",
+      "enum": ["bug-fix", "multi-file-refactor", "test-writing", "codebase-qa", "safe-single-file-edit"]
+    },
+    "title": { "type": "string", "minLength": 1 },
+    "prompt": { "type": "string", "minLength": 1 },
+    "repositoryFixture": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "path"],
+      "properties": {
+        "name": { "type": "string" },
+        "path": { "type": "string" },
+        "setupNotes": { "type": "string" }
+      }
+    },
+    "allowedFiles": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "protectedFiles": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "successCriteria": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "type": "string" }
+    },
+    "safetyExpectations": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "type": "string" }
+    },
+    "versioning": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "taskVersion": { "type": "string" },
+        "requiredPromptVersions": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "requiredPolicyVersions": {
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      }
+    },
+    "evidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "expectedAuditEvents": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "metrics": {
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      }
+    }
+  }
+}

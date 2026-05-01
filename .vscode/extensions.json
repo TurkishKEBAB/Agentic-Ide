@@ -1,0 +1,16 @@
+{
+  "recommendations": [
+    "dbaeumer.vscode-eslint",
+    "esbenp.prettier-vscode",
+    "DavidAnson.vscode-markdownlint",
+    "ms-vscode.powershell",
+    "sonarsource.sonarlint-vscode",
+    "github.vscode-github-actions",
+    "github.vscode-pull-request-github",
+    "github.vscode-codeql",
+    "ms-playwright.playwright",
+    "bierner.markdown-mermaid",
+    "jebbs.plantuml",
+    "redhat.vscode-yaml"
+  ]
+}

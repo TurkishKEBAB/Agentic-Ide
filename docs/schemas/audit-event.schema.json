@@ -1,0 +1,77 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/TurkishKEBAB/Agentic-Ide/schemas/audit-event.schema.json",
+  "title": "Agentic IDE Audit Event",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["eventId", "timestamp", "eventType", "runId", "actor", "decision", "workspaceRoot"],
+  "properties": {
+    "eventId": { "type": "string", "minLength": 1 },
+    "timestamp": { "type": "string", "format": "date-time" },
+    "runId": { "type": "string", "minLength": 1 },
+    "taskId": { "type": "string" },
+    "condition": {
+      "type": "string",
+      "enum": ["A", "B", "C", "not-applicable"]
+    },
+    "eventType": {
+      "type": "string",
+      "enum": [
+        "plan_created",
+        "file_read",
+        "retrieval_query",
+        "diff_created",
+        "approval_requested",
+        "approval_decision",
+        "write_attempted",
+        "write_blocked",
+        "write_applied",
+        "rollback_applied",
+        "safety_warning"
+      ]
+    },
+    "actor": {
+      "type": "string",
+      "enum": ["user", "implementation_agent", "verification_agent", "agent", "system"]
+    },
+    "decision": {
+      "type": "string",
+      "enum": ["none", "approved", "rejected", "blocked", "rolled_back"]
+    },
+    "workspaceRoot": { "type": "string" },
+    "targetPath": { "type": "string" },
+    "model": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "provider": { "type": "string" },
+        "name": { "type": "string" },
+        "id": { "type": "string" },
+        "version": { "type": "string" },
+        "temperature": { "type": "number" }
+      }
+    },
+    "promptVersions": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "implementation": { "type": "string" },
+        "verification": { "type": "string" },
+        "system": { "type": "string" }
+      }
+    },
+    "policyVersions": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "retrieval": { "type": "string" },
+        "safety": { "type": "string" },
+        "verification": { "type": "string" }
+      }
+    },
+    "metadata": {
+      "type": "object",
+      "additionalProperties": true
+    }
+  }
+}

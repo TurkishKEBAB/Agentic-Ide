@@ -16,4 +16,7 @@ For non-sensitive security improvements, open a GitHub issue using the requireme
 
 - [Safety and guardrails](SAFETY_AND_GUARDRAILS.md)
 - [Data and privacy](DATA_AND_PRIVACY.md)
+- [Threat model](docs/THREAT_MODEL.md)
+- [Incident response runbook](docs/INCIDENT_RESPONSE.md)
+- [Data retention and secure deletion](docs/DATA_RETENTION.md)
 - [Testing and CI](TESTING_AND_CI.md)

@@ -1,0 +1,30 @@
+name: Documentation Checks
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate-docs:
+    name: Validate documentation and diagrams
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+
+      - name: Validate Markdown links
+        shell: pwsh
+        run: ./scripts/validate-doc-links.ps1
+
+      - name: Validate PlantUML structure
+        shell: pwsh
+        run: ./scripts/validate-plantuml.ps1

@@ -9,17 +9,17 @@
 
 ### 1.1 Kullanıcı Verileri ve Nereye Gider
 
-| Veri Türü | Yerel Kalır | Bulut Modele Gönderilir | Loglanır |
-|---|---|---|---|
-| Kaynak kod dosyaları | ✅ | ✅ (yalnızca ilgili bağlam) | Dosya adı (içerik değil) |
-| Proje dizin yapısı | ✅ | ✅ (dosya/klasör adları) | Yok |
-| Kullanıcı chat mesajları | ✅ | ✅ | Zaman damgası |
-| Ajan yanıtları | ✅ | ❌ (buluttan gelir) | Zaman damgası |
-| Embedding vektörleri | ✅ | ❌ (yerel üretilir) | Yok |
-| API anahtarları | ✅ | ❌ | Yok |
-| `.env` / gizli dosyalar | ✅ | **❌ KESİNLİKLE HAYIR** | İhlal girişimi loglanır |
-| Audit log | ✅ | ❌ | N/A (log kendisi) |
-| Kullanıcı tercihleri | ✅ | ❌ | Yok |
+| Veri Türü                | Yerel Kalır | Bulut Modele Gönderilir    | Loglanır                 |
+|--------------------------|-------------|----------------------------|--------------------------|
+| Kaynak kod dosyaları     | ✅           | ✅ (yalnızca ilgili bağlam) | Dosya adı (içerik değil) |
+| Proje dizin yapısı       | ✅           | ✅ (dosya/klasör adları)    | Yok                      |
+| Kullanıcı chat mesajları | ✅           | ✅                          | Zaman damgası            |
+| Ajan yanıtları           | ✅           | ❌ (buluttan gelir)         | Zaman damgası            |
+| Embedding vektörleri     | ✅           | ❌ (yerel üretilir)         | Yok                      |
+| API anahtarları          | ✅           | ❌                          | Yok                      |
+| `.env` / gizli dosyalar  | ✅           | **❌ KESİNLİKLE HAYIR**     | İhlal girişimi loglanır  |
+| Audit log                | ✅           | ❌                          | N/A (log kendisi)        |
+| Kullanıcı tercihleri     | ✅           | ❌                          | Yok                      |
 
 ### 1.2 Veri Akış Diyagramı
 
@@ -41,22 +41,23 @@ Gizlilik Filtresi → [.env, .pem, .key dosyaları çıkarılır]
 
 ## 2. Yerel Model vs. Bulut Model: Gizlilik Karşılaştırması
 
-| Özellik | Yerel Model (Ollama) | Bulut Model (Claude API) |
-|---|---|---|
-| Veri nereye gider? | Hiçbir yere, tamamen yerel | Anthropic sunucularına |
-| API kullanım verisi loglanır mı? | Hayır | Anthropic politikasına bağlı |
-| İnternet bağlantısı gerekli mi? | Hayır | Evet |
-| KVKK/GDPR uyumluluğu | Otomatik (veri çıkmaz) | API sağlayıcı DPA gerekli |
-| Performans | Yavaş (donanıma bağlı) | Hızlı |
-| Kod güvenliği | Maksimum | Sağlayıcıya güven |
+| Özellik                          | Yerel Model (Ollama)       | Bulut Model (Claude API)     |
+|----------------------------------|----------------------------|------------------------------|
+| Veri nereye gider?               | Hiçbir yere, tamamen yerel | Anthropic sunucularına       |
+| API kullanım verisi loglanır mı? | Hayır                      | Anthropic politikasına bağlı |
+| İnternet bağlantısı gerekli mi?  | Hayır                      | Evet                         |
+| KVKK/GDPR uyumluluğu             | Otomatik (veri çıkmaz)     | API sağlayıcı DPA gerekli    |
+| Performans                       | Yavaş (donanıma bağlı)     | Hızlı                        |
+| Kod güvenliği                    | Maksimum                   | Sağlayıcıya güven            |
 
 ### 2.1 Kullanıcıya Gizlilik Kontrolü Sunulması
 
 Kullanıcı aşağıdaki tercihlerden birini seçebilir:
 
 - **🔒 Yalnızca Yerel:** Tüm veriler cihazda kalır. Bulut API hiç kullanılmaz.
-- **⚖️ Hibrit (varsayılan):** Basit görevler yerel, karmaşık görevler bulut.
-- **☁️ Yalnızca Bulut:** Tüm görevler bulut modele gönderilir (en yüksek kalite).
+- **⚖️ Manuel Hibrit (varsayılan):** Kullanıcı görev bazında yerel veya bulut modeli seçer; sistem otomatik karmaşıklık
+  tabanlı routing yapmaz.
+- **☁️ Yalnızca Bulut:** Tüm görevler bulut modele gönderilir (en yüksek kalite, en yüksek veri çıkışı).
 
 ---
 
@@ -64,14 +65,14 @@ Kullanıcı aşağıdaki tercihlerden birini seçebilir:
 
 ### 3.1 KVKK (Kişisel Verilerin Korunması Kanunu — Türkiye)
 
-| İlke | Durum | Açıklama |
-|---|---|---|
-| Hukuka uygunluk | ✅ | Kullanıcı açık rıza ile veri gönderir (model seçimi) |
-| Amaçla bağlılık | ✅ | Veri yalnızca kod analizi için kullanılır |
-| Veri minimizasyonu | ✅ | Yalnızca ilgili bağlam gönderilir (tüm repo değil) |
-| Doğruluk | ⚠ | Veri doğruluğu kullanıcı sorumluluğunda |
-| Saklama süresi | ✅ | Yerel veri kullanıcı kontrolünde; bulut sağlayıcı politikası |
-| Güvenlik | ✅ | HTTPS iletişim + gizli dosya filtresi |
+| İlke               | Durum | Açıklama                                                     |
+|--------------------|-------|--------------------------------------------------------------|
+| Hukuka uygunluk    | ✅     | Kullanıcı açık rıza ile veri gönderir (model seçimi)         |
+| Amaçla bağlılık    | ✅     | Veri yalnızca kod analizi için kullanılır                    |
+| Veri minimizasyonu | ✅     | Yalnızca ilgili bağlam gönderilir (tüm repo değil)           |
+| Doğruluk           | ⚠     | Veri doğruluğu kullanıcı sorumluluğunda                      |
+| Saklama süresi     | ✅     | Yerel veri kullanıcı kontrolünde; bulut sağlayıcı politikası |
+| Güvenlik           | ✅     | HTTPS iletişim + gizli dosya filtresi                        |
 
 ### 3.2 GDPR (AB — referans olarak)
 
@@ -93,12 +94,12 @@ Kullanıcı aşağıdaki tercihlerden birini seçebilir:
 
 ### 4.2 İyileştirme Seçenekleri (Gelecek)
 
-| Seçenek | Güvenlik | Karmaşıklık |
-|---|---|---|
-| Ortam değişkeni | Orta | Düşük |
-| `.env` dosyası | Orta | Düşük |
-| OS Keychain (Keytar) | Yüksek | Orta |
-| Hardware Security Module | Çok Yüksek | Yüksek |
+| Seçenek                  | Güvenlik   | Karmaşıklık |
+|--------------------------|------------|-------------|
+| Ortam değişkeni          | Orta       | Düşük       |
+| `.env` dosyası           | Orta       | Düşük       |
+| OS Keychain (Keytar)     | Yüksek     | Orta        |
+| Hardware Security Module | Çok Yüksek | Yüksek      |
 
 **MVP kararı:** Dosya bazlı saklama + dosya izinleri yeterli. OS Keychain gelecek çalışma.
 

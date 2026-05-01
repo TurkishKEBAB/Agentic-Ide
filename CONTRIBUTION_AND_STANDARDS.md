@@ -1,6 +1,7 @@
 # KATKI STANDARTLARI VE KOD KALİTESİ (CONTRIBUTION_AND_STANDARDS)
 
-> **Belge amacı:** Proje geliştirme sürecinde uyulacak kodlama standartlarını, commit kurallarını ve kalite eşiklerini tanımlar.
+> **Belge amacı:** Proje geliştirme sürecinde uyulacak kodlama standartlarını, commit kurallarını ve kalite eşiklerini
+> tanımlar.
 
 ---
 
@@ -23,21 +24,24 @@
 
 ```typescript
 // 1. İthalatlar (harici → dahili → tip)
-import { app } from 'electron';
-import { ContextEngine } from './context-engine';
-import type { ModelProvider } from './types';
+import {app} from 'electron';
+import {ContextEngine} from './context-engine';
+import type {ModelProvider} from './types';
 
 // 2. Sabitler
 const MAX_UNDO_STACK = 10;
 
 // 3. Tip tanımları (dosyaya özel)
-interface InternalState { /* ... */ }
+interface InternalState { /* ... */
+}
 
 // 4. Ana sınıf / fonksiyonlar
-export class AgentLoop { /* ... */ }
+export class AgentLoop { /* ... */
+}
 
 // 5. Yardımcı fonksiyonlar (dışa aktarılmayan)
-function normalizeText(input: string): string { /* ... */ }
+function normalizeText(input: string): string { /* ... */
+}
 ```
 
 ### 1.3 Dosya Boyutu Kuralı
@@ -61,17 +65,18 @@ function normalizeText(input: string): string { /* ... */ }
 
 **Tip'ler:**
 
-| Tip | Kullanım |
-|---|---|
-| `feat` | Yeni özellik |
-| `fix` | Hata düzeltme |
+| Tip        | Kullanım                             |
+|------------|--------------------------------------|
+| `feat`     | Yeni özellik                         |
+| `fix`      | Hata düzeltme                        |
 | `refactor` | Davranış değiştirmeyen kod düzenleme |
-| `test` | Test ekleme/güncelleme |
-| `docs` | Dokümantasyon değişikliği |
-| `chore` | Build, CI, bağımlılık güncellemesi |
-| `security` | Güvenlik düzeltmesi |
+| `test`     | Test ekleme/güncelleme               |
+| `docs`     | Dokümantasyon değişikliği            |
+| `chore`    | Build, CI, bağımlılık güncellemesi   |
+| `security` | Güvenlik düzeltmesi                  |
 
 **Örnekler:**
+
 ```
 feat(agent): add ReAct loop implementation
 fix(sandbox): prevent path traversal via symlinks
@@ -97,30 +102,30 @@ main ← stabil, her zaman çalışır
 
 ### 3.1 Kod Kalitesi
 
-| Metrik | Hedef | Araç |
-|---|---|---|
-| TypeScript strict hatası | 0 | `tsc --noEmit` |
-| ESLint hatası | 0 | `eslint .` |
-| Kullanılmayan import | 0 | ESLint no-unused-imports |
-| `any` kullanımı | 0 | ESLint no-explicit-any |
-| Dosya boyutu | < 300 satır | Manuel kontrol |
+| Metrik                   | Hedef       | Araç                     |
+|--------------------------|-------------|--------------------------|
+| TypeScript strict hatası | 0           | `tsc --noEmit`           |
+| ESLint hatası            | 0           | `eslint .`               |
+| Kullanılmayan import     | 0           | ESLint no-unused-imports |
+| `any` kullanımı          | 0           | ESLint no-explicit-any   |
+| Dosya boyutu             | < 300 satır | Manuel kontrol           |
 
 ### 3.2 Test Kalitesi
 
-| Metrik | Hedef | Araç |
-|---|---|---|
-| Birim test coverage | ≥ %70 | Vitest / Jest |
-| Güvenlik testleri | %100 pass | Özel test suite |
-| Entegrasyon testleri | Kritik yollar %100 | Vitest |
-| CI pipeline durumu | Her push'ta yeşil | GitHub Actions |
+| Metrik               | Hedef              | Araç            |
+|----------------------|--------------------|-----------------|
+| Birim test coverage  | ≥ %70              | Vitest / Jest   |
+| Güvenlik testleri    | %100 pass          | Özel test suite |
+| Entegrasyon testleri | Kritik yollar %100 | Vitest          |
+| CI pipeline durumu   | Her push'ta yeşil  | GitHub Actions  |
 
 ### 3.3 Dokümantasyon
 
-| Kural | Açıklama |
-|---|---|
-| Her public fonksiyon JSDoc'lu | Açıklama + parametre + dönüş tipi |
-| Her modül README'si | Modülün amacı ve örnek kullanımı |
-| Mimari değişikliklerde ADR | Architecture Decision Record yazılır |
+| Kural                         | Açıklama                             |
+|-------------------------------|--------------------------------------|
+| Her public fonksiyon JSDoc'lu | Açıklama + parametre + dönüş tipi    |
+| Her modül README'si           | Modülün amacı ve örnek kullanımı     |
+| Mimari değişikliklerde ADR    | Architecture Decision Record yazılır |
 
 ---
 

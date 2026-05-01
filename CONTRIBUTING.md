@@ -21,6 +21,8 @@ Before opening a PR:
 - Run the available validation scripts.
 - Explain the motivation and scope clearly.
 - Link related issues or requirement items.
+- Link the requirement/evidence trace when the change affects thesis claims.
+- Check the active gates in [docs/QUALITY_GATES.md](docs/QUALITY_GATES.md).
 - Avoid committing local IDE state, secrets, generated caches, or environment files.
 
 ## Scope Discipline

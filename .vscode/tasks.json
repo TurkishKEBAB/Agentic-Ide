@@ -1,0 +1,121 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Problems: Scan Workspace",
+      "type": "shell",
+      "command": "powershell",
+      "args": [
+        "-ExecutionPolicy",
+        "Bypass",
+        "-File",
+        "${workspaceFolder}/scripts/vscode-problems.ps1",
+        "-Owner",
+        "TurkishKEBAB"
+      ],
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "presentation": {
+        "reveal": "silent",
+        "panel": "dedicated",
+        "clear": true
+      },
+      "runOptions": {
+        "runOn": "folderOpen"
+      },
+      "problemMatcher": {
+        "owner": "agentic-ide",
+        "fileLocation": [
+          "relative",
+          "${workspaceFolder}"
+        ],
+        "pattern": {
+          "regexp": "^(.*)\\((\\d+),(\\d+)\\):\\s+(error|warning|info)\\s+([A-Z0-9_-]+):\\s+(.*)$",
+          "file": 1,
+          "line": 2,
+          "column": 3,
+          "severity": 4,
+          "code": 5,
+          "message": 6
+        }
+      }
+    },
+    {
+      "label": "Validate: Governance",
+      "type": "shell",
+      "command": "powershell",
+      "args": [
+        "-ExecutionPolicy",
+        "Bypass",
+        "-File",
+        "${workspaceFolder}/scripts/validate-github-governance.ps1",
+        "-Owner",
+        "TurkishKEBAB"
+      ],
+      "problemMatcher": []
+    },
+    {
+      "label": "Validate: Docs Links",
+      "type": "shell",
+      "command": "powershell",
+      "args": [
+        "-ExecutionPolicy",
+        "Bypass",
+        "-File",
+        "${workspaceFolder}/scripts/validate-doc-links.ps1"
+      ],
+      "problemMatcher": []
+    },
+    {
+      "label": "Validate: PlantUML",
+      "type": "shell",
+      "command": "powershell",
+      "args": [
+        "-ExecutionPolicy",
+        "Bypass",
+        "-File",
+        "${workspaceFolder}/scripts/validate-plantuml.ps1"
+      ],
+      "problemMatcher": []
+    },
+    {
+      "label": "Validate: Project Seed Dry Run",
+      "type": "shell",
+      "command": "powershell",
+      "args": [
+        "-ExecutionPolicy",
+        "Bypass",
+        "-File",
+        "${workspaceFolder}/scripts/setup-requirements-github-project.ps1",
+        "-Owner",
+        "TurkishKEBAB",
+        "-DryRun"
+      ],
+      "problemMatcher": []
+    },
+    {
+      "label": "Git: Diff Whitespace Check",
+      "type": "shell",
+      "command": "git",
+      "args": [
+        "diff",
+        "--check"
+      ],
+      "problemMatcher": {
+        "owner": "git-diff-check",
+        "fileLocation": [
+          "relative",
+          "${workspaceFolder}"
+        ],
+        "pattern": {
+          "regexp": "^(.+):(\\d+):\\s+(.+)$",
+          "file": 1,
+          "line": 2,
+          "message": 3
+        }
+      }
+    }
+  ]
+}

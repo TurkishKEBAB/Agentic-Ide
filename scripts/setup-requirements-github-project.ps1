@@ -5,7 +5,8 @@ param(
   [string]$ProjectTitle,
   [string]$SpecPath,
   [switch]$DryRun,
-  [switch]$SkipViews
+  [switch]$SkipViews,
+  [switch]$SyncWorkflowStatus
 )
 
 Set-StrictMode -Version Latest
@@ -168,14 +169,149 @@ function Assert-GhReady {
   }
 }
 
+function Assert-TextValue {
+  param(
+    [object]$Value,
+    [string]$Message
+  )
+
+  if ([string]::IsNullOrWhiteSpace([string]$Value)) {
+    throw $Message
+  }
+}
+
+function Assert-AllowedOption {
+  param(
+    [hashtable]$OptionsByField,
+    [string]$FieldName,
+    [string]$Value,
+    [string]$IssueKey
+  )
+
+  if (-not $OptionsByField.ContainsKey($FieldName)) {
+    throw "Project field is missing or is not SINGLE_SELECT: $FieldName"
+  }
+
+  if (-not $OptionsByField[$FieldName].ContainsKey($Value)) {
+    throw "Issue $IssueKey uses invalid $FieldName option: $Value"
+  }
+}
+
 function Assert-Spec {
   param([object]$Spec)
+
+  $repoRoot = Resolve-Path -LiteralPath (Join-Path $PSScriptRoot '..')
+  $requiredProjectFields = @(
+    'Requirement Status',
+    'Area',
+    'Requirement Type',
+    'Phase',
+    'Priority',
+    'Source Doc',
+    'Acceptance Criteria',
+    'Parent Epic',
+    'MVP Scenario',
+    'Risk',
+    'Test Target',
+    'Thesis Evidence',
+    'Readiness'
+  )
+
+  $projectFieldNames = @{}
+  $singleSelectOptionsByField = @{}
+  foreach ($field in $Spec.project.fields) {
+    Assert-TextValue -Value $field.name -Message 'Project field without a name detected.'
+    Assert-TextValue -Value $field.dataType -Message "Project field $($field.name) is missing dataType."
+    $projectFieldNames[$field.name] = $true
+
+    if ($field.dataType -eq 'SINGLE_SELECT') {
+      $options = @{}
+      foreach ($option in (Get-Collection $field.options)) {
+        Assert-TextValue -Value $option -Message "Project field $($field.name) has an empty option."
+        $options[[string]$option] = $true
+      }
+
+      if ($options.Count -lt 1) {
+        throw "Single-select field $($field.name) has no options."
+      }
+
+      $singleSelectOptionsByField[$field.name] = $options
+    }
+  }
+
+  foreach ($fieldName in $requiredProjectFields) {
+    if (-not $projectFieldNames.ContainsKey($fieldName)) {
+      throw "Required project field is missing: $fieldName"
+    }
+  }
+
+  foreach ($view in (Get-Collection $Spec.project.views)) {
+    Assert-TextValue -Value $view.name -Message 'Project view without a name detected.'
+    Assert-TextValue -Value $view.layout -Message "Project view $($view.name) is missing layout."
+
+    foreach ($fieldName in (Get-Collection (Get-PropertyValue -Object $view -Name 'visibleFields'))) {
+      if (-not $projectFieldNames.ContainsKey($fieldName) -and $fieldName -ne 'Status') {
+        throw "Project view $($view.name) references unknown visible field: $fieldName"
+      }
+    }
+
+    foreach ($fieldName in (Get-Collection (Get-PropertyValue -Object $view -Name 'sortBy'))) {
+      if (-not $projectFieldNames.ContainsKey($fieldName) -and $fieldName -ne 'Status') {
+        throw "Project view $($view.name) references unknown sort field: $fieldName"
+      }
+    }
+
+    $groupBy = Get-PropertyValue -Object $view -Name 'groupBy'
+    if (-not [string]::IsNullOrWhiteSpace([string]$groupBy) -and -not $projectFieldNames.ContainsKey($groupBy) -and $groupBy -ne 'Status') {
+      throw "Project view $($view.name) references unknown groupBy field: $groupBy"
+    }
+
+    $filter = Get-PropertyValue -Object $view -Name 'filter'
+    if (-not [string]::IsNullOrWhiteSpace([string]$filter) -and $filter -match '^(?<field>[^:]+):') {
+      $filterField = $Matches.field.Trim()
+      if (-not $projectFieldNames.ContainsKey($filterField) -and $filterField -ne 'Status') {
+        throw "Project view $($view.name) references unknown filter field: $filterField"
+      }
+    }
+  }
+
+  $definedLabels = @{}
+  foreach ($label in $Spec.labels) {
+    Assert-TextValue -Value $label.name -Message 'Repository label without a name detected.'
+    Assert-TextValue -Value $label.description -Message "Repository label $($label.name) is missing a description."
+    Assert-TextValue -Value $label.color -Message "Repository label $($label.name) is missing a color."
+
+    if ($label.color -notmatch '^[0-9A-Fa-f]{6}$') {
+      throw "Repository label $($label.name) must use a 6-digit hex color without #: $($label.color)"
+    }
+
+    if ($definedLabels.ContainsKey($label.name)) {
+      throw "Duplicate repository label detected: $($label.name)"
+    }
+
+    $definedLabels[$label.name] = $true
+  }
 
   $seenKeys = @{}
   $seenTitles = @{}
   $epicKeys = @{}
 
   foreach ($issue in $Spec.issues) {
+    foreach ($fieldName in @('key', 'kind', 'title', 'status', 'area', 'requirementType', 'phase', 'priority', 'requirement', 'rationale', 'acceptanceSummary')) {
+      $value = Get-PropertyValue -Object $issue -Name $fieldName
+      Assert-TextValue -Value $value -Message "Issue is missing required field ${fieldName}: $($issue.key)"
+    }
+
+    if ($issue.kind -notin @('epic', 'issue')) {
+      throw "Issue $($issue.key) has invalid kind: $($issue.kind)"
+    }
+
+    Assert-AllowedOption -OptionsByField $singleSelectOptionsByField -FieldName 'Requirement Status' -Value $issue.status -IssueKey $issue.key
+    Assert-AllowedOption -OptionsByField $singleSelectOptionsByField -FieldName 'Area' -Value $issue.area -IssueKey $issue.key
+    Assert-AllowedOption -OptionsByField $singleSelectOptionsByField -FieldName 'Requirement Type' -Value $issue.requirementType -IssueKey $issue.key
+    Assert-AllowedOption -OptionsByField $singleSelectOptionsByField -FieldName 'Phase' -Value $issue.phase -IssueKey $issue.key
+    Assert-AllowedOption -OptionsByField $singleSelectOptionsByField -FieldName 'Priority' -Value $issue.priority -IssueKey $issue.key
+
     if ($seenKeys.ContainsKey($issue.key)) {
       throw "Duplicate issue key detected: $($issue.key)"
     }
@@ -190,9 +326,46 @@ function Assert-Spec {
     if ($issue.kind -eq 'epic') {
       $epicKeys[$issue.key] = $true
     }
+
+    foreach ($arrayFieldName in @('labels', 'acceptanceCriteria', 'outOfScope', 'sourceDocuments')) {
+      $items = @(Get-Collection (Get-PropertyValue -Object $issue -Name $arrayFieldName))
+      if ($items.Count -lt 1) {
+        throw "Issue $($issue.key) must define at least one ${arrayFieldName} item."
+      }
+
+      foreach ($item in $items) {
+        Assert-TextValue -Value $item -Message "Issue $($issue.key) has an empty ${arrayFieldName} item."
+      }
+    }
+
+    foreach ($labelName in (Get-Collection $issue.labels)) {
+      if (-not $definedLabels.ContainsKey($labelName)) {
+        throw "Issue $($issue.key) references undefined label: $labelName"
+      }
+    }
+
+    foreach ($sourceDocument in (Get-Collection $issue.sourceDocuments)) {
+      $sourcePath = Join-Path $repoRoot $sourceDocument
+      if (-not (Test-Path -LiteralPath $sourcePath)) {
+        throw "Issue $($issue.key) references missing source document: $sourceDocument"
+      }
+    }
+
+    $targetDate = Get-PropertyValue -Object $issue -Name 'targetDate'
+    if (-not [string]::IsNullOrWhiteSpace([string]$targetDate)) {
+      try {
+        $null = [DateTime]::ParseExact([string]$targetDate, 'yyyy-MM-dd', [Globalization.CultureInfo]::InvariantCulture)
+      } catch {
+        throw "Issue $($issue.key) has invalid targetDate; expected yyyy-MM-dd: $targetDate"
+      }
+    }
   }
 
   foreach ($issue in $Spec.issues) {
+    if ($issue.kind -eq 'epic' -and -not [string]::IsNullOrWhiteSpace([string](Get-PropertyValue -Object $issue -Name 'parentKey'))) {
+      throw "Epic $($issue.key) must not define parentKey."
+    }
+
     if ($issue.kind -eq 'issue' -and [string]::IsNullOrWhiteSpace($issue.parentKey)) {
       throw "Child issue $($issue.key) is missing parentKey."
     }
@@ -296,7 +469,7 @@ function Get-OrCreateProject {
   }
 }
 
-function Ensure-ProjectLink {
+function Set-ProjectLink {
   param(
     [string]$OwnerLogin,
     [string]$ProjectNumber,
@@ -310,7 +483,7 @@ function Ensure-ProjectLink {
   }
 }
 
-function Ensure-Labels {
+function Set-RepositoryLabels {
   param(
     [object]$Spec,
     [string]$RepoFullName
@@ -337,7 +510,7 @@ function Get-ProjectFields {
   return Get-Collection (Invoke-Gh -Arguments @('project', 'field-list', $ProjectNumber, '--owner', $OwnerLogin, '--limit', '100', '--format', 'json') -AsJson)
 }
 
-function Ensure-ProjectFields {
+function Set-ProjectFields {
   param(
     [object]$Spec,
     [string]$OwnerLogin,
@@ -540,7 +713,7 @@ $(($phaseLines -join [Environment]::NewLine))
 "@
 }
 
-function Ensure-Issue {
+function Set-Issue {
   param(
     [object]$IssueDefinition,
     [hashtable]$IssueDefinitionsByKey,
@@ -621,7 +794,7 @@ query($owner: String!, $repo: String!, $issueNumber: Int!) {
   return $null
 }
 
-function Ensure-IssueInProject {
+function Set-IssueInProject {
   param(
     [string]$OwnerLogin,
     [string]$ProjectNumber,
@@ -630,14 +803,36 @@ function Ensure-IssueInProject {
     [object]$Issue
   )
 
-  $existingItemId = Get-ProjectItemIdForIssue -RepoOwner $RepoOwner -RepoName $RepoName -IssueNumber $Issue.number -ProjectNumber $ProjectNumber
-  if ($null -ne $existingItemId) {
-    return $existingItemId
+  for ($attempt = 1; $attempt -le 3; $attempt++) {
+    $existingItemId = Get-ProjectItemIdForIssue -RepoOwner $RepoOwner -RepoName $RepoName -IssueNumber $Issue.number -ProjectNumber $ProjectNumber
+    if ($null -ne $existingItemId) {
+      return $existingItemId
+    }
+
+    Start-Sleep -Seconds 1
   }
 
   Write-Detail "Adding issue #$($Issue.number) to project"
-  $null = Invoke-Gh -Arguments @('project', 'item-add', $ProjectNumber, '--owner', $OwnerLogin, '--url', $Issue.url)
-  $itemId = Get-ProjectItemIdForIssue -RepoOwner $RepoOwner -RepoName $RepoName -IssueNumber $Issue.number -ProjectNumber $ProjectNumber
+  try {
+    $null = Invoke-Gh -Arguments @('project', 'item-add', $ProjectNumber, '--owner', $OwnerLogin, '--url', $Issue.url)
+  } catch {
+    $message = "$($_.Exception.Message)`n$_"
+    if ($message -notmatch 'Content already exists in this project') {
+      throw
+    }
+
+    Write-Detail "Issue #$($Issue.number) is already in the project; resolving item id again."
+  }
+
+  $itemId = $null
+  for ($attempt = 1; $attempt -le 5; $attempt++) {
+    $itemId = Get-ProjectItemIdForIssue -RepoOwner $RepoOwner -RepoName $RepoName -IssueNumber $Issue.number -ProjectNumber $ProjectNumber
+    if ($null -ne $itemId) {
+      break
+    }
+
+    Start-Sleep -Seconds 2
+  }
 
   if ($null -eq $itemId) {
     throw "Issue #$($Issue.number) could not be resolved as a project item after adding it."
@@ -690,7 +885,174 @@ function Set-ProjectFieldValue {
   $null = Invoke-Gh -Arguments $arguments
 }
 
-function Create-ProjectViews {
+function Set-ProjectFieldValueIfPresent {
+  param(
+    [string]$ProjectId,
+    [string]$ItemId,
+    [hashtable]$FieldMap,
+    [string]$FieldName,
+    [string]$Value
+  )
+
+  if ($FieldMap.ContainsKey($FieldName)) {
+    Set-ProjectFieldValue -ProjectId $ProjectId -ItemId $ItemId -FieldMap $FieldMap -FieldName $FieldName -Value $Value
+  }
+}
+
+function Get-WorkflowStatus {
+  param([object]$IssueDefinition)
+
+  if ($IssueDefinition.status -eq 'Advisor Review') {
+    return 'Review'
+  }
+
+  if ($IssueDefinition.kind -eq 'epic') {
+    return 'Review'
+  }
+
+  if ($IssueDefinition.phase -eq 'Faz 1' -and $IssueDefinition.priority -eq 'P0') {
+    return 'Ready'
+  }
+
+  return 'Backlog'
+}
+
+function Get-Readiness {
+  param([object]$IssueDefinition)
+
+  if ($IssueDefinition.status -in @('Approved', 'Done')) {
+    return 'Validated'
+  }
+
+  if ($IssueDefinition.status -eq 'Deferred') {
+    return 'Blocked'
+  }
+
+  $labels = Get-Collection (Get-PropertyValue -Object $IssueDefinition -Name 'labels')
+  if ($labels -contains 'blocked') {
+    return 'Blocked'
+  }
+
+  if ($IssueDefinition.status -eq 'Advisor Review') {
+    return 'Ready'
+  }
+
+  if ($IssueDefinition.phase -eq 'Faz 1' -and $IssueDefinition.priority -eq 'P0') {
+    return 'Ready'
+  }
+
+  return 'Needs Clarification'
+}
+
+function Get-MvpScenario {
+  param([object]$IssueDefinition)
+
+  switch ($IssueDefinition.area) {
+    'Research' { return 'Research scope and thesis success criteria' }
+    'Editor' { return 'Editor foundation and workspace onboarding' }
+    'Retrieval' { return 'Codebase Q&A and multi-file context retrieval' }
+    'Agent' { return 'User-triggered agent task flow' }
+    'Safety' { return 'Safety guardrails and protected workspace behavior' }
+    'Model' { return 'Cloud/local model selection and fallback' }
+    'Testing' { return 'Verification of approval-gated agent flow' }
+    'Evaluation' { return 'Benchmark and thesis evaluation' }
+    'Thesis' { return 'Thesis roadmap and final deliverables' }
+    'UX' {
+      if ($IssueDefinition.title -match 'onboarding|konfigurasyon|Ilk acilis') {
+        return 'Editor foundation and workspace onboarding'
+      }
+
+      if ($IssueDefinition.title -match 'Diff|onay|approval|rollback|kontrol|neden|Reactive') {
+        return 'Diff review, approval, rollback, and safety warning flow'
+      }
+
+      return 'Controlled user interaction'
+    }
+    default { return $IssueDefinition.area }
+  }
+}
+
+function Get-RiskTrace {
+  param([object]$IssueDefinition)
+
+  if ($IssueDefinition.requirementType -eq 'Risk') {
+    return $IssueDefinition.acceptanceSummary
+  }
+
+  switch ($IssueDefinition.area) {
+    'Research' { return 'Scope drift or unclear advisor acceptance' }
+    'Editor' { return 'Weak editor base can block end-to-end agent evaluation' }
+    'Retrieval' { return 'Wrong, missing, or excessive context can reduce accuracy or privacy' }
+    'Agent' { return 'Excessive agency or missing approval boundary' }
+    'Safety' { return 'Unauthorized write, secret exposure, or boundary bypass' }
+    'UX' {
+      if ($IssueDefinition.title -match 'onboarding|konfigurasyon|Ilk acilis') {
+        return 'Incorrect workspace, model, or privacy setup can weaken safety assumptions'
+      }
+
+      return 'Loss of user control, trust, or review clarity'
+    }
+    'Model' { return 'Cost, latency, provider availability, or quality trade-off' }
+    'Testing' { return 'Regression in core safety or agent flows' }
+    'Evaluation' { return 'Weak evidence can make thesis claims hard to defend' }
+    'Thesis' { return 'Missed roadmap gate or final deliverable risk' }
+    default { return 'Tracked in source documents' }
+  }
+}
+
+function Get-TestTarget {
+  param([object]$IssueDefinition)
+
+  if ($IssueDefinition.kind -eq 'epic') {
+    return 'Child issue completion and advisor review checklist'
+  }
+
+  switch ($IssueDefinition.area) {
+    'Research' { return 'Document review and traceability check' }
+    'Editor' { return 'UI smoke, workspace, and file-flow tests' }
+    'Retrieval' { return 'Retrieval fixtures, privacy filters, and context selection tests' }
+    'Agent' { return 'Agent loop and approval-gate integration tests' }
+    'Safety' { return 'Boundary, protected-file, secret-scan, and audit regression tests' }
+    'UX' {
+      if ($IssueDefinition.title -match 'onboarding|konfigurasyon|Ilk acilis') {
+        return 'Onboarding, workspace selection, preference, and API-key storage smoke tests'
+      }
+
+      return 'Approval, reject, rollback, and warning E2E flows'
+    }
+    'Model' { return 'Provider adapter, fallback, latency, and cost checks' }
+    'Testing' { return 'CI coverage and test-suite execution' }
+    'Evaluation' { return 'Benchmark harness, scoring rubric, and metric export validation' }
+    'Thesis' { return 'Roadmap checkpoint and final deliverable review' }
+    default { return 'Manual verification' }
+  }
+}
+
+function Get-ThesisEvidence {
+  param([object]$IssueDefinition)
+
+  switch ($IssueDefinition.area) {
+    'Research' { return 'Advisor-approved scope notes and linked planning documents' }
+    'Editor' { return 'Working prototype demo, screenshots, and smoke-test result' }
+    'Retrieval' { return 'Context citation samples, retrieval precision notes, and token comparison' }
+    'Agent' { return 'Plan-first execution traces and approved diff records' }
+    'Safety' { return 'Security test results, audit log entries, and unauthorized-write count' }
+    'UX' {
+      if ($IssueDefinition.title -match 'onboarding|konfigurasyon|Ilk acilis') {
+        return 'Onboarding screenshots, config storage behavior, and privacy trace notes'
+      }
+
+      return 'Approval/reject/rollback traces and short user trust observations'
+    }
+    'Model' { return 'Local/cloud latency, cost, and fallback comparison table' }
+    'Testing' { return 'CI artifacts, test reports, and coverage summaries' }
+    'Evaluation' { return 'Benchmark tables, anonymized exports, and metric summaries' }
+    'Thesis' { return 'Roadmap checkpoint evidence, demo package, thesis text, and defense materials' }
+    default { return 'Evidence linked from source documents' }
+  }
+}
+
+function New-ProjectViews {
   param(
     [object]$Spec,
     [string]$OwnerLogin,
@@ -762,27 +1124,28 @@ if ($DryRun) {
   Write-Detail "Fields: $($spec.project.fields.Count)"
   Write-Detail "Labels: $($spec.labels.Count)"
   Write-Detail "Issues: $($spec.issues.Count)"
+  Write-Detail "Sync workflow status: $SyncWorkflowStatus"
   return
 }
 
 Assert-GhReady
 
 Write-Step 'Ensuring repository labels'
-Ensure-Labels -Spec $spec -RepoFullName $repoInfo.FullName
+Set-RepositoryLabels -Spec $spec -RepoFullName $repoInfo.FullName
 
 Write-Step 'Ensuring GitHub Project'
 $project = Get-OrCreateProject -OwnerLogin $ownerLogin -Title $projectName
 $projectNumber = [string](Get-PropertyValue -Object $project -Name 'number')
-Ensure-ProjectLink -OwnerLogin $ownerLogin -ProjectNumber $projectNumber -RepoFullName $repoInfo.FullName
+Set-ProjectLink -OwnerLogin $ownerLogin -ProjectNumber $projectNumber -RepoFullName $repoInfo.FullName
 
 Write-Step 'Ensuring project fields'
-Ensure-ProjectFields -Spec $spec -OwnerLogin $ownerLogin -ProjectNumber $projectNumber
+Set-ProjectFields -Spec $spec -OwnerLogin $ownerLogin -ProjectNumber $projectNumber
 $projectMetadata = Get-ProjectMetadata -OwnerLogin $ownerLogin -ProjectNumber ([int]$projectNumber)
 $projectId = Get-PropertyValue -Object $projectMetadata -Name 'id'
 $fieldMap = Get-FieldMap -ProjectMetadata $projectMetadata
 
 Write-Step 'Ensuring project views'
-Create-ProjectViews -Spec $spec -OwnerLogin $ownerLogin -ProjectNumber ([int]$projectNumber)
+New-ProjectViews -Spec $spec -OwnerLogin $ownerLogin -ProjectNumber ([int]$projectNumber)
 
 Write-Step 'Ensuring issues and project items'
 $existingIssuesByTitle = Get-ExistingIssuesByTitle -RepoFullName $repoInfo.FullName
@@ -797,8 +1160,12 @@ $orderedIssues = @(
 )
 
 foreach ($issueDefinition in $orderedIssues) {
-  $issue = Ensure-Issue -IssueDefinition $issueDefinition -IssueDefinitionsByKey $issueDefinitionsByKey -ExistingIssuesByTitle $existingIssuesByTitle -RepoFullName $repoInfo.FullName
-  $itemId = Ensure-IssueInProject -OwnerLogin $ownerLogin -ProjectNumber $projectNumber -RepoOwner $repoInfo.Owner -RepoName $repoInfo.Name -Issue $issue
+  $issue = Set-Issue -IssueDefinition $issueDefinition -IssueDefinitionsByKey $issueDefinitionsByKey -ExistingIssuesByTitle $existingIssuesByTitle -RepoFullName $repoInfo.FullName
+  $itemId = Set-IssueInProject -OwnerLogin $ownerLogin -ProjectNumber $projectNumber -RepoOwner $repoInfo.Owner -RepoName $repoInfo.Name -Issue $issue
+
+  if ($SyncWorkflowStatus) {
+    Set-ProjectFieldValueIfPresent -ProjectId $projectId -ItemId $itemId -FieldMap $fieldMap -FieldName 'Status' -Value (Get-WorkflowStatus -IssueDefinition $issueDefinition)
+  }
 
   Set-ProjectFieldValue -ProjectId $projectId -ItemId $itemId -FieldMap $fieldMap -FieldName 'Requirement Status' -Value $issueDefinition.status
   Set-ProjectFieldValue -ProjectId $projectId -ItemId $itemId -FieldMap $fieldMap -FieldName 'Area' -Value $issueDefinition.area
@@ -807,6 +1174,11 @@ foreach ($issueDefinition in $orderedIssues) {
   Set-ProjectFieldValue -ProjectId $projectId -ItemId $itemId -FieldMap $fieldMap -FieldName 'Priority' -Value $issueDefinition.priority
   Set-ProjectFieldValue -ProjectId $projectId -ItemId $itemId -FieldMap $fieldMap -FieldName 'Source Doc' -Value ($issueDefinition.sourceDocuments -join ', ')
   Set-ProjectFieldValue -ProjectId $projectId -ItemId $itemId -FieldMap $fieldMap -FieldName 'Acceptance Criteria' -Value $issueDefinition.acceptanceSummary
+  Set-ProjectFieldValueIfPresent -ProjectId $projectId -ItemId $itemId -FieldMap $fieldMap -FieldName 'MVP Scenario' -Value (Get-MvpScenario -IssueDefinition $issueDefinition)
+  Set-ProjectFieldValueIfPresent -ProjectId $projectId -ItemId $itemId -FieldMap $fieldMap -FieldName 'Risk' -Value (Get-RiskTrace -IssueDefinition $issueDefinition)
+  Set-ProjectFieldValueIfPresent -ProjectId $projectId -ItemId $itemId -FieldMap $fieldMap -FieldName 'Test Target' -Value (Get-TestTarget -IssueDefinition $issueDefinition)
+  Set-ProjectFieldValueIfPresent -ProjectId $projectId -ItemId $itemId -FieldMap $fieldMap -FieldName 'Thesis Evidence' -Value (Get-ThesisEvidence -IssueDefinition $issueDefinition)
+  Set-ProjectFieldValueIfPresent -ProjectId $projectId -ItemId $itemId -FieldMap $fieldMap -FieldName 'Readiness' -Value (Get-Readiness -IssueDefinition $issueDefinition)
 
   $parentKey = Get-PropertyValue -Object $issueDefinition -Name 'parentKey'
   if (-not [string]::IsNullOrWhiteSpace($parentKey)) {

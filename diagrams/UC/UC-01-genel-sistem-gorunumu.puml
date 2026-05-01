@@ -1,4 +1,4 @@
-@startuml
+@startuml UC_01_genel_sistem_gorunumu
 title Agentic IDE - Genel Sistem Use Case Görünümü
 left to right direction
 skinparam packageStyle rectangle
@@ -11,28 +11,33 @@ actor "Dosya Sistemi" as FileSystem
 actor "Bağlam ve İndeks Servisi\n(Embedding + Symbol Retrieval)" as ContextService
 actor "Tercih Deposu\n(preferences.json)" as PreferenceStore
 actor "Audit Log\n(audit.jsonl)" as AuditLog
+actor "Undo Stack\n(son 10 değişiklik)" as UndoStack
 
 rectangle "Agentic IDE" {
   usecase "Proje klasörü aç" as UC_OpenProject
   usecase "Çalışma alanını indeksle" as UC_IndexWorkspace
   usecase "Dosya görüntüle ve düzenle" as UC_EditFiles
   usecase "Doğal dil ile görev başlat" as UC_StartTask
+  usecase "Kod değişikliği görevi başlat" as UC_StartChangeTask
   usecase "Kod tabanını açıkla\n(Q&A)" as UC_CodebaseQA
   usecase "Hata tespiti ve\ndüzeltme planı iste" as UC_BugFix
   usecase "Çok dosyalı refactor iste" as UC_Refactor
   usecase "Test oluşturma iste" as UC_TestGen
   usecase "Güvenli tek dosya\ndüzenleme iste" as UC_SafeEdit
-  usecase "Bağlam kaynaklarını göster" as UC_ShowSources
-  usecase "Diff incele" as UC_ReviewDiff
+  usecase "Bağlam kaynaklarını göster" as UC_ShowContextSources
+  usecase "Diff ve gerekçeyi incele" as UC_ReviewDiff
   usecase "Değişikliği onayla / reddet" as UC_ApproveReject
   usecase "Seçerek uygula" as UC_PartialApply
+  usecase "Onaylı değişikliği\natomik uygula" as UC_ApplyApproved
+  usecase "Undo kaydı oluştur" as UC_CreateUndo
   usecase "Rollback yap" as UC_Rollback
   usecase "Model tercihini ayarla" as UC_SelectModel
   usecase "Gizlilik tercihini ayarla" as UC_PrivacyPreference
-  usecase "Reactive safety warning göster\n(apply öncesi)" as UC_ReactiveSafetyWarning
+  usecase "Reactive safety check çalıştır\n(apply öncesi)" as UC_ReactiveSafetyCheck
   usecase "Audit geçmişini incele" as UC_ViewAudit
   usecase "İlgili dosyaları retrieve et" as UC_RetrieveContext
   usecase "Değişiklik planı oluştur" as UC_CreatePlan
+  usecase "Ajan eylemini audit log'a yaz" as UC_WriteAudit
 }
 
 Developer --> UC_OpenProject
@@ -40,6 +45,8 @@ Developer --> UC_EditFiles
 Developer --> UC_StartTask
 Developer --> UC_ReviewDiff
 Developer --> UC_ApproveReject
+Developer --> UC_ApplyApproved
+Developer --> UC_PartialApply
 Developer --> UC_Rollback
 Developer --> UC_SelectModel
 Developer --> UC_PrivacyPreference
@@ -47,32 +54,41 @@ Developer --> UC_ViewAudit
 
 UC_OpenProject .> UC_IndexWorkspace : <<include>>
 UC_StartTask .> UC_RetrieveContext : <<include>>
-UC_StartTask .> UC_CreatePlan : <<include>>
-UC_StartTask .> UC_ShowSources : <<include>>
-UC_StartTask .> UC_ReactiveSafetyWarning : <<include>>
-UC_BugFix -|> UC_StartTask
-UC_Refactor -|> UC_StartTask
-UC_TestGen -|> UC_StartTask
+UC_StartTask .> UC_ShowContextSources : <<include>>
 UC_CodebaseQA -|> UC_StartTask
-UC_SafeEdit -|> UC_StartTask
+UC_StartChangeTask -|> UC_StartTask
+UC_StartChangeTask .> UC_CreatePlan : <<include>>
+UC_StartChangeTask .> UC_ReactiveSafetyCheck : <<include>>
+UC_StartChangeTask .> UC_ReviewDiff : <<include>>
+UC_BugFix -|> UC_StartChangeTask
+UC_Refactor -|> UC_StartChangeTask
+UC_TestGen -|> UC_StartChangeTask
+UC_SafeEdit -|> UC_StartChangeTask
 UC_ApproveReject .> UC_ReviewDiff : <<include>>
-UC_PartialApply .> UC_ApproveReject : <<extend>>
-UC_Rollback .> UC_ViewAudit : <<include>>
+UC_ApproveReject .> UC_WriteAudit : <<include>>
+UC_ApplyApproved .> UC_ApproveReject : <<include>>
+UC_ApplyApproved .> UC_CreateUndo : <<include>>
+UC_ApplyApproved .> UC_WriteAudit : <<include>>
+UC_PartialApply -|> UC_ApplyApproved
+UC_ReactiveSafetyCheck .> UC_WriteAudit : <<include>>
+UC_Rollback .> UC_WriteAudit : <<include>>
 
 ContextService --> UC_IndexWorkspace
 ContextService --> UC_RetrieveContext
+ContextService --> UC_ShowContextSources
 CloudModel --> UC_CreatePlan
 LocalModel --> UC_CreatePlan
 FileSystem --> UC_OpenProject
 FileSystem --> UC_EditFiles
 FileSystem --> UC_ReviewDiff
+FileSystem --> UC_ApplyApproved
 FileSystem --> UC_Rollback
 PreferenceStore --> UC_SelectModel
 PreferenceStore --> UC_PrivacyPreference
 AuditLog --> UC_ViewAudit
-AuditLog --> UC_ApproveReject
-AuditLog --> UC_Rollback
-AuditLog --> UC_ReactiveSafetyWarning
+AuditLog --> UC_WriteAudit
+UndoStack --> UC_CreateUndo
+UndoStack --> UC_Rollback
 
 note right of UC_StartTask
 MVP görev ailesi:
@@ -88,13 +104,20 @@ Plan-first, approval-gated model:
 Kullanıcı onayı olmadan hiçbir dosya yazılmaz.
 end note
 
+note bottom of UC_StartChangeTask
+Q&A dosya yazmaz. Diff, reactive safety ve onay akışı
+yalnızca değişiklik üreten görevlerde zorunludur.
+Detaylı sıra için UC-02'ye bak.
+end note
+
 note bottom of UC_PrivacyPreference
 Kullanıcı bulut modeli veya yalnızca yerel modeli
 tercih ederek veri çıkışını kontrol eder.
+API anahtarı ve onboarding ayrıntıları UC-05'te modellenir.
 end note
 
-note bottom of UC_ReactiveSafetyWarning
-MVP içi reactive safety: yalnızca apply öncesi.
+note bottom of UC_ReactiveSafetyCheck
+MVP içi reactive safety check: yalnızca apply öncesi.
 Tetikleyiciler: workspace boundary violation,
 protected file write, large edit threshold,
 secret-in-diff. Detay: UC-03A.

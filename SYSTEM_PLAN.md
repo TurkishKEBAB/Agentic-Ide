@@ -1,7 +1,7 @@
 # SİSTEM PLANLAMA BELGESİ (SYSTEM_PLAN)
 
-> **Belge amacı:** Bu belge, Agentic IDE lisans bitirme projesinin teknik ve mimari boyutunu tanımlar.  
-> Nasıl inşa edileceğini, nasıl güvenli hale getirileceğini ve nasıl değerlendirileceğini netleştirir.  
+> **Belge amacı:** Bu belge, Agentic IDE lisans bitirme projesinin teknik ve mimari boyutunu tanımlar.
+> Nasıl inşa edileceğini, nasıl güvenli hale getirileceğini ve nasıl değerlendirileceğini netleştirir.
 > Ürün kararları için → `PRODUCT_PLAN.md`
 
 ---
@@ -50,6 +50,7 @@ Kullanıcı İsteği
 ```
 
 **Tool sistemi:** Ajan aşağıdaki araçlara erişebilir:
+
 - `read_file(path)` — dosya okuma
 - `write_file(path, content)` — güvenlik kontrolünden geçerek dosya yazma
 - `search_symbols(query)` — retrieval motoruna sorgu
@@ -59,13 +60,19 @@ Kullanıcı İsteği
 **Araç kısıtlaması:** Terminal komutları, `exec`, `eval`, `shell` araçları MVP'de **yoktur**.
 
 ### Gerekçe
-Single-agent döngüsü araştırma sorusunu yanıtlamak için yeterlidir. Multi-agent mimarisi, koordinasyon protokolleri, failure recovery ve test edilebilirlik açısından 1.5 yılın çok üzerinde bir mühendislik çabası gerektirir.
+
+Single-agent döngüsü araştırma sorusunu yanıtlamak için yeterlidir. Multi-agent mimarisi, koordinasyon protokolleri,
+failure recovery ve test edilebilirlik açısından 1.5 yılın çok üzerinde bir mühendislik çabası gerektirir.
 
 ### Trade-off
-Single-agent yaklaşımı, paralel görev yürütmeyi ve uzmanlaşmış ajanlar arasında iş bölümünü dışarıda bırakır. Bu, büyük ölçekli refaktorlarda performans sınırı anlamına gelir.
+
+Single-agent yaklaşımı, paralel görev yürütmeyi ve uzmanlaşmış ajanlar arasında iş bölümünü dışarıda bırakır. Bu, büyük
+ölçekli refaktorlarda performans sınırı anlamına gelir.
 
 ### Yanlış yapılırsa ne bozulur?
-Multi-agent sisteme erken geçilirse, koordinasyon hataları ayıklamak asıl özellik geliştirme süresini yok eder. "Ajan A, ajan B'nin bitirmesini beklerken sistem durdu" türü hatalar üretkenliği çökertir.
+
+Multi-agent sisteme erken geçilirse, koordinasyon hataları ayıklamak asıl özellik geliştirme süresini yok eder. "Ajan A,
+ajan B'nin bitirmesini beklerken sistem durdu" türü hatalar üretkenliği çökertir.
 
 ---
 
@@ -91,24 +98,34 @@ Katman 3 — Kullanıcı tarafından eklenen (User-pinned context)
 ```
 
 **İndeksleme stratejisi:**
-- Proje açılışında: tüm `.ts`, `.js`, `.py`, `.go` dosyaları embedding ile indekslenir (arka planda, editörü bloklamadan)
+
+- Proje açılışında: tüm `.ts`, `.js`, `.py`, `.go` dosyaları embedding ile indekslenir (arka planda, editörü
+  bloklamadan)
 - Her dosya kaydında: ilgili dosyanın indeksi güncellenir
 - Vektör store: SQLite + `sqlite-vec` (sıfır dış bağımlılık, taşınabilir)
 - Embedding modeli: `nomic-embed-text` (yerel, API maliyeti yok)
 
 **Gizlilik filtreleri:**
+
 - `.env`, `.pem`, `*.key`, `id_rsa`, `*.secret` dosyaları indekse alınmaz
 - `node_modules`, `.git`, `dist`, `build` klasörleri atlanır
 - Kural listesi yapılandırılabilir (`.agentignore` dosyası)
 
 ### Gerekçe
-Bu model, gerçek projeler için ölçeklenebilir. 100.000 satırlık bir repo için tüm içerik modele gönderilemez; ancak alakalı bağlam akıllıca seçilirse model performansı artar, maliyet düşer. Araştırma sorusunun alt sorusu bu yaklaşımın etkinliğini ölçmeyi hedefler.
+
+Bu model, gerçek projeler için ölçeklenebilir. 100.000 satırlık bir repo için tüm içerik modele gönderilemez; ancak
+alakalı bağlam akıllıca seçilirse model performansı artar, maliyet düşer. Araştırma sorusunun alt sorusu bu yaklaşımın
+etkinliğini ölçmeyi hedefler.
 
 ### Trade-off
-Katmanlı retrieval, yanlış parçaları seçme riskini taşır. Bir symbol başka bir isimde tanımlanmışsa retrieval onu kaçırabilir. Bu sınır tezde "sistem sınırı" olarak belgelenebilir.
+
+Katmanlı retrieval, yanlış parçaları seçme riskini taşır. Bir symbol başka bir isimde tanımlanmışsa retrieval onu
+kaçırabilir. Bu sınır tezde "sistem sınırı" olarak belgelenebilir.
 
 ### Yanlış yapılırsa ne bozulur?
-Tüm repo context göndermek: küçük projelerde çalışır, büyük projelerde context window taşar, API maliyeti artar. Vaat edilen özellik gerçek kullanımda çöker.
+
+Tüm repo context göndermek: küçük projelerde çalışır, büyük projelerde context window taşar, API maliyeti artar. Vaat
+edilen özellik gerçek kullanımda çöker.
 
 ---
 
@@ -119,39 +136,52 @@ Tüm repo context göndermek: küçük projelerde çalışır, büyük projelerd
 Güvenlik modeli "ne yasak" değil "ne izinli" sorusuna dayanır. Varsayılan her şey yasaklıdır; izinler açıkça tanımlanır.
 
 #### Katman 1 — Workspace Boundary + Path Normalization (Çalışma Dizini Kısıtlaması ve Traversal Koruması)
+
 - Ajan yalnızca kullanıcının açtığı proje dizini içindeki dosyaları okuyabilir ve yazabilir
 - Proje dizini dışına çıkmak için hiçbir araç yoktur
 - `../` traversal girişimleri path normalizasyonu ile önlenir
 
 #### Katman 2 — Gizli Dosya Koruması
+
 - Sabit kural: şu pattern'lar hiçbir zaman yazılamaz:
   - `.env`, `.env.*`, `*.pem`, `*.key`, `id_rsa`, `*.secret`, `*.p12`, `*.pfx`
 - Bu liste kullanıcı tarafından genişletilebilir ama daraltılamaz
 - Kural ihlal girişimi audit log'a yazılır ve kullanıcıya bildirilir
 
 #### Katman 3 — Değişiklik Onayı (Human Gate)
+
 - Her `write_file` çağrısı önce diff üretir
 - Diff kullanıcıya gösterilir; "Uygula" tıklanmadan işlem yapılmaz
 - Birden fazla dosya içeren planlar için: dosya listesi özeti önce, ardından her dosya için ayrı diff
 
 #### Katman 4 — Atomik Yazma ve Undo Stack
+
 - Dosya yazma işlemi: önce `.agentbackup` geçici dosyasına yaz, ardından atomik rename
 - Başarısız yazma işlemi orijinal dosyayı bozmaz
 - Son 10 değişiklik seti undo stack'te tutulur (her set, etkilenen tüm dosyaların önceki halini içerir)
 
 #### Katman 5 — Audit Log
+
 - Her ajan eylemi (dosya oku, dosya yaz, retrieval sorgusu) zaman damgası ve kullanıcı kararıyla loglanır
+- Benchmark oturumlarında `run_id`, `task_id` ve deney koşulu (`A` / `B` / `C`) log kaydına eklenir
 - Log dosyası: `~/.agentide/audit.jsonl` (satır bazlı JSON)
 - Log imzasız, salt metin; kullanıcı istediği zaman inceleyebilir
 
 ### Gerekçe
-Her katman bağımsız bir güvenlik önlemidir. Bir katman aşılsa bile bir sonraki devreye girer. Bu savunma derinliği (defense in depth) yaklaşımı, akademik tezde güvenlik bölümünü güçlendirir.
+
+Her katman bağımsız bir güvenlik önlemidir. Bir katman aşılsa bile bir sonraki devreye girer. Bu savunma derinliği (
+defense in depth) yaklaşımı, akademik tezde güvenlik bölümünü güçlendirir.
 
 ### Trade-off
-Bu model terminal komutlarını (shell execution) dışarıda bırakır. Kullanıcılar ajanın otomatik `npm install` ya da `pytest` çalıştırmasını isteyebilir. Bu özellik MVP'de yoktur; güvenlik modeli hazır olmadan eklenmez.
+
+Bu model terminal komutlarını (shell execution) dışarıda bırakır. Kullanıcılar ajanın otomatik `npm install` ya da
+`pytest` çalıştırmasını isteyebilir. Bu özellik MVP'de yoktur; güvenlik modeli hazır olmadan eklenmez.
 
 ### Yanlış yapılırsa ne bozulur?
-Güvenlik modeli "yasaklı komutlar listesi" şeklinde tasarlanırsa, listedeki olmayan ama tehlikeli bir komut çalıştırıldığında sistem saldırıya açık kalır. Pozitif liste (whitelist) yaklaşımı negatif listeden (blacklist) her zaman daha güvenlidir.
+
+Güvenlik modeli "yasaklı komutlar listesi" şeklinde tasarlanırsa, listedeki olmayan ama tehlikeli bir komut
+çalıştırıldığında sistem saldırıya açık kalır. Pozitif liste (whitelist) yaklaşımı negatif listeden (blacklist) her
+zaman daha güvenlidir.
 
 ---
 
@@ -160,7 +190,9 @@ Güvenlik modeli "yasaklı komutlar listesi" şeklinde tasarlanırsa, listedeki 
 ### Öneri: Üç Aşamalı Değişiklik Akışı
 
 #### Aşama 1 — Diff Üretimi
+
 Ajan değişiklik planını oluşturduktan sonra, uygulama öncesinde:
+
 - Unified diff formatında (+ / - satırları) her dosya için değişiklik üretilir
 - Yan yana (side-by-side) görünüm varsayılandır; kullanıcı unified diff'e geçebilir
 - Değişiklik kapsamı özeti: "3 dosyada 12 satır eklendi, 4 satır silindi"
@@ -180,22 +212,30 @@ Tek dosya değişikliği:
   [Tümünü Uygula] veya [Seçilerek Uygula] veya [İptal]
 ```
 
-**"Seçelerek Uygula":** Kullanıcı bazı dosyaların değişimini onaylayıp diğerlerini reddedebilir. Ajan kısmen uygulanmış durumu belirtir ve kullanıcıya "Kalan kısmı tamamlamamı ister misin?" diye sorar.
+**"Seçelerek Uygula":** Kullanıcı bazı dosyaların değişimini onaylayıp diğerlerini reddedebilir. Ajan kısmen uygulanmış
+durumu belirtir ve kullanıcıya "Kalan kısmı tamamlamamı ister misin?" diye sorar.
 
 #### Aşama 3 — Rollback
+
 - Her başarılı uygulama sonrası "Geri Al" butonu aktif kalır (10 adım)
 - Rollback: ilgili dosyaların önceki halini undo stack'ten restore eder
 - Rollback sırasında başka bir değişiklik yapılmışsa, çakışma kullanıcıya bildirilir
 - Rollback işlemi de audit log'a yazılır
 
 ### Gerekçe
-Bu model güveni arayüz düzeyinde inşa eder. Kullanıcı "ne olacağını" görmeden "tamam" demek zorunda değildir. Bu, araştırma sorusunun "kullanıcı güveni" boyutunu doğrudan ele alır.
+
+Bu model güveni arayüz düzeyinde inşa eder. Kullanıcı "ne olacağını" görmeden "tamam" demek zorunda değildir. Bu,
+araştırma sorusunun "kullanıcı güveni" boyutunu doğrudan ele alır.
 
 ### Trade-off
-Her değişiklik için diff göstermek, basit işlemlerde (örn. tek satır değişikliği) ekstra tıklama gerektiriyor gibi görünebilir. Uzun vadede "onaydan yorulma" riskini doğurabilir. Bu risk tezde ölçülmeli ve raporlanmalıdır.
+
+Her değişiklik için diff göstermek, basit işlemlerde (örn. tek satır değişikliği) ekstra tıklama gerektiriyor gibi
+görünebilir. Uzun vadede "onaydan yorulma" riskini doğurabilir. Bu risk tezde ölçülmeli ve raporlanmalıdır.
 
 ### Yanlış yapılırsa ne bozulur?
-"Onay mekanizması ekleyelim" deyip diff göstermeden yalnızca "Uygulayayım mı?" sorusu sormak, anlamlı bir onay değildir. Kullanıcı neyi onayladığını bilmeden "Evet" derse, güven mekanizması kağıt üzerinde kalır.
+
+"Onay mekanizması ekleyelim" deyip diff göstermeden yalnızca "Uygulayayım mı?" sorusu sormak, anlamlı bir onay değildir.
+Kullanıcı neyi onayladığını bilmeden "Evet" derse, güven mekanizması kağıt üzerinde kalır.
 
 ---
 
@@ -204,40 +244,53 @@ Her değişiklik için diff göstermek, basit işlemlerde (örn. tek satır değ
 ### Öneri: Dört Boyutlu Değerlendirme Çerçevesi
 
 #### Boyut 1 — Görev Başarı Oranı (Task Success Rate)
-**Tanım:** Ajan tarafından üretilen değişikliğin, hedeflenen işlevsel sonucu doğru şekilde gerçekleştirip gerçekleştirmediği.  
-**Ölçüm:** Her benchmark görevi için: Başarılı / Kısmen Başarılı / Başarısız  
-**Başarı kriteri:** Değişiklik uygulandıktan sonra görev tanımındaki koşulları karşılıyor mu?  
+
+**Tanım:** Ajan tarafından üretilen değişikliğin, hedeflenen işlevsel sonucu doğru şekilde gerçekleştirip
+gerçekleştirmediği.
+**Ölçüm:** Her benchmark görevi için: Başarılı / Kısmen Başarılı / Başarısız
+**Başarı kriteri:** Değişiklik uygulandıktan sonra görev tanımındaki koşulları karşılıyor mu?
 **Hedef:** ≥ %60 tam başarı (20 görev üzerinden)
 
 #### Boyut 2 — Güvenlik İhlali Oranı (Safety Violation Rate)
-**Tanım:** Ajanın hedef dışı dosyaları değiştirmeye çalışması, korumalı dosyalara erişmesi veya onaysız değişiklik yapması.  
-**Ölçüm:** 20 görev içinde güvenlik ihlali girişimi sayısı  
+
+**Tanım:** Ajanın hedef dışı dosyaları değiştirmeye çalışması, korumalı dosyalara erişmesi veya onaysız değişiklik
+yapması.
+**Ölçüm:** 20 görev içinde güvenlik ihlali girişimi sayısı
 **Hedef:** 0 başarılı ihlal (girişimler loglanır ve önlenir)
 
 #### Boyut 3 — Kullanıcı Geri Alma Oranı (Rollback Rate)
-**Tanım:** Kullanıcının onay verdikten sonra değişikliği geri aldığı durumların oranı.  
-**Ölçüm:** Uygulanan değişiklikler içinde geri alınan değişikliklerin yüzdesi  
-**Yorum:** Yüksek rollback oranı → ya ajan kalitesi düşük ya da diff yeterince anlaşılır değil  
+
+**Tanım:** Kullanıcının onay verdikten sonra değişikliği geri aldığı durumların oranı.
+**Ölçüm:** Uygulanan değişiklikler içinde geri alınan değişikliklerin yüzdesi
+**Yorum:** Yüksek rollback oranı → ya ajan kalitesi düşük ya da diff yeterince anlaşılır değil
 **Hedef:** ≤ %20 rollback oranı
 
 #### Boyut 4 — Hallucination Oranı (Factual Accuracy)
-**Tanım:** Ajanın var olmayan fonksiyon, dosya veya sembol atfetmesi.  
-**Ölçüm:** Her Q&A görevi için yanlış atıf sayısı / toplam atıf sayısı  
+
+**Tanım:** Ajanın var olmayan fonksiyon, dosya veya sembol atfetmesi.
+**Ölçüm:** Her Q&A görevi için yanlış atıf sayısı / toplam atıf sayısı
 **Hedef:** ≤ %15 yanlış atıf
 
 #### İkincil Metrikler (Tez için ek veri)
+
 - Ortalama yanıt gecikmesi (ms): bulut model vs. yerel model
 - Context retrieval doğruluğu: sorguyla alakalı dosyaların "ilk 5 sonuç"ta bulunma oranı
 - Token verimliliği: retrieval yaklaşımı vs. tüm dosya gönderme karşılaştırması
 
 ### Gerekçe
-Bu çerçeve, araştırma sorusunun her boyutunu bir metrikle eşleştirir. Sonuçlar hem nicel (oranlar, süreler) hem nitel (kullanıcı davranış örüntüleri) veri sağlar.
+
+Bu çerçeve, araştırma sorusunun her boyutunu bir metrikle eşleştirir. Sonuçlar hem nicel (oranlar, süreler) hem nitel (
+kullanıcı davranış örüntüleri) veri sağlar.
 
 ### Trade-off
-Dört boyut ayrı ayrı kodlanacak ölçüm altyapısı gerektirir. Basitçe "başarılı mı, değil mi" diye ölçmek daha kolaydır ama jüri önünde savunulamaz.
+
+Dört boyut ayrı ayrı kodlanacak ölçüm altyapısı gerektirir. Basitçe "başarılı mı, değil mi" diye ölçmek daha kolaydır
+ama jüri önünde savunulamaz.
 
 ### Yanlış yapılırsa ne bozulur?
-Tek metrik (görev başarı oranı) kullanılırsa, ajan başarılı bir değişiklik yaparken korumalı dosyayı da değiştirse bu görünmez. Güvenli olmayan ama "başarılı" görünen sistem üretilmiş olur.
+
+Tek metrik (görev başarı oranı) kullanılırsa, ajan başarılı bir değişiklik yaparken korumalı dosyayı da değiştirse bu
+görünmez. Güvenli olmayan ama "başarılı" görünen sistem üretilmiş olur.
 
 ---
 
@@ -246,61 +299,77 @@ Tek metrik (görev başarı oranı) kullanılırsa, ajan başarılı bir değiş
 ### Öneri: 20 Görevlik Standart Benchmark Seti
 
 **Tasarım ilkeleri:**
-1. Görevler dışarıdan tasarlanır — projeyi geliştiren kişi (tez öğrencisi) tarafından değil; tercihan danışman veya projeyi tanımayan üçüncü bir kişi tarafından
+
+1. Görevler dışarıdan tasarlanır — projeyi geliştiren kişi (tez öğrencisi) tarafından değil; tercihan danışman veya
+   projeyi tanımayan üçüncü bir kişi tarafından
 2. Her görev için beklenen çıktı önceden belgelenir
 3. Değerlendirme kör (blind) yapılır: ajan çıktısı anonimleştirilmiş şekilde başka bir kişi tarafından puanlanır
 4. Karşılaştırma noktası (baseline): aynı görev, araçsız geliştirici tarafından yapılır
 
 **Görev Kategorileri:**
 
-| Kategori | Görev Sayısı | Örnek Görevler |
-|---|---|---|
-| Tek dosya düzenleme | 5 | Fonksiyon yeniden adlandırma, tip düzeltme, yorum ekleme |
-| Çok dosya refactor | 4 | Import yolu değiştirme, interface güncelleme, sabiti merkezi yere taşıma |
-| Hata tespiti ve düzeltme | 4 | Null pointer, eksik async/await, yanlış parametre sırası |
-| Test yazma | 3 | Verilen modül için birim testleri, edge case'ler dahil |
-| Kod tabanı Q&A | 4 | "Bu projede auth nasıl çalışıyor?", "Bu fonksiyon nerede kullanılıyor?" |
+| Kategori                 | Görev Sayısı | Örnek Görevler                                                           |
+|--------------------------|--------------|--------------------------------------------------------------------------|
+| Tek dosya düzenleme      | 5            | Fonksiyon yeniden adlandırma, tip düzeltme, yorum ekleme                 |
+| Çok dosya refactor       | 4            | Import yolu değiştirme, interface güncelleme, sabiti merkezi yere taşıma |
+| Hata tespiti ve düzeltme | 4            | Null pointer, eksik async/await, yanlış parametre sırası                 |
+| Test yazma               | 3            | Verilen modül için birim testleri, edge case'ler dahil                   |
+| Kod tabanı Q&A           | 4            | "Bu projede auth nasıl çalışıyor?", "Bu fonksiyon nerede kullanılıyor?"  |
 
-**Test projesi:** Orta büyüklükte (~3.000 satır), 15–20 dosyalı, TypeScript tabanlı örnek bir uygulama. Gerçek açık kaynak projeden türetilir (lisans uyumlu).
+**Test projesi:** Orta büyüklükte (~3.000 satır), 15–20 dosyalı, TypeScript tabanlı örnek bir uygulama. Gerçek açık
+kaynak projeden türetilir (lisans uyumlu).
 
 **Değerlendirme formu:** Her görev için:
+
 - Doğru dosya/satırlar değiştirildi mi? (0/1)
 - Değişiklik derleniyor mu? (0/1)
 - Değişiklik görev tanımını karşılıyor mu? (0/1/2 — kısmen doğru için 1)
 - Hedef dışı dosya değiştirildi mi? (ihlal olarak kayıt)
 
 ### Gerekçe
-20 görev istatistiksel olarak çok büyük değil ama tek geliştirici tezi için makul bir örneklemdir. Dışarıdan tasarlanmış görevler jürinin "kendi sınavınızı kendiniz geçtiniz" eleştirisini engeller.
+
+20 görev istatistiksel olarak çok büyük değil ama tek geliştirici tezi için makul bir örneklemdir. Dışarıdan tasarlanmış
+görevler jürinin "kendi sınavınızı kendiniz geçtiniz" eleştirisini engeller.
 
 ### Trade-off
-20 görev, ajan davranışının tüm boyutlarını kapsamaz. Ancak 50+ görev hazırlamak ve değerlendirmek tez süresinin önemli bir kısmını tüketir.
+
+20 görev, ajan davranışının tüm boyutlarını kapsamaz. Ancak 50+ görev hazırlamak ve değerlendirmek tez süresinin önemli
+bir kısmını tüketir.
 
 ### Yanlış yapılırsa ne bozulur?
-Görevleri ajan geliştiricisi tasarlarsa, bilinçsiz olarak ajanın iyi performans gösterdiği görev türleri seçilir. Bu akademik açıdan geçersiz bir değerlendirme üretir.
+
+Görevleri ajan geliştiricisi tasarlarsa, bilinçsiz olarak ajanın iyi performans gösterdiği görev türleri seçilir. Bu
+akademik açıdan geçersiz bir değerlendirme üretir.
 
 ---
 
 ## 13. Teknik Riskler ve Azaltma Planları
 
-| Risk | Olasılık | Etki | Azaltma Planı | B Planı |
-|---|---|---|---|---|
-| **Electron bellek kullanımı VS Code'u aşıyor** | Yüksek | Orta | Electron süreç mimarisini doğru kur; renderer'da ağır işlem yapma; erken performans ölçümü | Demo için yeterli RAM'li makinede çalıştır; tezde sınır olarak belgele |
-| **Context retrieval alakasız dosyalar döndürüyor** | Orta | Yüksek | Precision/recall metriği erken ölç; manuel validation seti oluştur | Kullanıcıya "context'i düzelt" arayüzü sun (katman 3) |
-| **Bulut API maliyeti bütçeyi aşıyor** | Orta | Düşük | Günlük harcama limiti (hard cap); token sayacı dashboard | Yerel modele geç; bulut özelliklerini teze "maliyet analizi" olarak ekle |
-| **Model güncellenmesi prompt'ları bozuyor** | Orta | Yüksek | Model versiyonunu kilitle; prompt şablonları versionlanmış dosyada tut | Kilitli eski versiyona geri dön; güncellemeyi tez bitiminde yap |
-| **TypeScript/Electron öğrenme süresi uzuyor** | Yüksek | Yüksek | İlk 2 ay tamamen öğrenme + basit prototip'e ayır; ajan kodu başlangıçta yok | Electron yerine Tauri (Rust) değil; daha basit bir Electron şablonu kullan |
-| **Undo stack çok dosyalı senaryoda tutarsızlaşıyor** | Düşük | Yüksek | Undo'yu transaction tabanlı modellemek; test kapsamını erken yaz | Rollback özelliğini MVP'den çıkar, sadece "dosyayı geri yükle" sun |
-| **Güvenlik duvarı bypass edilebiliyor** | Düşük | Çok Yüksek | Her yeni araç eklenmeden önce güvenlik incelemesi; path traversal testleri | Araç erişimini tamamen kapat; okuma moduna geç |
-| **Benchmark görevi tasarımı taraflı çıkıyor** | Orta | Yüksek | Görevleri danışman veya sınıf arkadaşı tasarlasın | Açık kaynak benchmark seti kullan (SWE-bench mini gibi) |
+| Risk                                                 | Olasılık | Etki       | Azaltma Planı                                                                              | B Planı                                                                    |
+|------------------------------------------------------|----------|------------|--------------------------------------------------------------------------------------------|----------------------------------------------------------------------------|
+| **Electron bellek kullanımı VS Code'u aşıyor**       | Yüksek   | Orta       | Electron süreç mimarisini doğru kur; renderer'da ağır işlem yapma; erken performans ölçümü | Demo için yeterli RAM'li makinede çalıştır; tezde sınır olarak belgele     |
+| **Context retrieval alakasız dosyalar döndürüyor**   | Orta     | Yüksek     | Precision/recall metriği erken ölç; manuel validation seti oluştur                         | Kullanıcıya "context'i düzelt" arayüzü sun (katman 3)                      |
+| **Bulut API maliyeti bütçeyi aşıyor**                | Orta     | Düşük      | Günlük harcama limiti (hard cap); token sayacı dashboard                                   | Yerel modele geç; bulut özelliklerini teze "maliyet analizi" olarak ekle   |
+| **Model güncellenmesi prompt'ları bozuyor**          | Orta     | Yüksek     | Model versiyonunu kilitle; prompt şablonları versionlanmış dosyada tut                     | Kilitli eski versiyona geri dön; güncellemeyi tez bitiminde yap            |
+| **TypeScript/Electron öğrenme süresi uzuyor**        | Yüksek   | Yüksek     | İlk 2 ay tamamen öğrenme + basit prototip'e ayır; ajan kodu başlangıçta yok                | Electron yerine Tauri (Rust) değil; daha basit bir Electron şablonu kullan |
+| **Undo stack çok dosyalı senaryoda tutarsızlaşıyor** | Düşük    | Yüksek     | Undo'yu transaction tabanlı modellemek; test kapsamını erken yaz                           | Rollback özelliğini MVP'den çıkar, sadece "dosyayı geri yükle" sun         |
+| **Güvenlik duvarı bypass edilebiliyor**              | Düşük    | Çok Yüksek | Her yeni araç eklenmeden önce güvenlik incelemesi; path traversal testleri                 | Araç erişimini tamamen kapat; okuma moduna geç                             |
+| **Benchmark görevi tasarımı taraflı çıkıyor**        | Orta     | Yüksek     | Görevleri danışman veya sınıf arkadaşı tasarlasın                                          | Açık kaynak benchmark seti kullan (SWE-bench mini gibi)                    |
 
 ### Gerekçe
-Risk tablosu, proje boyunca haftalık danışman toplantılarında kontrol listesi olarak kullanılmalıdır. Her risk için "B planı" hazır olmak, tez savunmasında "Bu sorunu nasıl çözerdинiz?" sorusuna hazırlıklı olmak demektir.
+
+Risk tablosu, proje boyunca haftalık danışman toplantılarında kontrol listesi olarak kullanılmalıdır. Her risk için "B
+planı" hazır olmak, tez savunmasında "Bu sorunu nasıl çözerdинiz?" sorusuna hazırlıklı olmak demektir.
 
 ### Trade-off
-Tüm riskleri sıfıra indirmek mümkün değildir. Hedef, yüksek etki + yüksek olasılık kombinasyonlarını yönetilebilir hale getirmektir.
+
+Tüm riskleri sıfıra indirmek mümkün değildir. Hedef, yüksek etki + yüksek olasılık kombinasyonlarını yönetilebilir hale
+getirmektir.
 
 ### Yanlış yapılırsa ne bozulur?
-Risk tablosu hazırlanıp bir kez "bakıldıktan" sonra rafa kaldırılırsa, riskler gerçekleştiğinde plansız yakalanılır. Risk kaydı canlı bir dokümandır.
+
+Risk tablosu hazırlanıp bir kez "bakıldıktan" sonra rafa kaldırılırsa, riskler gerçekleştiğinde plansız yakalanılır.
+Risk kaydı canlı bir dokümandır.
 
 ---
 
@@ -323,6 +392,7 @@ Ay 16–18 │ Tez ve Final (Thesis & Final)
 **Hedef:** Proje çalışır durumda, mimari kararlar verilmiş, teknoloji öğrenilmiş.
 
 **Yapılacaklar:**
+
 - [ ] TypeScript ve Electron temellerini öğren (resmi dokümantasyon + 2-3 mini proje)
 - [ ] Monaco Editor'ü Electron içinde çalıştır (merhaba dünya seviyesi)
 - [ ] Dosya aç / kaydet / sekme yönetimi (en fazla 5 sekme)
@@ -342,6 +412,7 @@ Ay 16–18 │ Tez ve Final (Thesis & Final)
 **Hedef:** Kod yazılabilir, stabil bir editör. AI henüz yok ama altyapı hazır.
 
 **Yapılacaklar:**
+
 - [ ] Dosya ağacı (klasör açma, yenileme, arama)
 - [ ] Sözdizim vurgulama (Monaco dil desteği aktivasyonu)
 - [ ] Durum çubuğu (aktif dosya, satır/sütun, encoding)
@@ -361,6 +432,7 @@ Ay 16–18 │ Tez ve Final (Thesis & Final)
 **Hedef:** Ajan değişiklik önerebilir, kullanıcı onaylar, değişiklik uygulanır.
 
 **Yapılacaklar:**
+
 - [ ] Tool sistemi: `read_file`, `write_file`, `search_symbols`, `list_files`
 - [ ] `write_file` güvenlik katmanları (workspace boundary, path normalization, write boundary / gizli dosya filtresi)
 - [ ] Diff üretimi (unified diff → Monaco'da görsel diff)
@@ -378,6 +450,7 @@ Ay 16–18 │ Tez ve Final (Thesis & Final)
 **Hedef:** Tüm benchmark senaryoları çalışıyor; ölçüm altyapısı hazır; güvenlik testleri geçilmiş.
 
 **Yapılacaklar:**
+
 - [ ] Çok dosyalı refactor desteği (Senaryo 2)
 - [ ] Test yazma modu (Senaryo 3)
 - [ ] Q&A modu — sadece açıklama, dosya değişikliği yok (Senaryo 4)
@@ -396,6 +469,7 @@ Ay 16–18 │ Tez ve Final (Thesis & Final)
 **Hedef:** Tez yazılmış, demo hazır, savunma yapılmış.
 
 **Yapılacaklar:**
+
 - [ ] Tez yazımı (ölçüm sonuçları, bulgular, tartışma)
 - [ ] Demo senaryosu hazırlığı (5 dakikalık canlı demo akışı)
 - [ ] Bilinen sınırlar bölümü: ne yapılamadı, neden
@@ -415,13 +489,16 @@ Bu özet bölümü, tüm belgeden çıkan en kritik kararlardır.
 
 ### Tek Cümlelik Net Proje Tanımı
 
-> **"Güvenli, açıklanabilir ve kullanıcı onaylı bir ajan döngüsü kullanan AI destekli kod editörü; çok dosyalı değişikliklerde hata oranını ve güven düzeyini, doğrudan LLM çıktısına kıyasla ölçmektedir."**
+> **"Güvenli, açıklanabilir ve kullanıcı onaylı bir ajan döngüsü kullanan AI destekli kod editörü; çok dosyalı
+değişikliklerde hata oranını ve güven düzeyini, doğrudan LLM çıktısına kıyasla ölçmektedir."**
 
 ---
 
 ### En Savunulabilir Akademik Araştırma Sorusu
 
-> **"Kullanıcı tetiklemeli, plan-önce-onay-sonra bir ajan döngüsü, çok dosyalı kod değişikliklerinde güvenlik ihlali oranını ve kullanıcı rollback davranışını, doğrudan LLM uygulamasına kıyasla istatistiksel olarak anlamlı biçimde iyileştirir mi?"**
+> **"Kullanıcı tetiklemeli, plan-önce-onay-sonra bir ajan döngüsü, çok dosyalı kod değişikliklerinde güvenlik ihlali
+oranını ve kullanıcı rollback davranışını, doğrudan LLM uygulamasına kıyasla istatistiksel olarak anlamlı biçimde
+iyileştirir mi?"**
 
 ---
 
@@ -446,24 +523,25 @@ Bu özet bölümü, tüm belgeden çıkan en kritik kararlardır.
 5. **Mimari karar belgesi** — seçenekler karşılaştırılmış, yol netleştirilmiş (1 hafta)
 6. **Danışman gösterisi** — çalışan editör shell + embedding demosu (hafta 12)
 
-**Ay 3 sonunda elimizde olması gereken:** Dosya açabilen bir editör ve 5 dosyalık bir proje üzerinde embedding araması yapabilen ayrı bir demo scripti. Ajan kodu henüz yok.
+**Ay 3 sonunda elimizde olması gereken:** Dosya açabilen bir editör ve 5 dosyalık bir proje üzerinde embedding araması
+yapabilen ayrı bir demo scripti. Ajan kodu henüz yok.
 
 ---
 
 ### Kesin Çıkarılması Gereken Özellikler
 
-| Özellik | Neden Çıkarılmalı |
-|---|---|
-| Proaktif / otomatik ajan analizi | Alert fatigue, araştırma sorusuyla ilgisi yok, UX güvenini zedeler |
-| Multi-agent mimari | Tamamlanamaz karmaşıklık, single-agent yeterli |
-| Terminal / shell komut çalıştırma | Shell injection riski, güvenlik modeli hazır değil |
-| 3+ model sağlayıcısı | Soyutlama katmanı yeterli, her sağlayıcı ayrı hata yönetimi istiyor |
-| VS Code extension desteği | Yıllarca sürecek geriye dönük uyumluluk mühendisliği |
-| Tüm repo'yu tek seferde context'e almak | Context window aşımı + token maliyeti + sinyal-gürültü problemi |
-| Git entegrasyonu | Kapsam dışı, undo stack yeterli |
-| Otomatik CI/CD ve installer | Demo için `npm run dev` yeterli |
+| Özellik                                 | Neden Çıkarılmalı                                                   |
+|-----------------------------------------|---------------------------------------------------------------------|
+| Proaktif / otomatik ajan analizi        | Alert fatigue, araştırma sorusuyla ilgisi yok, UX güvenini zedeler  |
+| Multi-agent mimari                      | Tamamlanamaz karmaşıklık, single-agent yeterli                      |
+| Terminal / shell komut çalıştırma       | Shell injection riski, güvenlik modeli hazır değil                  |
+| 3+ model sağlayıcısı                    | Soyutlama katmanı yeterli, her sağlayıcı ayrı hata yönetimi istiyor |
+| VS Code extension desteği               | Yıllarca sürecek geriye dönük uyumluluk mühendisliği                |
+| Tüm repo'yu tek seferde context'e almak | Context window aşımı + token maliyeti + sinyal-gürültü problemi     |
+| Git entegrasyonu                        | Kapsam dışı, undo stack yeterli                                     |
+| Otomatik CI/CD ve installer             | Demo için `npm run dev` yeterli                                     |
 
 ---
 
-*Sistem kararları için → bu belge.*  
+*Sistem kararları için → bu belge.*
 *Ürün kararları için → `PRODUCT_PLAN.md`*

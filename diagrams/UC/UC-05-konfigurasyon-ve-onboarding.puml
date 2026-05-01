@@ -1,0 +1,87 @@
+@startuml UC_05_konfigurasyon_ve_onboarding
+title Agentic IDE - UC-05 Konfigürasyon ve Onboarding Use Case Diyagramı
+left to right direction
+skinparam packageStyle rectangle
+skinparam shadowing false
+
+actor "Geliştirici" as Developer
+actor "Sistem Dosya Seçici" as FilePicker
+actor "Dosya Sistemi" as FileSystem
+actor "Tercih Deposu\n(preferences.json)" as PreferenceStore
+actor "Konfigürasyon Deposu\n(~/.agentide/config.json)" as ConfigStore
+actor "Yerel Model Sağlayıcı\n(Ollama)" as LocalModel
+actor "Bulut Model Sağlayıcı\n(Claude API)" as CloudModel
+actor "Bağlam ve İndeks Servisi" as ContextService
+
+rectangle "Agentic IDE - İlk Kurulum ve Tercihler" {
+  usecase "İlk açılış/onboarding\nakışını başlat" as UC_StartOnboarding
+  usecase "Proje klasörü seç" as UC_SelectWorkspace
+  usecase "Workspace boundary doğrula" as UC_ValidateWorkspace
+  usecase "Dosya ağacını yükle" as UC_LoadFileTree
+  usecase "İndekslemeyi başlat" as UC_StartIndexing
+  usecase "İndeksleme gizlilik filtresini\nuygula" as UC_ApplyPrivacyFilter
+  usecase "Varsayılan model\nprofilini seç" as UC_SelectModelProfile
+  usecase "Yerel model bağlantısını\ntest et" as UC_TestLocalModel
+  usecase "Bulut API anahtarını gir" as UC_EnterCloudKey
+  usecase "API anahtarını güvenli\nkonfigürasyona yaz" as UC_StoreCloudKey
+  usecase "Gizlilik tercihini seç" as UC_SelectPrivacyMode
+  usecase "Tercihleri kaydet" as UC_SavePreferences
+  usecase "Son projeleri göster" as UC_ShowRecentProjects
+}
+
+Developer --> UC_StartOnboarding
+Developer --> UC_SelectWorkspace
+Developer --> UC_SelectModelProfile
+Developer --> UC_EnterCloudKey
+Developer --> UC_SelectPrivacyMode
+Developer --> UC_ShowRecentProjects
+
+UC_StartOnboarding .> UC_SelectWorkspace : <<include>>
+UC_SelectWorkspace .> UC_ValidateWorkspace : <<include>>
+UC_SelectWorkspace .> UC_LoadFileTree : <<include>>
+UC_SelectWorkspace .> UC_StartIndexing : <<include>>
+UC_StartIndexing .> UC_ApplyPrivacyFilter : <<include>>
+UC_StartOnboarding .> UC_SelectModelProfile : <<include>>
+UC_StartOnboarding .> UC_SelectPrivacyMode : <<include>>
+UC_TestLocalModel .> UC_SelectModelProfile : <<extend>>
+UC_EnterCloudKey .> UC_SelectModelProfile : <<extend>>
+UC_EnterCloudKey .> UC_StoreCloudKey : <<include>>
+UC_SelectPrivacyMode .> UC_SavePreferences : <<include>>
+UC_SelectModelProfile .> UC_SavePreferences : <<include>>
+
+FilePicker --> UC_SelectWorkspace
+FileSystem --> UC_ValidateWorkspace
+FileSystem --> UC_LoadFileTree
+ContextService --> UC_StartIndexing
+ContextService --> UC_ApplyPrivacyFilter
+LocalModel --> UC_TestLocalModel
+CloudModel --> UC_EnterCloudKey
+PreferenceStore --> UC_SavePreferences
+PreferenceStore --> UC_ShowRecentProjects
+ConfigStore --> UC_StoreCloudKey
+
+note right of UC_SelectModelProfile
+MVP'de otomatik karmaşıklık tabanlı router yoktur.
+Kullanıcı model profilini açıkça seçer:
+- yalnızca yerel
+- manuel hibrit
+- yalnızca bulut
+
+Yerel profil seçilirse bağlantı testi,
+bulut profili seçilirse API anahtarı girişi açılır.
+end note
+
+note bottom of UC_StoreCloudKey
+API anahtarı audit log'a, model context'ine veya
+embedding indeksine yazılmaz. MVP saklama yeri
+~/.agentide/config.json dosyasıdır.
+end note
+
+note bottom of UC_SelectWorkspace
+Workspace boundary, kullanıcının seçtiği kök klasördür.
+Sonraki dosya okuma/yazma izinleri bu sınırdan türetilir.
+Dosya ağacı yükleme editörü açar; indeksleme arka planda
+ve gizli/protected dosyaları dışarıda bırakarak ilerler.
+end note
+
+@enduml

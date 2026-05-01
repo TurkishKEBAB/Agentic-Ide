@@ -51,11 +51,11 @@
 
 ### 2.2 Panel Boyutları (Varsayılan)
 
-| Panel | Genişlik | Yeniden boyutlandırılabilir |
-|---|---|---|
-| Dosya ağacı | 250px | ✅ |
-| Editör | Kalan alan | ✅ |
-| Sohbet paneli | 400px | ✅ (gizlenebilir) |
+| Panel         | Genişlik   | Yeniden boyutlandırılabilir |
+|---------------|------------|-----------------------------|
+| Dosya ağacı   | 250px      | ✅                           |
+| Editör        | Kalan alan | ✅                           |
+| Sohbet paneli | 400px      | ✅ (gizlenebilir)            |
 
 ---
 
@@ -118,23 +118,23 @@
 
 ### 4.1 Cursor UX
 
-| Özellik | Cursor | Agentic IDE |
-|---|---|---|
-| Değişiklik önerisi | Tab ile kabul, inline diff | Ayrı diff panelinde detaylı görünüm |
-| Çok dosya düzenleme | Composer panelinde | Dosya listesi + adım adım diff |
-| Onay mekanizması | "Accept" / "Reject" (hızlı) | "Tümünü Uygula" / "Seçerek Uygula" |
-| Rollback | Yok | ✅ Son 10 değişiklik |
-| Bağlam kaynakları | Kısıtlı görünürlük | Tam şeffaflık |
-| Model seçimi | Ayarlar menüsünde | Alt çubukta tek tıkla |
+| Özellik             | Cursor                      | Agentic IDE                         |
+|---------------------|-----------------------------|-------------------------------------|
+| Değişiklik önerisi  | Tab ile kabul, inline diff  | Ayrı diff panelinde detaylı görünüm |
+| Çok dosya düzenleme | Composer panelinde          | Dosya listesi + adım adım diff      |
+| Onay mekanizması    | "Accept" / "Reject" (hızlı) | "Tümünü Uygula" / "Seçerek Uygula"  |
+| Rollback            | Yok                         | ✅ Son 10 değişiklik                 |
+| Bağlam kaynakları   | Kısıtlı görünürlük          | Tam şeffaflık                       |
+| Model seçimi        | Ayarlar menüsünde           | Alt çubukta tek tıkla               |
 
 ### 4.2 Windsurf UX
 
-| Özellik | Windsurf | Agentic IDE |
-|---|---|---|
-| Ajan döngüsü | Cascade (otomatik) | ReAct (kullanıcı tetiklemeli) |
-| Bağlam yönetimi | Otomatik akış takibi | Katmanlı retrieval + manual pin |
-| Onay | Bazı işlemler otomatik | Her değişiklik onay zorunlu |
-| Güvenlik | Temel | Çok katmanlı (workspace boundary, write boundary, reactive safety, audit) |
+| Özellik         | Windsurf               | Agentic IDE                                                               |
+|-----------------|------------------------|---------------------------------------------------------------------------|
+| Ajan döngüsü    | Cascade (otomatik)     | ReAct (kullanıcı tetiklemeli)                                             |
+| Bağlam yönetimi | Otomatik akış takibi   | Katmanlı retrieval + manual pin                                           |
+| Onay            | Bazı işlemler otomatik | Her değişiklik onay zorunlu                                               |
+| Güvenlik        | Temel                  | Çok katmanlı (workspace boundary, write boundary, reactive safety, audit) |
 
 ---
 
@@ -145,6 +145,7 @@
 **Risk:** Her değişiklik için onay istemek kullanıcıyı "her şeyi kabul eden robot"a dönüştürebilir.
 
 **Azaltma stratejileri:**
+
 - Basit değişikliklerde (yorum, formatlama) kısa diff göster
 - Kritik değişikliklerde (dosya silme, çok dosya) detaylı uyarı
 - Gelecekte: güven seviyesine göre otomatik onay seçeneği
@@ -153,30 +154,31 @@
 ### 5.2 İlk Kullanıcı Deneyimi (Onboarding)
 
 **Tasarım:**
+
 - Hoş geldin ekranı: "Klasör Aç" + "Son Projeler" + kısa demo videosu
 - İlk görev önerisi: "Bir soru sorun veya dosya üzerinde değişiklik isteyin"
 - Tooltip'ler: ilk 3 kullanımda sohbet paneli, diff paneli, rollback açıklaması
 
 ### 5.3 Hata Durumu İletişimi
 
-| Hata Türü | Gösterim |
-|---|---|
-| Model yanıt vermedi | "Model yanıt veremedi. Tekrar deneyin veya model değiştirin." |
-| Güvenlik ihlali girişimi | "⚠ Bu dosya güvenlik sebebiyle erişilemez: .env" |
-| Diff uygulama hatası | "Dosya değiştirilmiş. Güncel versiyonu görmek ister misiniz?" |
+| Hata Türü                     | Gösterim                                                      |
+|-------------------------------|---------------------------------------------------------------|
+| Model yanıt vermedi           | "Model yanıt veremedi. Tekrar deneyin veya model değiştirin." |
+| Güvenlik ihlali girişimi      | "⚠ Bu dosya güvenlik sebebiyle erişilemez: .env"              |
+| Diff uygulama hatası          | "Dosya değiştirilmiş. Güncel versiyonu görmek ister misiniz?" |
 | Bağlantı hatası (bulut model) | "İnternet bağlantısı yok. Yerel modele geçmek ister misiniz?" |
 
 ---
 
 ## 6. Erişilebilirlik (Temel)
 
-| Özellik | Durum |
-|---|---|
-| Klavye navigasyonu | ✅ (Monaco sağlar) |
-| Screen reader desteği | ⚠ Temel (Monaco desteği) |
-| Yüksek kontrast tema | ❌ (MVP'de yok, Monaco varsayılan) |
-| Özelleştirilebilir yazı boyutu | ✅ (Monaco sağlar) |
-| Kısayol tuşları | ✅ Özelleştirilebilir |
+| Özellik                        | Durum                             |
+|--------------------------------|-----------------------------------|
+| Klavye navigasyonu             | ✅ (Monaco sağlar)                 |
+| Screen reader desteği          | ⚠ Temel (Monaco desteği)          |
+| Yüksek kontrast tema           | ❌ (MVP'de yok, Monaco varsayılan) |
+| Özelleştirilebilir yazı boyutu | ✅ (Monaco sağlar)                 |
+| Kısayol tuşları                | ✅ Özelleştirilebilir              |
 
 ---
 
