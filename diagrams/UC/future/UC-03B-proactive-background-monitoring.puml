@@ -1,4 +1,4 @@
-@startuml
+@startuml UC_03B_proactive_background_monitoring
 title Agentic IDE - UC-03B Proactive Background Monitoring (Future Work — MVP Dışı; former UC-03)
 left to right direction
 skinparam packageStyle rectangle
@@ -9,13 +9,15 @@ skinparam shadowing false
 ' Apply-öncesi reactive safety warnings için bkz. UC-03A.
 
 actor "Geliştirici" as Developer
-actor "Dil Sunucusu" as LanguageServer
-actor "Secret / Pattern Detector" as SecretDetector
-actor "Değişiklik Planlayıcı" as ChangePlanner
 actor "Tercih Deposu\n(preferences.json)" as PreferenceStore
 actor "Audit Log" as AuditLog
 
 rectangle "Agentic IDE - Proactive Background Layer (Future Work)" {
+  usecase "Save-time analiz tetikle" as UC_TriggerSaveTime
+  usecase "Idle-time analiz tetikle" as UC_TriggerIdleTime
+  usecase "Project-open analiz tetikle" as UC_TriggerProjectOpen
+  usecase "Pre-commit analiz tetikle" as UC_TriggerPreCommit
+  usecase "Arka plan analizini çalıştır" as UC_RunBackgroundAnalysis
   usecase "Proaktif uyarı al" as UC_ReceiveAlert
   usecase "Kritik secret uyarısını göster" as UC_ShowSecretAlert
   usecase "Korumalı dosya açılış uyarısını göster" as UC_ShowProtectedFileAlert
@@ -35,21 +37,30 @@ rectangle "Agentic IDE - Proactive Background Layer (Future Work)" {
 }
 
 Developer --> UC_ReceiveAlert
+Developer --> UC_TriggerPreCommit
 Developer --> UC_EditPreferences
 Developer --> UC_SetConfidence
 Developer --> UC_SnoozeAlert
 Developer --> UC_MuteTrigger
 Developer --> UC_StartPrimaryAction
 
-LanguageServer --> UC_ShowSyntaxAlert
-SecretDetector --> UC_ShowSecretAlert
-SecretDetector --> UC_ShowProtectedFileAlert
-ChangePlanner --> UC_ShowLargeEditAlert
-ChangePlanner --> UC_ShowRollbackAlert
 PreferenceStore --> UC_EditPreferences
 PreferenceStore --> UC_SetConfidence
 AuditLog --> UC_LogReaction
 
+UC_TriggerSaveTime .> UC_RunBackgroundAnalysis : <<include>>
+UC_TriggerIdleTime .> UC_RunBackgroundAnalysis : <<include>>
+UC_TriggerProjectOpen .> UC_RunBackgroundAnalysis : <<include>>
+UC_TriggerPreCommit .> UC_RunBackgroundAnalysis : <<include>>
+UC_TriggerSaveTime .> UC_ReceiveAlert : <<extend>>
+UC_TriggerIdleTime .> UC_ReceiveAlert : <<extend>>
+UC_TriggerProjectOpen .> UC_ReceiveAlert : <<extend>>
+UC_TriggerPreCommit .> UC_ReceiveAlert : <<extend>>
+UC_ShowSecretAlert .> UC_RunBackgroundAnalysis : <<extend>>
+UC_ShowProtectedFileAlert .> UC_RunBackgroundAnalysis : <<extend>>
+UC_ShowSyntaxAlert .> UC_RunBackgroundAnalysis : <<extend>>
+UC_ShowLargeEditAlert .> UC_RunBackgroundAnalysis : <<extend>>
+UC_ShowRollbackAlert .> UC_RunBackgroundAnalysis : <<extend>>
 UC_ReceiveAlert .> UC_Debounce : <<include>>
 UC_ReceiveAlert .> UC_QueueAlert : <<include>>
 UC_ReceiveAlert .> UC_CheckConfidence : <<include>>
@@ -69,6 +80,10 @@ FUTURE WORK — MVP DIŞI.
 Background scanning, save-time / idle-time tetikleyiciler,
 debounce/throttle, alert queue, snooze ve mute davranışı
 gelecek çalışma kapsamındadır.
+
+Bu diyagram, PROACTIVE_BEHAVIOR_DESIGN §2.1 içindeki
+Katman 1-3 davranışlarını taslak olarak gösterir.
+Katman 0 (Sessiz) MVP'nin mevcut davranışıdır.
 
 MVP içindeki apply-öncesi reactive safety warnings
 için bkz. UC-03A ve SAFETY_AND_GUARDRAILS §2.6.

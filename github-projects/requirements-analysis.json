@@ -1,6 +1,6 @@
 {
   "project": {
-    "title": "Agentic IDE - Requirements Analysis",
+    "title": "Agentic IDE - Thesis Backlog",
     "fields": [
       {
         "name": "Requirement Status",
@@ -74,24 +74,102 @@
       {
         "name": "Parent Epic",
         "dataType": "TEXT"
+      },
+      {
+        "name": "MVP Scenario",
+        "dataType": "TEXT"
+      },
+      {
+        "name": "Risk",
+        "dataType": "TEXT"
+      },
+      {
+        "name": "Test Target",
+        "dataType": "TEXT"
+      },
+      {
+        "name": "Thesis Evidence",
+        "dataType": "TEXT"
+      },
+      {
+        "name": "Readiness",
+        "dataType": "SINGLE_SELECT",
+        "options": [
+          "Needs Clarification",
+          "Ready",
+          "Blocked",
+          "Validated"
+        ]
       }
     ],
     "views": [
       {
         "name": "Requirements Master",
-        "layout": "table"
+        "layout": "table",
+        "groupBy": "Parent Epic",
+        "sortBy": [
+          "Priority",
+          "Phase"
+        ],
+        "visibleFields": [
+          "Requirement Status",
+          "Readiness",
+          "Area",
+          "Requirement Type",
+          "Phase",
+          "Priority",
+          "MVP Scenario",
+          "Risk",
+          "Test Target",
+          "Thesis Evidence"
+        ]
       },
       {
         "name": "Advisor Review",
-        "layout": "board"
+        "layout": "board",
+        "filter": "Requirement Status:Advisor Review",
+        "groupBy": "Area",
+        "visibleFields": [
+          "Priority",
+          "Readiness",
+          "Source Doc",
+          "Acceptance Criteria"
+        ]
       },
       {
         "name": "By Phase",
-        "layout": "board"
+        "layout": "board",
+        "groupBy": "Phase",
+        "visibleFields": [
+          "Requirement Status",
+          "Priority",
+          "Readiness",
+          "Parent Epic"
+        ]
       },
       {
         "name": "Roadmap",
-        "layout": "roadmap"
+        "layout": "roadmap",
+        "groupBy": "Phase",
+        "visibleFields": [
+          "Requirement Status",
+          "Priority",
+          "Target Date",
+          "Thesis Evidence"
+        ]
+      },
+      {
+        "name": "Quality Gates",
+        "layout": "table",
+        "filter": "Area:Testing,Evaluation,Safety",
+        "groupBy": "Readiness",
+        "visibleFields": [
+          "Requirement Status",
+          "Priority",
+          "Test Target",
+          "Thesis Evidence",
+          "Risk"
+        ]
       }
     ]
   },
@@ -120,6 +198,81 @@
       "name": "req:risk",
       "color": "D73A4A",
       "description": "Risk or mitigation tracking item"
+    },
+    {
+      "name": "task:infra",
+      "color": "BFD4F2",
+      "description": "Infrastructure or automation planning task"
+    },
+    {
+      "name": "task:planning",
+      "color": "C5DEF5",
+      "description": "Planning and readiness task"
+    },
+    {
+      "name": "task:research",
+      "color": "D4C5F9",
+      "description": "Research preparation task"
+    },
+    {
+      "name": "adr",
+      "color": "0052CC",
+      "description": "Architecture decision record task"
+    },
+    {
+      "name": "spike",
+      "color": "FBCA04",
+      "description": "Time-boxed investigation before implementation"
+    },
+    {
+      "name": "blocked",
+      "color": "B60205",
+      "description": "Blocked until a decision or dependency is resolved"
+    },
+    {
+      "name": "bug",
+      "color": "D73A4A",
+      "description": "Reproducible defect in prototype, docs, or automation"
+    },
+    {
+      "name": "enhancement",
+      "color": "A2EEEF",
+      "description": "Scoped feature or improvement request"
+    },
+    {
+      "name": "documentation",
+      "color": "0075CA",
+      "description": "Documentation-only work"
+    },
+    {
+      "name": "tech-debt",
+      "color": "FBCA04",
+      "description": "Internal cleanup or maintainability work"
+    },
+    {
+      "name": "dependencies",
+      "color": "0366D6",
+      "description": "Dependency update or dependency policy work"
+    },
+    {
+      "name": "github-actions",
+      "color": "2088FF",
+      "description": "GitHub Actions workflow or automation work"
+    },
+    {
+      "name": "security",
+      "color": "B60205",
+      "description": "Security, privacy, or abuse-resistance work"
+    },
+    {
+      "name": "quality-gate",
+      "color": "5319E7",
+      "description": "Quality gate, validation, or release-readiness work"
+    },
+    {
+      "name": "vdd",
+      "color": "7057FF",
+      "description": "Verification-Driven Development research framing"
     }
   ],
   "issues": [
@@ -154,6 +307,209 @@
       ]
     },
     {
+      "key": "epic-vdd-research-framing",
+      "kind": "epic",
+      "title": "Epic: Verification-Driven Development Research Framing",
+      "status": "Advisor Review",
+      "area": "Research",
+      "requirementType": "Research",
+      "phase": "Faz 1",
+      "priority": "P0",
+      "labels": [
+        "epic",
+        "req:research",
+        "vdd"
+      ],
+      "requirement": "Agentic IDE, AI-assisted implementationu testlerden daha genis bir dogrulama ve kanit katmani altinda yoneten Verification-Driven Development arastirma cercevesini acikca tartismalidir.",
+      "rationale": "AI hem kodu hem testi uretebildiginde test-first yaklasimi tek basina guvenilir oracle olmayabilir; tez iddiasinin danismanla netlestirilmesi gerekir.",
+      "acceptanceSummary": "VDD, TDD konumu, ajan ayrimi, spiral rollback ve karar otoritesi danisman onayina hazir.",
+      "acceptanceCriteria": [
+        "VERIFICATION_DRIVEN_DEVELOPMENT.md dosyasi danismanla tartisilacak acik tez iddiasini, akademik iddia sinirlarini ve slogan adaylarini icerir.",
+        "TDD'nin tamamen degersiz oldugu iddia edilmez; TDD'nin AI caginda tek kalite kontrol cevabi olmadigi savunulabilir bicimde yazilir.",
+        "Implementation agent ve verification agent rollerinin ayrimi minimum, guclu ve ideal arastirma seviyeleriyle tanimlanir.",
+        "Student mode ve professional engineering mode ayni VDD mantigi uzerinde farkli etkilesim politikalarina baglanir."
+      ],
+      "outOfScope": [
+        "Literatur taramasi tamamlanmadan VDD'nin yerlesik bir standart oldugunu iddia etmek.",
+        "TDD'nin hic kullanilmamasi gerektigini savunmak.",
+        "Bu epic icinde uygulama kodu yazmak."
+      ],
+      "sourceDocuments": [
+        "VERIFICATION_DRIVEN_DEVELOPMENT.md",
+        "PRODUCT_PLAN.md",
+        "EVALUATION_PLAN.md",
+        "docs/IMPLEMENTATION_READINESS.md"
+      ]
+    },
+    {
+      "key": "adr-vdd-terminology-and-stance",
+      "parentKey": "epic-vdd-research-framing",
+      "kind": "issue",
+      "title": "ADR: Decide VDD Terminology, TDD Stance, and Thesis Slogan",
+      "status": "Advisor Review",
+      "area": "Research",
+      "requirementType": "Research",
+      "phase": "Faz 1",
+      "priority": "P0",
+      "labels": [
+        "adr",
+        "task:research",
+        "vdd"
+      ],
+      "requirement": "VDD'nin tezde yeni metodoloji, tasarim cercevesi veya proje-ozel surec modeli olarak nasil adlandirilacagi kararlastirilmalidir.",
+      "rationale": "TDD'nin miladinin doldugu iddiasi carpicidir ancak hakem karsisinda savunulabilir akademik sinirlara ihtiyac duyar.",
+      "acceptanceSummary": "Danismanla kullanilacak akademik ifade, provokatif slogan ve kacinilacak iddialar secildi.",
+      "acceptanceCriteria": [
+        "En az bir akademik slogan ve bir proje slogani secilir.",
+        "TDD icin kullanilacak kesin ifade belirlenir: tamamen reddetme, sinirlama veya VDD altinda yeniden konumlandirma.",
+        "Makale/tez metninde kacinilacak desteklenmemis iddialar listeye eklenir.",
+        "Karar bir ADR veya thesis planning notu olarak izlenir."
+      ],
+      "outOfScope": [
+        "Deney sonucu olmadan VDD'nin ustun oldugunu iddia etmek.",
+        "Literatur taramasini bu issue icinde tamamlamak."
+      ],
+      "sourceDocuments": [
+        "VERIFICATION_DRIVEN_DEVELOPMENT.md",
+        "docs/adr/README.md",
+        "THESIS_OUTLINE.md"
+      ]
+    },
+    {
+      "key": "req-vdd-independent-verification-agent",
+      "parentKey": "epic-vdd-research-framing",
+      "kind": "issue",
+      "title": "Requirement: Separate Implementation and Verification Agent Roles",
+      "status": "Advisor Review",
+      "area": "Agent",
+      "requirementType": "Research",
+      "phase": "Faz 1",
+      "priority": "P0",
+      "labels": [
+        "req:research",
+        "vdd"
+      ],
+      "requirement": "AI tarafindan uretilen kod ve AI tarafindan uretilen testler tek basina yeterli kabul edilmemeli; implementation ve verification rolleri ayri kanit uretmelidir.",
+      "rationale": "Ayni veya yakin baglamdaki AI hem implementasyonu hem testi urettiginde testler bagimsiz bir oracle gibi davranmayabilir.",
+      "acceptanceSummary": "Implementation agent ve verifier agent rollerinin sorumluluklari, sinirlari ve loglari tanimlandi.",
+      "acceptanceCriteria": [
+        "Implementation agent kod, diff, test ve dokumantasyon onerisi uretir.",
+        "Verification agent requirement, acceptance criteria, risk, rollback ve kanitlari kontrol eder.",
+        "Verifier dogrudan implementation dosyalarini degistirmez; bulgu ve karar onerisi uretir.",
+        "Accept/reject kararlari structured log olarak izlenebilir."
+      ],
+      "outOfScope": [
+        "Ilk mezuniyet kapsaminda birden fazla model kullanmayi zorunlu kilmak.",
+        "Verifier'in insan kararini tamamen otomatik gecersiz kilmasi."
+      ],
+      "sourceDocuments": [
+        "VERIFICATION_DRIVEN_DEVELOPMENT.md",
+        "SYSTEM_PLAN.md",
+        "AGENT_ARCHITECTURE_ANALYSIS.md"
+      ]
+    },
+    {
+      "key": "req-vdd-spiral-requirements-control",
+      "parentKey": "epic-vdd-research-framing",
+      "kind": "issue",
+      "title": "Requirement: Spiral Requirements Control with Rollback Per Spin",
+      "status": "Advisor Review",
+      "area": "Evaluation",
+      "requirementType": "Research",
+      "phase": "Faz 1",
+      "priority": "P0",
+      "labels": [
+        "req:research",
+        "vdd"
+      ],
+      "requirement": "Her spiral spin oncesinde stakeholder ve shareholder gereksinimleri, oncelikler, acceptance criteria, test hedefleri ve rollback noktasi acikca kontrol edilmelidir.",
+      "rationale": "Asil arastirma degeri, AI'in dogru implementasyonu ilk katmanda yakalamaya yaklasip yaklasmadigini olcmek ve requirement drift'i azaltmaktir.",
+      "acceptanceSummary": "Her spin icin requirement kontrolu, evidence plan ve rollback karari izlenebilir hale getirildi.",
+      "acceptanceCriteria": [
+        "Her requirement icin owner, source, priority, acceptance criteria, test target, verification target, risk ve rollback expectation alanlari tanimlanir.",
+        "Her spin basinda requirement degisimi ve karar otoritesi kontrol edilir.",
+        "Rollback yerine ileri patch secildiginde neden kaydedilir.",
+        "Requirement drift, rollback event ve first-pass correctness metrikleri evaluation planina baglanir."
+      ],
+      "outOfScope": [
+        "Tum enterprise requirements engineering sureclerini kapsamak.",
+        "Rollback'i tam surum kontrol sistemi yerine gecirmek."
+      ],
+      "sourceDocuments": [
+        "VERIFICATION_DRIVEN_DEVELOPMENT.md",
+        "EVALUATION_PLAN.md",
+        "docs/benchmark/README.md"
+      ]
+    },
+    {
+      "key": "req-vdd-student-professional-modes",
+      "parentKey": "epic-vdd-research-framing",
+      "kind": "issue",
+      "title": "Requirement: Student and Professional VDD Interaction Modes",
+      "status": "Advisor Review",
+      "area": "UX",
+      "requirementType": "Research",
+      "phase": "Faz 1",
+      "priority": "P1",
+      "labels": [
+        "req:research",
+        "vdd"
+      ],
+      "requirement": "Ayni VDD dongusu ogrenciler icin ogretici ve uyaran, profesyoneller icin ise degerlendiren ve karar kaydi tutan bir etkilesim moduna ayrilmalidir.",
+      "rationale": "Ogrenciler yazilim yasam dongusunu ogrenmeye, profesyoneller ise kendi kararlarinin dogrulama izini gormeye ihtiyac duyar.",
+      "acceptanceSummary": "Student mode ve professional mode icin farkli AI davranislari ve beklenen ciktilar tanimlandi.",
+      "acceptanceCriteria": [
+        "Student mode her anlamli degisiklikte olasi sonuclari, etkilenen requirementlari ve yasam dongusu baglamini aciklar.",
+        "Professional mode onaylanan ve reddedilen noktalari, kabul edilen riskleri ve kanit durumunu kaydeder.",
+        "Birincil ogrenci ciktisi yazilim yasam dongusunu anlamak olarak tanimlanir.",
+        "Ikincil ogrenci ciktilari AI kullanma becerisi, AI kapasite siniri farkindaligi ve requirements analysis anlayisi olarak tanimlanir."
+      ],
+      "outOfScope": [
+        "Ilk MVP'de iki tamamen ayri urun gelistirmek.",
+        "Ogrenci modunu sadece tutorial metinlerine indirgemek."
+      ],
+      "sourceDocuments": [
+        "VERIFICATION_DRIVEN_DEVELOPMENT.md",
+        "PRODUCT_PLAN.md",
+        "diagrams/UC/UC-05-konfigurasyon-ve-onboarding.puml"
+      ]
+    },
+    {
+      "key": "spike-vdd-advisor-open-questions",
+      "parentKey": "epic-vdd-research-framing",
+      "kind": "issue",
+      "title": "Spike: Advisor Questions for VDD Scope and Metrics",
+      "status": "Advisor Review",
+      "area": "Thesis",
+      "requirementType": "Research",
+      "phase": "Faz 1",
+      "priority": "P0",
+      "labels": [
+        "spike",
+        "task:research",
+        "vdd"
+      ],
+      "requirement": "VDD'nin tez kapsaminda hangi iddia, metrik, baslangic artefakti ve yayin acisiyla ilerleyecegi danismanla netlestirilmelidir.",
+      "rationale": "Professional engineering metrikleri, student learning metrikleri ve ilk lifecycle artefakti netlesmeden implementasyon arastirma kaniti uretmekte zayif kalabilir.",
+      "acceptanceSummary": "Danisman gorusmesi icin acik sorular, kararlar ve takip aksiyonlari hazir.",
+      "acceptanceCriteria": [
+        "TDD iddiasinin provokatif ve akademik versiyonlari danismana sunulur.",
+        "Professional metric adaylari ve student learning metric adaylari ayri tartisilir.",
+        "Ilk artefakt secimi tartisilir: stakeholder request, requirement card, acceptance test, use case diagram veya AI plan.",
+        "Implementation-verification ayriminin minimum mezuniyet kapsami kararlastirilir.",
+        "Spiral rollback'in tez icindeki zorunlu kanit seviyesi kararlastirilir."
+      ],
+      "outOfScope": [
+        "Danisman karari olmadan full conference paper iddiasi yazmak.",
+        "Butun deney altyapisini bu spike icinde implemente etmek."
+      ],
+      "sourceDocuments": [
+        "VERIFICATION_DRIVEN_DEVELOPMENT.md",
+        "SUPERVISOR_BRIEF.md",
+        "THESIS_OUTLINE.md"
+      ]
+    },
+    {
       "key": "epic-editor-foundation",
       "kind": "epic",
       "title": "Epic: Editor Foundation",
@@ -179,7 +535,9 @@
       "sourceDocuments": [
         "PRODUCT_PLAN.md",
         "PROJECT_ROADMAP.md",
-        "ARCHITECTURE_OPTIONS.md"
+        "ARCHITECTURE_OPTIONS.md",
+        "TOOLING_AND_REFERENCE_RECOMMENDATIONS.md",
+        "diagrams/UC/UC-05-konfigurasyon-ve-onboarding.puml"
       ]
     },
     {
@@ -417,6 +775,564 @@
       ]
     },
     {
+      "key": "epic-implementation-readiness",
+      "kind": "epic",
+      "title": "Epic: Implementation Readiness and Planning Infrastructure",
+      "status": "Advisor Review",
+      "area": "Thesis",
+      "requirementType": "Research",
+      "phase": "Faz 1",
+      "priority": "P0",
+      "labels": [
+        "epic",
+        "task:planning"
+      ],
+      "requirement": "Implementasyona gecmeden once mimari kararlar, readiness kapilari, veri sozlesmeleri, dogrulama scriptleri ve benchmark hazirligi tek bir izlenebilir epic altinda toplanmalidir.",
+      "rationale": "Proje zor ve guvenlik yuklu oldugu icin erken kod yazmak yerine karar ve kanit altyapisini once sabitlemek riskleri azaltir.",
+      "acceptanceSummary": "ADR, readiness, schema, validation CI ve benchmark hazirligi tek epicte toplandi.",
+      "acceptanceCriteria": [
+        "Bu epic altinda ADR, readiness, schema, CI ve benchmark hazirlik kartlari bulunur.",
+        "Her child issue en az bir kaynak dokumana ve olculebilir kabul kriterine baglanir.",
+        "Faz 1 implementasyon kartlari bu epic tamamlanmadan In Progress'e alinmaz."
+      ],
+      "outOfScope": [
+        "Uygulama kodunu baslatmak.",
+        "Tum tez metnini bu epic altinda yazmak."
+      ],
+      "sourceDocuments": [
+        "docs/IMPLEMENTATION_READINESS.md",
+        "docs/adr/README.md",
+        "TOOLING_AND_REFERENCE_RECOMMENDATIONS.md",
+        "github-projects/README.md"
+      ]
+    },
+    {
+      "key": "adr-electron-monaco-shell",
+      "parentKey": "epic-implementation-readiness",
+      "kind": "issue",
+      "title": "ADR: Electron + Monaco editor shell karari sabitlensin",
+      "status": "Advisor Review",
+      "area": "Editor",
+      "requirementType": "Research",
+      "phase": "Faz 1",
+      "priority": "P0",
+      "labels": [
+        "adr",
+        "task:planning"
+      ],
+      "requirement": "Electron + Monaco secimi bir ADR ile gerekce, trade-off ve yeniden degerlendirme kosullariyla kayit altina alinmalidir.",
+      "rationale": "Editor platformu secimi tum mimariyi etkiler; bu karar sadece daginik plan notu olarak kalmamali.",
+      "acceptanceSummary": "Electron + Monaco karari ADR olarak kayitli.",
+      "acceptanceCriteria": [
+        "ADR secilen platformu ve reddedilen alternatifleri ozetler.",
+        "Memory, bundle size ve Electron security trade-off'lari yazilir.",
+        "ARCHITECTURE_OPTIONS.md ile baglantisi korunur."
+      ],
+      "outOfScope": [
+        "Electron uygulamasini scaffold etmek."
+      ],
+      "sourceDocuments": [
+        "docs/adr/ADR-001-electron-monaco-editor-shell.md",
+        "ARCHITECTURE_OPTIONS.md",
+        "TECH_STACK_AND_AI.md"
+      ]
+    },
+    {
+      "key": "adr-node-runtime-target",
+      "parentKey": "epic-implementation-readiness",
+      "kind": "issue",
+      "title": "ADR: Node runtime hedefi ve fallback politikasi sabitlensin",
+      "status": "Advisor Review",
+      "area": "Thesis",
+      "requirementType": "Research",
+      "phase": "Faz 1",
+      "priority": "P0",
+      "labels": [
+        "adr",
+        "task:infra"
+      ],
+      "requirement": "Node 24 LTS hedefi, Node 22 fallback kosulu ve Electron gomulu Node ayrimi ADR ile aciklanmalidir.",
+      "rationale": "Node 20 EOL oldugu icin implementasyona eski runtime ile baslamak gereksiz guvenlik ve dependency riski yaratir.",
+      "acceptanceSummary": "Runtime hedefi ve fallback kurali ADR olarak kayitli.",
+      "acceptanceCriteria": [
+        "ADR Node 24 hedefini ve Node 22 fallback kosulunu belirtir.",
+        "TECH_STACK_AND_AI.md eski Node 20 hedefinden arindirilir.",
+        "Ilk app scaffold asamasinda engines ve CI Node surumu bu karara gore ayarlanir."
+      ],
+      "outOfScope": [
+        "package.json veya app scaffold dosyalarini bu kartta olusturmak."
+      ],
+      "sourceDocuments": [
+        "docs/adr/ADR-002-node-runtime-target.md",
+        "TECH_STACK_AND_AI.md",
+        "TOOLING_AND_REFERENCE_RECOMMENDATIONS.md"
+      ]
+    },
+    {
+      "key": "adr-manual-model-selection",
+      "parentKey": "epic-implementation-readiness",
+      "kind": "issue",
+      "title": "ADR: MVP'de manuel model secimi ve provider siniri sabitlensin",
+      "status": "Advisor Review",
+      "area": "Model",
+      "requirementType": "Research",
+      "phase": "Faz 1",
+      "priority": "P0",
+      "labels": [
+        "adr",
+        "task:planning"
+      ],
+      "requirement": "MVP'de otomatik model router yerine manuel model secimi ve ince provider abstraction karari ADR'lerle sabitlenmelidir.",
+      "rationale": "Model router eklemek arastirma degiskenlerini karistirir ve kullanici guveni deneyini bulaniklastirir.",
+      "acceptanceSummary": "Manual selection ve cloud/local boundary ADR'leri hazir.",
+      "acceptanceCriteria": [
+        "Manual model selection ADR'i local-only, manual-hybrid ve cloud-only modlarini belirtir.",
+        "Cloud/local provider boundary ADR'i provider arayuzunun kapsam sinirini belirtir.",
+        "UC-05 ve UC-06 ile izlenebilir bag kurulur."
+      ],
+      "outOfScope": [
+        "Model provider adapter kodunu yazmak.",
+        "Otomatik router tasarlamak."
+      ],
+      "sourceDocuments": [
+        "docs/adr/ADR-004-manual-model-selection.md",
+        "docs/adr/ADR-005-cloud-local-provider-boundary.md",
+        "TECH_STACK_AND_AI.md",
+        "diagrams/UC/UC-05-konfigurasyon-ve-onboarding.puml",
+        "diagrams/UC/UC-06-bulut-yerel-model-fallback.puml"
+      ]
+    },
+    {
+      "key": "adr-approval-gate-ablation-baseline",
+      "parentKey": "epic-implementation-readiness",
+      "kind": "issue",
+      "title": "ADR: Approval-gate ablation baseline tasarimi sabitlensin",
+      "status": "Advisor Review",
+      "area": "Evaluation",
+      "requirementType": "Research",
+      "phase": "Faz 1",
+      "priority": "P0",
+      "labels": [
+        "adr",
+        "task:research"
+      ],
+      "requirement": "A/B/C benchmark kosullari ve B kosulunun ayni kod tabaninda approval-gate-disabled flag oldugu ADR ile sabitlenmelidir.",
+      "rationale": "Tezde approval gate etkisini olcmek icin baseline tasarimi implementasyon oncesi net olmalidir.",
+      "acceptanceSummary": "A/B/C ablation tasarimi ADR olarak kayitli.",
+      "acceptanceCriteria": [
+        "A, B ve C kosullari tek tek tanimlanir.",
+        "B kosulunun ayri sistem degil ayni app icinde experimental flag oldugu yazilir.",
+        "Benchmark task template bu kosullari kaydedebilir."
+      ],
+      "outOfScope": [
+        "Benchmark runner kodunu yazmak."
+      ],
+      "sourceDocuments": [
+        "docs/adr/ADR-007-ablation-baseline-design.md",
+        "EVALUATION_PLAN.md",
+        "docs/benchmark/README.md",
+        "diagrams/UC/UC-04-benchmark-ve-degerlendirme.puml"
+      ]
+    },
+    {
+      "key": "adr-workspace-boundary-no-shell",
+      "parentKey": "epic-implementation-readiness",
+      "kind": "issue",
+      "title": "ADR: Workspace boundary terminolojisi ve no-shell MVP kurali sabitlensin",
+      "status": "Advisor Review",
+      "area": "Safety",
+      "requirementType": "Research",
+      "phase": "Faz 1",
+      "priority": "P0",
+      "labels": [
+        "adr",
+        "task:planning"
+      ],
+      "requirement": "Sandbox yerine workspace boundary terminolojisi ve MVP'de shell execution olmamasi ADR'lerle netlestirilmelidir.",
+      "rationale": "Guvenlik iddiasi teknik olarak dogru kelimelerle kurulmazsa tez savunmasinda fazla vaat riski olusur.",
+      "acceptanceSummary": "Workspace boundary ve no-shell kararlarinin ADR'leri hazir.",
+      "acceptanceCriteria": [
+        "Workspace boundary ADR'i sandbox teriminin neden kullanilmadigini aciklar.",
+        "No-shell ADR'i allowed tool surface'i ve future-work kosullarini belirtir.",
+        "Safety ve UC dokumanlari ayni terminolojiyi kullanir."
+      ],
+      "outOfScope": [
+        "Shell runner tasarimi yapmak.",
+        "OS-level sandbox implementasyonu yapmak."
+      ],
+      "sourceDocuments": [
+        "docs/adr/ADR-006-no-shell-execution-in-mvp.md",
+        "docs/adr/ADR-008-workspace-boundary-terminology.md",
+        "SAFETY_AND_GUARDRAILS.md",
+        "diagrams/UC/README.md"
+      ]
+    },
+    {
+      "key": "task-readiness-gate-definition",
+      "parentKey": "epic-implementation-readiness",
+      "kind": "issue",
+      "title": "TASK: Implementation readiness gate ve DoR/DoD tanimlansin",
+      "status": "Advisor Review",
+      "area": "Thesis",
+      "requirementType": "Research",
+      "phase": "Faz 1",
+      "priority": "P0",
+      "labels": [
+        "task:planning"
+      ],
+      "requirement": "Implementasyona gecmeden once readiness gate, Definition of Ready ve Definition of Done repo icinde net tanimlanmalidir.",
+      "rationale": "Kartlarin Ready gorunmesi tek basina yeterli degil; Ready'nin ne demek oldugu herkes icin ayni olmali.",
+      "acceptanceSummary": "Implementation readiness gate ve DoR/DoD dokumani var.",
+      "acceptanceCriteria": [
+        "Readiness gate Project alanlarini, ADR'leri, test hedeflerini ve advisor checkpoint'ini sayar.",
+        "Definition of Ready kaynak, risk, test ve thesis evidence alanlarini zorunlu kilar.",
+        "Definition of Done validation ve evidence yakalama beklentisini belirtir."
+      ],
+      "outOfScope": [
+        "Tum kartlari Done yapmak."
+      ],
+      "sourceDocuments": [
+        "docs/IMPLEMENTATION_READINESS.md",
+        "github-projects/README.md"
+      ]
+    },
+    {
+      "key": "task-core-planning-schemas",
+      "parentKey": "epic-implementation-readiness",
+      "kind": "issue",
+      "title": "TASK: Plan, audit event, config ve benchmark task semalari tanimlansin",
+      "status": "Advisor Review",
+      "area": "Testing",
+      "requirementType": "Non-Functional",
+      "phase": "Faz 1",
+      "priority": "P0",
+      "labels": [
+        "task:planning",
+        "task:infra"
+      ],
+      "requirement": "Agent plan, audit event, configuration ve benchmark task veri sozlesmeleri implementasyon oncesi JSON Schema olarak yazilmalidir.",
+      "rationale": "Ajan akisi ve benchmark kaniti veri sozlesmeleri net olmadan yazilirsa sonradan uyumsuz log ve raporlar uretilir.",
+      "acceptanceSummary": "Core planning schema dosyalari repo icinde hazir.",
+      "acceptanceCriteria": [
+        "Plan schema affectedFiles, contextSources, riskLevel ve approval bilgisini icerir.",
+        "Audit schema run_id, task_id, condition, decision ve eventType alanlarini icerir.",
+        "Config ve benchmark task semalari onboarding ve evaluation dokumanlariyla uyumludur."
+      ],
+      "outOfScope": [
+        "Runtime schema validator kutuphanesi secmek.",
+        "Implementation code uretmek."
+      ],
+      "sourceDocuments": [
+        "docs/schemas/README.md",
+        "docs/schemas/plan.schema.json",
+        "docs/schemas/audit-event.schema.json",
+        "docs/schemas/config.schema.json",
+        "docs/schemas/benchmark-task.schema.json"
+      ]
+    },
+    {
+      "key": "task-doc-diagram-validation-ci",
+      "parentKey": "epic-implementation-readiness",
+      "kind": "issue",
+      "title": "TASK: Dokuman linkleri ve PlantUML diyagramlari CI'da dogrulansin",
+      "status": "Advisor Review",
+      "area": "Testing",
+      "requirementType": "Non-Functional",
+      "phase": "Faz 1",
+      "priority": "P0",
+      "labels": [
+        "task:infra"
+      ],
+      "requirement": "Markdown linkleri, temel PlantUML yapisi ve governance gereksinimleri pull request uzerinde otomatik kontrol edilmelidir.",
+      "rationale": "Planlama belgeleri implementasyon kadar kritik oldugu icin kirik link ve hatali diyagramlar erken yakalanmali.",
+      "acceptanceSummary": "Docs/diagram validation scriptleri ve CI workflow'u hazir.",
+      "acceptanceCriteria": [
+        "validate-doc-links.ps1 yerel Markdown link hedeflerini kontrol eder.",
+        "validate-plantuml.ps1 her .puml dosyasinda @startuml ve @enduml dengesini kontrol eder.",
+        "docs.yml workflow'u PR ve main icin bu kontrolleri calistirir."
+      ],
+      "outOfScope": [
+        "PlantUML render JAR'i indirip gorsel cikti uretmek."
+      ],
+      "sourceDocuments": [
+        "scripts/validate-doc-links.ps1",
+        "scripts/validate-plantuml.ps1",
+        ".github/workflows/docs.yml",
+        "diagrams/UC/README.md"
+      ]
+    },
+    {
+      "key": "task-benchmark-template-evidence-matrix",
+      "parentKey": "epic-implementation-readiness",
+      "kind": "issue",
+      "title": "TASK: Benchmark task template ve evidence matrix hazirlansin",
+      "status": "Advisor Review",
+      "area": "Evaluation",
+      "requirementType": "Research",
+      "phase": "Faz 1",
+      "priority": "P0",
+      "labels": [
+        "task:research",
+        "task:planning"
+      ],
+      "requirement": "Benchmark task kategorileri, A/B/C evidence alanlari ve ilk JSON task format beklentisi implementasyon oncesi yazilmalidir.",
+      "rationale": "Benchmark runner kodlanmadan once neyin olculecegi sabitlenirse tez kaniti daha tutarli olur.",
+      "acceptanceSummary": "Benchmark plan dokumani ve schema evidence alanlari hazir.",
+      "acceptanceCriteria": [
+        "Benchmark kategorileri ve hedef gorev sayilari yazilir.",
+        "A/B/C condition evidence alanlari listelenir.",
+        "Ilk bes task'in JSON olarak hazirlanmasi sonraki manuel adim olarak gorunur."
+      ],
+      "outOfScope": [
+        "Benchmark fixture reposu olusturmak.",
+        "Runner implementasyonu yapmak."
+      ],
+      "sourceDocuments": [
+        "docs/benchmark/README.md",
+        "docs/schemas/benchmark-task.schema.json",
+        "EVALUATION_PLAN.md"
+      ]
+    },
+    {
+      "key": "task-faz1-p0-ready-review",
+      "parentKey": "epic-implementation-readiness",
+      "kind": "issue",
+      "title": "TASK: Faz 1 P0 kartlari advisor review sonrasi Ready kabul edilsin",
+      "status": "Advisor Review",
+      "area": "Thesis",
+      "requirementType": "Research",
+      "phase": "Faz 1",
+      "priority": "P0",
+      "labels": [
+        "task:planning"
+      ],
+      "requirement": "Faz 1 P0 kartlarinin Ready kalabilmesi icin advisor review notlari ve kalan blokajlar Project uzerinde kontrol edilmelidir.",
+      "rationale": "Implementasyona baslarken ilk kartlarin sadece teknik olarak degil akademik olarak da hazir oldugundan emin olmak gerekir.",
+      "acceptanceSummary": "Faz 1 P0 kartlari icin advisor review kontrol karti olusturuldu.",
+      "acceptanceCriteria": [
+        "Advisor review'dan sonra Faz 1 P0 kartlari Ready, Blocked veya Deferred olarak ayrilir.",
+        "Blocked kalan kartlar icin eksik karar veya kaynak dokuman yazilir.",
+        "Workflow Board gorunumu manuel olarak Board layout ve Status grouping ile kontrol edilir."
+      ],
+      "outOfScope": [
+        "Kartlari otomatik kapatmak.",
+        "Danisman onayini varsaymak."
+      ],
+      "sourceDocuments": [
+        "docs/IMPLEMENTATION_READINESS.md",
+        "github-projects/README.md"
+      ]
+    },
+    {
+      "key": "task-devops-quality-gates-baseline",
+      "parentKey": "epic-implementation-readiness",
+      "kind": "issue",
+      "title": "TASK: Pre-implementation CI and quality gates baseline hazir olsun",
+      "status": "Advisor Review",
+      "area": "Testing",
+      "requirementType": "Non-Functional",
+      "phase": "Faz 1",
+      "priority": "P0",
+      "labels": [
+        "task:infra",
+        "quality-gate",
+        "github-actions"
+      ],
+      "requirement": "Implementation baslamadan once governance, docs, security, app CI, CodeQL ve supply-chain gate'leri repo icinde tanimli olmalidir.",
+      "rationale": "AI destekli gelistirmede kaliteyi sonradan eklemek VDD iddiasini zayiflatir; kapilar ilk app scaffold gelmeden once hazir olmalidir.",
+      "acceptanceSummary": "Quality gate dokumani ve app/security/supply-chain workflow'lari hazir.",
+      "acceptanceCriteria": [
+        "docs/QUALITY_GATES.md aktif, armed, manual ve planned gate'leri ayirir.",
+        ".github/workflows/ci.yml package.json geldikten sonra format, lint, typecheck, test, security test ve build scriptlerini calistirir.",
+        "CodeQL ve supply-chain workflow'lari uygulama manifesti geldikten sonra devreye girecek sekilde tanimlanir.",
+        "Branch protection icin gerekli status check listesi yazilir."
+      ],
+      "outOfScope": [
+        "Henuz uygulama kodu yokken ESLint/Vitest dependency'lerini kurmak.",
+        "SonarCloud veya Codecov'u zorunlu gate yapmak."
+      ],
+      "sourceDocuments": [
+        "docs/QUALITY_GATES.md",
+        ".github/workflows/ci.yml",
+        ".github/workflows/codeql.yml",
+        ".github/workflows/supply-chain.yml"
+      ]
+    },
+    {
+      "key": "task-reproducible-dev-environment",
+      "parentKey": "epic-implementation-readiness",
+      "kind": "issue",
+      "title": "TASK: Reproducible development environment baseline hazir olsun",
+      "status": "Advisor Review",
+      "area": "Thesis",
+      "requirementType": "Non-Functional",
+      "phase": "Faz 1",
+      "priority": "P0",
+      "labels": [
+        "task:infra",
+        "quality-gate"
+      ],
+      "requirement": "Node runtime, editor ayarlari, extension onerileri ve commit mesaji standardi implementasyon oncesi repo icinde tanimlanmalidir.",
+      "rationale": "Tekrarlanabilirlik tezin savunulabilirligi icin gereklidir; farkli makinelerde farkli runtime ve editor ayarlari kaniti zayiflatir.",
+      "acceptanceSummary": "Node 24, editorconfig, VS Code extension onerileri ve commitlint baseline hazir.",
+      "acceptanceCriteria": [
+        ".nvmrc Node 24 hedefini gosterir.",
+        ".editorconfig satir sonu, encoding ve indentation standardini belirler.",
+        ".vscode/extensions.json proje icin gerekli extension onerilerini listeler.",
+        ".commitlintrc.json Conventional Commits tiplerini tanimlar."
+      ],
+      "outOfScope": [
+        "package.json yokken Husky hook'larini kurmak.",
+        "Tum gelistiricilerin ayni IDE'yi kullanmasini zorunlu kilmak."
+      ],
+      "sourceDocuments": [
+        ".nvmrc",
+        ".editorconfig",
+        ".commitlintrc.json",
+        ".vscode/extensions.json",
+        "docs/PRE_IMPLEMENTATION_AUDIT.md"
+      ]
+    },
+    {
+      "key": "task-security-threat-incident-retention",
+      "parentKey": "epic-implementation-readiness",
+      "kind": "issue",
+      "title": "TASK: Threat model, incident response ve data retention baseline hazir olsun",
+      "status": "Advisor Review",
+      "area": "Safety",
+      "requirementType": "Risk",
+      "phase": "Faz 1",
+      "priority": "P0",
+      "labels": [
+        "security",
+        "req:risk",
+        "task:planning"
+      ],
+      "requirement": "Workspace boundary, protected files, model context, audit log ve dependency supply-chain riskleri implementasyon oncesi tehdit modeliyle izlenmelidir.",
+      "rationale": "Agentic IDE'nin guvenlik iddiasi sadece kodla degil, olay yaniti ve veri saklama kararlarinin onceden belirlenmesiyle savunulabilir.",
+      "acceptanceSummary": "Threat model, incident response ve data retention dokumanlari hazir.",
+      "acceptanceCriteria": [
+        "docs/THREAT_MODEL.md MVP varliklarini, STRIDE risklerini ve gerekli testleri listeler.",
+        "docs/INCIDENT_RESPONSE.md secret leak, unsafe write ve invalid evidence icin runbook verir.",
+        "docs/DATA_RETENTION.md local index, embeddings, audit log, API key ve benchmark export saklama politikasini tanimlar.",
+        "Security issue template'i hardening ve verification alanlarini icerir."
+      ],
+      "outOfScope": [
+        "Tam kurumsal DPIA veya yasal danismanlik yapmak.",
+        "MVP'de OS keychain'i zorunlu kilmak."
+      ],
+      "sourceDocuments": [
+        "docs/THREAT_MODEL.md",
+        "docs/INCIDENT_RESPONSE.md",
+        "docs/DATA_RETENTION.md",
+        "DATA_AND_PRIVACY.md",
+        ".github/ISSUE_TEMPLATE/security-hardening.md"
+      ]
+    },
+    {
+      "key": "task-github-project-ops-templates-labels",
+      "parentKey": "epic-implementation-readiness",
+      "kind": "issue",
+      "title": "TASK: GitHub Project operations, templates ve label taxonomy hazir olsun",
+      "status": "Advisor Review",
+      "area": "Thesis",
+      "requirementType": "Non-Functional",
+      "phase": "Faz 1",
+      "priority": "P0",
+      "labels": [
+        "task:infra",
+        "github-actions",
+        "documentation"
+      ],
+      "requirement": "Project field/view niyeti, issue intake template'leri ve repo label taxonomy'si implementasyon oncesi tekil operasyon modeline baglanmalidir.",
+      "rationale": "Requirements ve kalite kapilari Project uzerinde izlenmezse implementasyon sirasinda todo'lar dagilir ve tez kaniti kaybolur.",
+      "acceptanceSummary": "GitHub Project operasyon dokumani, yeni issue template'leri ve genisletilmis label seti hazir.",
+      "acceptanceCriteria": [
+        "docs/GITHUB_PROJECT_OPERATIONS.md Requirement Status ile built-in Status farkini aciklar.",
+        "ADR, spike, research question, security ve quality gate issue template'leri vardir.",
+        "requirements-analysis.json label seti bug, enhancement, documentation, tech-debt, dependencies, github-actions, security, quality-gate ve vdd etiketlerini icerir.",
+        "Seed validasyonu undefined label ve eksik source document durumlarini yakalar."
+      ],
+      "outOfScope": [
+        "GitHub UI view'larini API ile kusursuz otomatik ayarlamayi garanti etmek.",
+        "Manuel olusturulan her issue'yu seed'e otomatik geri yazmak."
+      ],
+      "sourceDocuments": [
+        "docs/GITHUB_PROJECT_OPERATIONS.md",
+        "github-projects/requirements-analysis.json",
+        ".github/ISSUE_TEMPLATE/adr.md",
+        ".github/ISSUE_TEMPLATE/spike.md",
+        ".github/ISSUE_TEMPLATE/research-question.md",
+        ".github/ISSUE_TEMPLATE/quality-gate-gap.md"
+      ]
+    },
+    {
+      "key": "adr-prompt-model-versioning",
+      "parentKey": "epic-implementation-readiness",
+      "kind": "issue",
+      "title": "ADR: Prompt ve model versioning stratejisi sabitlensin",
+      "status": "Advisor Review",
+      "area": "Model",
+      "requirementType": "Research",
+      "phase": "Faz 1",
+      "priority": "P0",
+      "labels": [
+        "adr",
+        "task:research",
+        "vdd"
+      ],
+      "requirement": "Implementation prompt, verification prompt, model id, retrieval policy ve safety policy versiyonlari audit ve benchmark kanitlarinda kaydedilmelidir.",
+      "rationale": "Prompt/model degisiklikleri kaydedilmezse VDD deneyleri tekrarlanabilir olmaz ve verifier davranisi aciklanamaz.",
+      "acceptanceSummary": "ADR-009 prompt ve model versioning kararini kayda alir.",
+      "acceptanceCriteria": [
+        "ADR-009 implementation ve verification prompt versiyonlarini ayri izler.",
+        "Audit event ve benchmark export tasarimi model id, provider ve policy version alanlarini dikkate alir.",
+        "Prompt degisikliginin mimari karar etkisi oldugu dokumante edilir."
+      ],
+      "outOfScope": [
+        "Prompt registry veya UI tabanli prompt editor implementasyonu yapmak.",
+        "Tum provider parametrelerini ilk MVP'de deney degiskeni yapmak."
+      ],
+      "sourceDocuments": [
+        "docs/adr/ADR-009-prompt-model-versioning.md",
+        "VERIFICATION_DRIVEN_DEVELOPMENT.md",
+        "EVALUATION_PLAN.md",
+        "docs/schemas/audit-event.schema.json"
+      ]
+    },
+    {
+      "key": "task-accessibility-quality-plan",
+      "parentKey": "epic-implementation-readiness",
+      "kind": "issue",
+      "title": "TASK: Accessibility plan quality gate olarak hazir olsun",
+      "status": "Advisor Review",
+      "area": "UX",
+      "requirementType": "Non-Functional",
+      "phase": "Faz 1",
+      "priority": "P1",
+      "labels": [
+        "documentation",
+        "quality-gate"
+      ],
+      "requirement": "MVP UI gelistirilmeden once klavye navigasyonu, focus, contrast, accessible names ve safety warning erisilebilirligi icin baseline plan olmalidir.",
+      "rationale": "Approval-gated bir IDE'de kullanici onayi ve guvenlik uyarilari erisilebilir degilse guven modeli eksik kalir.",
+      "acceptanceSummary": "Accessibility plan WCAG hedefini ve test stratejisini belirler.",
+      "acceptanceCriteria": [
+        "docs/ACCESSIBILITY_PLAN.md WCAG 2.2 AA hedefini MVP icin pratik sinirlarla belirtir.",
+        "Diff, approval, rollback ve safety warning akislarinda klavye/focus beklentileri yazilir.",
+        "Playwright accessibility smoke check sonraki sprint gate'i olarak kaydedilir."
+      ],
+      "outOfScope": [
+        "Ilk planlama asamasinda tam accessibility audit yapmak.",
+        "Monaco'nun tum ic davranisini yeniden implemente etmek."
+      ],
+      "sourceDocuments": [
+        "docs/ACCESSIBILITY_PLAN.md",
+        "UX_AND_INTERACTION.md",
+        "docs/QUALITY_GATES.md"
+      ]
+    },
+    {
       "key": "req-research-question",
       "parentKey": "epic-research-scope",
       "kind": "issue",
@@ -592,6 +1508,39 @@
       ]
     },
     {
+      "key": "req-editor-onboarding-configuration",
+      "parentKey": "epic-editor-foundation",
+      "kind": "issue",
+      "title": "REQ: Ilk acilis onboarding ve guvenli konfigurasyon akisi desteklenmeli",
+      "status": "Draft",
+      "area": "UX",
+      "requirementType": "Functional",
+      "phase": "Faz 1",
+      "priority": "P0",
+      "labels": [
+        "req:functional"
+      ],
+      "requirement": "Uygulama ilk acilista workspace secimi, model profili, gizlilik tercihi, guvenli API key saklama ve son projeler akislarini kullaniciya sunmalidir.",
+      "rationale": "Onboarding akisi olmadan workspace boundary, model secimi ve gizlilik varsayimlari kullanici tarafindan gorunur ve denetlenebilir olmaz.",
+      "acceptanceSummary": "UC-05 onboarding, model/gizlilik tercihi ve guvenli konfigurasyon akisi backloga tasindi.",
+      "acceptanceCriteria": [
+        "Ilk acilista proje klasoru secilir ve secilen kok klasor workspace boundary olarak kaydedilir.",
+        "Kullanici yerel, manuel hibrit veya bulut model profilini ve gizlilik tercihini acikca secer.",
+        "Bulut API anahtari ~/.agentide/config.json icinde saklanir; audit log, model context veya embedding indeksine yazilmaz.",
+        "Son projeler preferences.json uzerinden tekrar acilabilir."
+      ],
+      "outOfScope": [
+        "Gorev karmasikligina gore otomatik model router.",
+        "Cloud auth veya hesap sistemi."
+      ],
+      "sourceDocuments": [
+        "diagrams/UC/UC-05-konfigurasyon-ve-onboarding.puml",
+        "PRODUCT_PLAN.md",
+        "DATA_AND_PRIVACY.md",
+        "TECH_STACK_AND_AI.md"
+      ]
+    },
+    {
       "key": "req-context-always-on",
       "parentKey": "epic-context-retrieval",
       "kind": "issue",
@@ -674,7 +1623,9 @@
       "sourceDocuments": [
         "SYSTEM_PLAN.md",
         "DATA_AND_PRIVACY.md",
-        "TECH_STACK_AND_AI.md"
+        "TECH_STACK_AND_AI.md",
+        "TOOLING_AND_REFERENCE_RECOMMENDATIONS.md",
+        "diagrams/UC/UC-05-konfigurasyon-ve-onboarding.puml"
       ]
     },
     {
@@ -935,7 +1886,8 @@
       "sourceDocuments": [
         "SYSTEM_PLAN.md",
         "TESTING_AND_CI.md",
-        "EVALUATION_PLAN.md"
+        "EVALUATION_PLAN.md",
+        "diagrams/UC/UC-07-audit-log-inceleme.puml"
       ]
     },
     {
@@ -1114,7 +2066,9 @@
       ],
       "sourceDocuments": [
         "PRODUCT_PLAN.md",
-        "TECH_STACK_AND_AI.md"
+        "TECH_STACK_AND_AI.md",
+        "TOOLING_AND_REFERENCE_RECOMMENDATIONS.md",
+        "diagrams/UC/UC-06-bulut-yerel-model-fallback.puml"
       ]
     },
     {
@@ -1143,7 +2097,9 @@
       "sourceDocuments": [
         "PRODUCT_PLAN.md",
         "TECH_STACK_AND_AI.md",
-        "COST_AND_PERFORMANCE.md"
+        "COST_AND_PERFORMANCE.md",
+        "diagrams/UC/UC-05-konfigurasyon-ve-onboarding.puml",
+        "diagrams/UC/UC-06-bulut-yerel-model-fallback.puml"
       ]
     },
     {
@@ -1172,7 +2128,10 @@
       "sourceDocuments": [
         "EVALUATION_PLAN.md",
         "COST_AND_PERFORMANCE.md",
-        "TECH_STACK_AND_AI.md"
+        "TECH_STACK_AND_AI.md",
+        "TOOLING_AND_REFERENCE_RECOMMENDATIONS.md",
+        "diagrams/UC/UC-04-benchmark-ve-degerlendirme.puml",
+        "diagrams/UC/UC-06-bulut-yerel-model-fallback.puml"
       ]
     },
     {
@@ -1201,7 +2160,8 @@
       "sourceDocuments": [
         "RISK_REGISTER.md",
         "COST_AND_PERFORMANCE.md",
-        "TECH_STACK_AND_AI.md"
+        "TECH_STACK_AND_AI.md",
+        "diagrams/UC/UC-06-bulut-yerel-model-fallback.puml"
       ]
     },
     {
@@ -1228,7 +2188,8 @@
         "Dusuk riskli tum UI ayrintilarini birim testlerle kaplamak."
       ],
       "sourceDocuments": [
-        "TESTING_AND_CI.md"
+        "TESTING_AND_CI.md",
+        "TOOLING_AND_REFERENCE_RECOMMENDATIONS.md"
       ]
     },
     {
@@ -1313,7 +2274,9 @@
       ],
       "sourceDocuments": [
         "EVALUATION_PLAN.md",
-        "PRODUCT_PLAN.md"
+        "PRODUCT_PLAN.md",
+        "TOOLING_AND_REFERENCE_RECOMMENDATIONS.md",
+        "diagrams/UC/UC-04-benchmark-ve-degerlendirme.puml"
       ]
     },
     {
@@ -1341,7 +2304,10 @@
       ],
       "sourceDocuments": [
         "EVALUATION_PLAN.md",
-        "TESTING_AND_CI.md"
+        "TESTING_AND_CI.md",
+        "TOOLING_AND_REFERENCE_RECOMMENDATIONS.md",
+        "diagrams/UC/UC-04-benchmark-ve-degerlendirme.puml",
+        "diagrams/UC/UC-07-audit-log-inceleme.puml"
       ]
     },
     {

@@ -1,6 +1,7 @@
 # DAĞITIM VE PAKETLEME (DEPLOYMENT_AND_PACKAGING)
 
-> **Belge amacı:** Uygulamanın geliştirme ortamında çalıştırılması, paketlenmesi ve dağıtılmasına ilişkin planı belgeler.
+> **Belge amacı:** Uygulamanın geliştirme ortamında çalıştırılması, paketlenmesi ve dağıtılmasına ilişkin planı
+> belgeler.
 
 ---
 
@@ -8,14 +9,14 @@
 
 ### 1.1 Gereksinimler
 
-| Bileşen | Versiyon | Açıklama |
-|---|---|---|
-| Node.js | 20 LTS+ | Runtime |
-| npm | 10+ | Paket yöneticisi |
-| TypeScript | 5.4+ | Dil |
-| Electron | 30+ | Masaüstü framework |
-| Git | 2.40+ | Kaynak kontrol |
-| Ollama | 0.3+ | Yerel model çalıştırıcı (opsiyonel) |
+| Bileşen    | Versiyon | Açıklama                                                                                 |
+|------------|----------|------------------------------------------------------------------------------------------|
+| Node.js    | 24 LTS   | Runtime; Node 22 LTS only as temporary fallback if Electron/native modules block Node 24 |
+| npm        | 10+      | Paket yöneticisi                                                                         |
+| TypeScript | 5.4+     | Dil                                                                                      |
+| Electron   | 30+      | Masaüstü framework                                                                       |
+| Git        | 2.40+    | Kaynak kontrol                                                                           |
+| Ollama     | 0.3+     | Yerel model çalıştırıcı (opsiyonel)                                                      |
 
 ### 1.2 Kurulum Adımları
 
@@ -39,11 +40,11 @@ npm test
 
 ### 1.3 Ortam Değişkenleri
 
-| Değişken | Zorunlu | Açıklama |
-|---|---|---|
-| `ANTHROPIC_API_KEY` | Evet (bulut kullanılacaksa) | Claude API anahtarı |
-| `OLLAMA_HOST` | Hayır | Ollama sunucu adresi (varsayılan: `http://localhost:11434`) |
-| `AGENTIDE_LOG_LEVEL` | Hayır | Log seviyesi: `debug`, `info`, `warn`, `error` |
+| Değişken             | Zorunlu                     | Açıklama                                                    |
+|----------------------|-----------------------------|-------------------------------------------------------------|
+| `ANTHROPIC_API_KEY`  | Evet (bulut kullanılacaksa) | Claude API anahtarı                                         |
+| `OLLAMA_HOST`        | Hayır                       | Ollama sunucu adresi (varsayılan: `http://localhost:11434`) |
+| `AGENTIDE_LOG_LEVEL` | Hayır                       | Log seviyesi: `debug`, `info`, `warn`, `error`              |
 
 ---
 
@@ -54,6 +55,7 @@ npm test
 **Karar:** Paketleme yapılmaz. `npm run dev` ile çalıştırılır.
 
 **Gerekçe:**
+
 - Demo için yeterli
 - Paketleme karmaşıklığı (code signing, auto-update) zaman kaybı
 - Hızlı iterasyon gerekiyor
@@ -62,11 +64,11 @@ npm test
 
 Jüri demosu için basit paketleme yapılabilir:
 
-| Seçenek | Araç | Çıktı | Karmaşıklık |
-|---|---|---|---|
-| **Electron-Forge** | `@electron-forge/cli` | `.exe` / `.dmg` / `.AppImage` | Orta |
-| **Electron-Builder** | `electron-builder` | Installer + portable | Orta-Yüksek |
-| **Portable build** | `electron-packager` | Klasör (zip ile dağıt) | Düşük |
+| Seçenek              | Araç                  | Çıktı                         | Karmaşıklık |
+|----------------------|-----------------------|-------------------------------|-------------|
+| **Electron-Forge**   | `@electron-forge/cli` | `.exe` / `.dmg` / `.AppImage` | Orta        |
+| **Electron-Builder** | `electron-builder`    | Installer + portable          | Orta-Yüksek |
+| **Portable build**   | `electron-packager`   | Klasör (zip ile dağıt)        | Düşük       |
 
 **Tavsiye:** `electron-forge` ile basit portable build. Installer ve auto-update gereksiz.
 
@@ -86,9 +88,9 @@ Jüri demosu için basit paketleme yapılabilir:
 ### 3.1 GitHub Actions Workflow
 
 ```yaml
-# .github/workflows/ci.yml
+# .github/workflows/app-ci.yml
 name: CI
-on: [push, pull_request]
+on: [ push, pull_request ]
 
 jobs:
   lint-and-test:
@@ -96,7 +98,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
-        with: { node-version: '20' }
+        with: { node-version: '24' }
       - run: npm ci
       - run: npm run lint
       - run: npm run typecheck
@@ -105,25 +107,27 @@ jobs:
 
 ### 3.2 CI/CD Kararları
 
-| Özellik | MVP'de | Neden |
-|---|---|---|
-| Lint + TypeCheck | ✅ | Kod kalitesi temel |
-| Birim testler | ✅ | Regresyon önleme |
-| Build kontrolü | ✅ | Derleme hatası yakalama |
-| Auto paketleme | ❌ | Gereksiz karmaşıklık |
-| Auto deploy | ❌ | Masaüstü uygulama, deploy yok |
-| SonarQube | ❌ | Tez için overkill |
+| Özellik          | MVP'de | Neden                         |
+|------------------|--------|-------------------------------|
+| Lint + TypeCheck | ✅      | Kod kalitesi temel            |
+| Birim testler    | ✅      | Regresyon önleme              |
+| Build kontrolü   | ✅      | Derleme hatası yakalama       |
+| Auto paketleme   | ❌      | Gereksiz karmaşıklık          |
+| Auto deploy      | ❌      | Masaüstü uygulama, deploy yok |
+| SonarQube        | ❌      | Tez için overkill             |
 
 ---
 
 ## 4. Dağıtım Planı
 
 ### 4.1 Jüri Demosu İçin
+
 1. Geliştirme makinesinde `npm run dev` ile çalıştır
 2. Projeksiyon/ekran paylaşımı ile göster
 3. Yedek: önceden hazırlanmış portable build USB'de
 
 ### 4.2 Kaynak Kod Teslimi
+
 1. GitHub repository (public veya university-restricted)
 2. `README.md` ile kurulum ve çalıştırma kılavuzu
 3. `docs/` klasöründe mimari dokümantasyon

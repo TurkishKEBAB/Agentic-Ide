@@ -10,3 +10,12 @@ updates:
     labels:
       - dependencies
       - github-actions
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+      time: "08:30"
+      timezone: Europe/Istanbul
+    labels:
+      - dependencies

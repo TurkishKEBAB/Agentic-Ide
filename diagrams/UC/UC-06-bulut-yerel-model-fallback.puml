@@ -1,0 +1,78 @@
+@startuml UC_06_bulut_yerel_model_fallback
+title Agentic IDE - UC-06 Bulut/Yerel Model Seçimi ve Fallback Use Case Diyagramı
+left to right direction
+skinparam packageStyle rectangle
+skinparam shadowing false
+
+actor "Geliştirici" as Developer
+actor "Bulut Model Sağlayıcı\n(Claude API)" as CloudModel
+actor "Yerel Model Sağlayıcı\n(Ollama)" as LocalModel
+actor "Tercih Deposu\n(preferences.json)" as PreferenceStore
+actor "Konfigürasyon Deposu\n(~/.agentide/config.json)" as ConfigStore
+actor "Audit ve Metrik Kayıtları\n(audit.jsonl + eval export)" as MetricsStore
+
+rectangle "Agentic IDE - Model Provider Katmanı" {
+  usecase "Aktif model sağlayıcısını seç" as UC_SelectProvider
+  usecase "Provider erişilebilirliğini\ntest et" as UC_PingProvider
+  usecase "Bulut API anahtarını oku" as UC_LoadCloudKey
+  usecase "Bulut modelle görevi çalıştır" as UC_RunCloudTask
+  usecase "Yerel modelle görevi çalıştır" as UC_RunLocalTask
+  usecase "Bulut bağlantı/maliyet\nhatasını göster" as UC_ShowCloudFailure
+  usecase "Yerel modele geçmeyi öner" as UC_OfferLocalFallback
+  usecase "Kullanıcı onayıyla\ngörevi yeniden dene" as UC_RetryWithLocal
+  usecase "Local-only moda geç" as UC_EnableLocalOnly
+  usecase "Model, gecikme ve maliyet\nmetriklerini kaydet" as UC_RecordModelMetrics
+}
+
+Developer --> UC_SelectProvider
+Developer --> UC_RunCloudTask
+Developer --> UC_RunLocalTask
+Developer --> UC_OfferLocalFallback
+Developer --> UC_RetryWithLocal
+Developer --> UC_EnableLocalOnly
+
+UC_SelectProvider .> UC_PingProvider : <<include>>
+UC_RunCloudTask .> UC_LoadCloudKey : <<include>>
+UC_ShowCloudFailure .> UC_RunCloudTask : <<extend>>
+UC_ShowCloudFailure .> UC_PingProvider : <<include>>
+UC_ShowCloudFailure .> UC_OfferLocalFallback : <<include>>
+UC_RetryWithLocal .> UC_OfferLocalFallback : <<extend>>
+UC_RetryWithLocal .> UC_RunLocalTask : <<include>>
+UC_EnableLocalOnly .> UC_SelectProvider : <<extend>>
+UC_RunCloudTask .> UC_RecordModelMetrics : <<include>>
+UC_RunLocalTask .> UC_RecordModelMetrics : <<include>>
+
+CloudModel --> UC_PingProvider
+ConfigStore --> UC_LoadCloudKey
+CloudModel --> UC_RunCloudTask
+LocalModel --> UC_PingProvider
+LocalModel --> UC_RunLocalTask
+PreferenceStore --> UC_SelectProvider
+PreferenceStore --> UC_EnableLocalOnly
+MetricsStore --> UC_RecordModelMetrics
+
+note right of UC_OfferLocalFallback
+Fallback kullanıcı aracılıdır.
+Sistem otomatik olarak görev karmaşıklığına göre
+model değiştirmez; yalnızca bağlantı, kota, maliyet
+veya kullanıcı tercihi nedeniyle seçenek sunar.
+end note
+
+note top of UC_PingProvider
+Provider ping'i model seçimi sırasında ve hata sonrası
+tekrar denemede kullanılır; her model çağrısını zorunlu
+olarak bloklayan bir adım değildir.
+end note
+
+note bottom of UC_EnableLocalOnly
+Local-only modda tüm kod ve chat bağlamı cihazda kalır.
+Bulut provider'a veri gönderilmez.
+end note
+
+note bottom of UC_RecordModelMetrics
+Tez için yerel/bulut gecikmesi, token kullanımı ve
+maliyet ayrı ölçülür. API anahtarları veya secret içerik
+audit/metrik kayıtlarına yazılmaz.
+end note
+
+@enduml

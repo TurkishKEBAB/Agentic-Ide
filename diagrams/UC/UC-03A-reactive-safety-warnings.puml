@@ -1,4 +1,4 @@
-@startuml
+@startuml UC_03A_reactive_safety_warnings
 title Agentic IDE - UC-03A Reactive Safety Warnings (Apply Öncesi — MVP)
 left to right direction
 skinparam packageStyle rectangle
@@ -9,42 +9,58 @@ skinparam shadowing false
 ' Background (arka plan) proaktif analiz MVP DIŞIDIR (bkz. UC-03B).
 
 actor "Geliştirici" as Developer
-actor "Değişiklik Planlayıcı" as ChangePlanner
-actor "Secret / Pattern Detector" as SecretDetector
-actor "Workspace Boundary Guard" as BoundaryGuard
 actor "Audit Log" as AuditLog
 
 rectangle "Agentic IDE - Reactive Safety Layer (MVP)" {
   usecase "Plan sonrası reactive safety check\nçalıştır" as UC_RunReactiveCheck
+  usecase "Workspace boundary\nkontrolü yap" as UC_CheckBoundary
+  usecase "Write boundary / protected file\nkontrolü yap" as UC_CheckProtectedWrite
+  usecase "Large edit threshold\nkontrolü yap" as UC_CheckLargeEdit
+  usecase "Secret-in-diff\nkontrolü yap" as UC_CheckSecretInDiff
   usecase "Workspace boundary ihlal\nuyarısını göster" as UC_ShowBoundaryViolation
   usecase "Protected file write\nuyarısını göster" as UC_ShowProtectedFileWrite
   usecase "Large edit threshold\nuyarısını göster" as UC_ShowLargeEdit
   usecase "Diff içinde secret\nuyarısını göster" as UC_ShowSecretInDiff
   usecase "Uyarı için neden\naçıklamasını göster" as UC_ShowWhy
-  usecase "Planı düzelt veya iptal et" as UC_RevisePlanOrCancel
+  usecase "Kullanıcı kararını al" as UC_GetUserDecision
+  usecase "Planı düzelt" as UC_RevisePlan
+  usecase "Planı iptal et" as UC_CancelPlan
+  usecase "Large edit için devam et" as UC_ContinueLargeEdit
   usecase "Reactive uyarıyı audit log'a yaz" as UC_LogReactiveAlert
 }
 
 Developer --> UC_RunReactiveCheck
-Developer --> UC_RevisePlanOrCancel
+Developer --> UC_ShowWhy
+Developer --> UC_GetUserDecision
+Developer --> UC_RevisePlan
+Developer --> UC_CancelPlan
+Developer --> UC_ContinueLargeEdit
 
-ChangePlanner --> UC_RunReactiveCheck
-ChangePlanner --> UC_ShowLargeEdit
-SecretDetector --> UC_ShowSecretInDiff
-SecretDetector --> UC_ShowProtectedFileWrite
-BoundaryGuard --> UC_ShowBoundaryViolation
 AuditLog --> UC_LogReactiveAlert
 
-UC_RunReactiveCheck .> UC_ShowBoundaryViolation : <<extend>>
-UC_RunReactiveCheck .> UC_ShowProtectedFileWrite : <<extend>>
-UC_RunReactiveCheck .> UC_ShowLargeEdit : <<extend>>
-UC_RunReactiveCheck .> UC_ShowSecretInDiff : <<extend>>
-UC_RunReactiveCheck .> UC_ShowWhy : <<include>>
-UC_RunReactiveCheck .> UC_LogReactiveAlert : <<include>>
-UC_ShowBoundaryViolation .> UC_RevisePlanOrCancel : <<extend>>
-UC_ShowProtectedFileWrite .> UC_RevisePlanOrCancel : <<extend>>
-UC_ShowLargeEdit .> UC_RevisePlanOrCancel : <<extend>>
-UC_ShowSecretInDiff .> UC_RevisePlanOrCancel : <<extend>>
+UC_RunReactiveCheck .> UC_CheckBoundary : <<include>>
+UC_RunReactiveCheck .> UC_CheckProtectedWrite : <<include>>
+UC_RunReactiveCheck .> UC_CheckLargeEdit : <<include>>
+UC_RunReactiveCheck .> UC_CheckSecretInDiff : <<include>>
+UC_ShowBoundaryViolation .> UC_RunReactiveCheck : <<extend>>
+UC_ShowProtectedFileWrite .> UC_RunReactiveCheck : <<extend>>
+UC_ShowLargeEdit .> UC_RunReactiveCheck : <<extend>>
+UC_ShowSecretInDiff .> UC_RunReactiveCheck : <<extend>>
+UC_ShowBoundaryViolation .> UC_ShowWhy : <<include>>
+UC_ShowProtectedFileWrite .> UC_ShowWhy : <<include>>
+UC_ShowLargeEdit .> UC_ShowWhy : <<include>>
+UC_ShowSecretInDiff .> UC_ShowWhy : <<include>>
+UC_ShowBoundaryViolation .> UC_GetUserDecision : <<include>>
+UC_ShowProtectedFileWrite .> UC_GetUserDecision : <<include>>
+UC_ShowLargeEdit .> UC_GetUserDecision : <<include>>
+UC_ShowSecretInDiff .> UC_GetUserDecision : <<include>>
+UC_ShowBoundaryViolation .> UC_LogReactiveAlert : <<include>>
+UC_ShowProtectedFileWrite .> UC_LogReactiveAlert : <<include>>
+UC_ShowLargeEdit .> UC_LogReactiveAlert : <<include>>
+UC_ShowSecretInDiff .> UC_LogReactiveAlert : <<include>>
+UC_RevisePlan .> UC_GetUserDecision : <<extend>>
+UC_CancelPlan .> UC_GetUserDecision : <<extend>>
+UC_ContinueLargeEdit .> UC_GetUserDecision : <<extend>>
 
 note top of UC_RunReactiveCheck
 TETİKLEME KOŞULU:
@@ -55,12 +71,18 @@ UC_ReactiveSafetyCheck adımı bu use case'i çağırır.
 
 Background scanning, save-time veya idle-time
 tetikleyiciler MVP DIŞIDIR (bkz. UC-03B).
+
+Hiçbir trigger oluşmazsa akış UC-02'deki
+diff inceleme ve onay ekranına devam eder.
 end note
 
 note right of UC_ShowLargeEdit
 Eşikler:
 - > 20 dosya VEYA
 - > 500 satır toplam değişiklik
+
+Yalnızca bu trigger'da "devam et" seçeneği vardır.
+Boundary, protected file ve secret trigger'ları bloklayıcıdır.
 end note
 
 note bottom of UC_ShowSecretInDiff

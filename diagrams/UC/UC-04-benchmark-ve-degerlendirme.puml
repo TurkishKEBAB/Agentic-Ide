@@ -1,4 +1,4 @@
-@startuml
+@startuml UC_04_benchmark_ve_degerlendirme
 title Agentic IDE - Benchmark ve Değerlendirme Use Case Diyagramı
 left to right direction
 skinparam packageStyle rectangle
@@ -13,21 +13,31 @@ actor "Audit ve Metrik Kayıtları" as MetricsStore
 rectangle "Değerlendirme ve Benchmark Katmanı" {
   usecase "Benchmark görev setini tanımla" as UC_DefineTasks
   usecase "Beklenen çıktıları belgeleyip\npuanlama kuralı oluştur" as UC_DefineRubric
+  usecase "Deney koşulunu seç\n(A / B / C)" as UC_SelectCondition
   usecase "Baseline oturumu çalıştır\n(ajan olmadan)" as UC_RunBaseline
-  usecase "Ajan destekli oturumu çalıştır" as UC_RunAgentSession
+  usecase "Agentic IDE oturumu çalıştır" as UC_RunAgentSession
+  usecase "Görev sırasını\ncounterbalance et" as UC_Counterbalance
   usecase "Katılımcı görevini tamamla" as UC_CompleteTask
+  usecase "Audit ve metrikleri topla" as UC_CollectMetrics
   usecase "Çıktıları anonimleştir" as UC_AnonymizeOutputs
   usecase "Görev başarı oranını ölç" as UC_MeasureSuccess
-  usecase "Güvenlik ihlali girişimlerini ölç" as UC_MeasureSafety
-  usecase "Rollback oranını ölç" as UC_MeasureRollback
+  usecase "Successful unauthorized\nwrite count ölç" as UC_MeasureUnauthorizedWrite
+  usecase "Blocked attempt count\nraporla" as UC_MeasureBlockedAttempts
+  usecase "Pre-apply reject\noranını ölç" as UC_MeasureReject
+  usecase "Post-apply rollback\noranını ölç" as UC_MeasureRollback
   usecase "Yanlış atıf / hallucination\noranını ölç" as UC_MeasureAccuracy
   usecase "Gecikme ve model\nperformansını ölç" as UC_MeasureLatency
+  usecase "Retrieval doğruluğunu ölç\n(Precision@5)" as UC_MeasureRetrievalAccuracy
+  usecase "Token verimliliğini ölç" as UC_MeasureTokenEfficiency
+  usecase "Tamamlanma süresini ölç" as UC_MeasureCompletionTime
+  usecase "Onay yorulma\ngöstergesini ölç" as UC_MeasureApprovalFatigue
   usecase "Sonuçları karşılaştır" as UC_CompareResults
   usecase "Tez raporu ve bulguları üret" as UC_GenerateReport
 }
 
 Researcher --> UC_DefineTasks
 Researcher --> UC_DefineRubric
+Researcher --> UC_SelectCondition
 Researcher --> UC_RunBaseline
 Researcher --> UC_RunAgentSession
 Researcher --> UC_CompareResults
@@ -35,31 +45,57 @@ Researcher --> UC_GenerateReport
 Participant --> UC_CompleteTask
 Reviewer --> UC_AnonymizeOutputs
 Reviewer --> UC_MeasureSuccess
-Reviewer --> UC_MeasureSafety
+Reviewer --> UC_MeasureUnauthorizedWrite
+Reviewer --> UC_MeasureBlockedAttempts
+Reviewer --> UC_MeasureReject
 Reviewer --> UC_MeasureRollback
 Reviewer --> UC_MeasureAccuracy
 
 AgentIDE --> UC_RunAgentSession
+AgentIDE --> UC_CollectMetrics
 AgentIDE --> UC_MeasureLatency
 MetricsStore --> UC_MeasureSuccess
-MetricsStore --> UC_MeasureSafety
+MetricsStore --> UC_MeasureUnauthorizedWrite
+MetricsStore --> UC_MeasureBlockedAttempts
+MetricsStore --> UC_MeasureReject
 MetricsStore --> UC_MeasureRollback
 MetricsStore --> UC_MeasureAccuracy
 MetricsStore --> UC_MeasureLatency
+MetricsStore --> UC_MeasureRetrievalAccuracy
+MetricsStore --> UC_MeasureTokenEfficiency
+MetricsStore --> UC_MeasureCompletionTime
+MetricsStore --> UC_MeasureApprovalFatigue
 
 UC_DefineTasks .> UC_DefineRubric : <<include>>
+UC_RunBaseline .> UC_SelectCondition : <<include>>
+UC_RunAgentSession .> UC_SelectCondition : <<include>>
+UC_RunBaseline .> UC_Counterbalance : <<include>>
+UC_RunAgentSession .> UC_Counterbalance : <<include>>
 UC_RunBaseline .> UC_CompleteTask : <<include>>
 UC_RunAgentSession .> UC_CompleteTask : <<include>>
-UC_RunAgentSession .> UC_MeasureLatency : <<include>>
-UC_AnonymizeOutputs .> UC_MeasureSuccess : <<include>>
-UC_AnonymizeOutputs .> UC_MeasureSafety : <<include>>
-UC_AnonymizeOutputs .> UC_MeasureRollback : <<include>>
-UC_AnonymizeOutputs .> UC_MeasureAccuracy : <<include>>
+UC_RunAgentSession .> UC_CollectMetrics : <<include>>
+UC_CollectMetrics .> UC_MeasureLatency : <<include>>
+UC_CollectMetrics .> UC_MeasureRetrievalAccuracy : <<include>>
+UC_CollectMetrics .> UC_MeasureTokenEfficiency : <<include>>
+UC_CollectMetrics .> UC_MeasureCompletionTime : <<include>>
+UC_CollectMetrics .> UC_MeasureApprovalFatigue : <<include>>
+UC_MeasureSuccess .> UC_AnonymizeOutputs : <<include>>
+UC_MeasureUnauthorizedWrite .> UC_AnonymizeOutputs : <<include>>
+UC_MeasureBlockedAttempts .> UC_AnonymizeOutputs : <<include>>
+UC_MeasureReject .> UC_AnonymizeOutputs : <<include>>
+UC_MeasureRollback .> UC_AnonymizeOutputs : <<include>>
+UC_MeasureAccuracy .> UC_AnonymizeOutputs : <<include>>
 UC_CompareResults .> UC_MeasureSuccess : <<include>>
-UC_CompareResults .> UC_MeasureSafety : <<include>>
+UC_CompareResults .> UC_MeasureUnauthorizedWrite : <<include>>
+UC_CompareResults .> UC_MeasureBlockedAttempts : <<include>>
+UC_CompareResults .> UC_MeasureReject : <<include>>
 UC_CompareResults .> UC_MeasureRollback : <<include>>
 UC_CompareResults .> UC_MeasureAccuracy : <<include>>
 UC_CompareResults .> UC_MeasureLatency : <<include>>
+UC_CompareResults .> UC_MeasureRetrievalAccuracy : <<include>>
+UC_CompareResults .> UC_MeasureTokenEfficiency : <<include>>
+UC_CompareResults .> UC_MeasureCompletionTime : <<include>>
+UC_CompareResults .> UC_MeasureApprovalFatigue : <<include>>
 UC_GenerateReport .> UC_CompareResults : <<include>>
 
 note right of UC_RunAgentSession
@@ -84,6 +120,24 @@ ABLATION TASARIMI (3 koşul, aynı sistem):
 
 Birincil metrik: successful unauthorized write count = 0
 Detay: docs/adr/ADR-007-ablation-baseline-design.md
+end note
+
+note right of UC_RunBaseline
+Baseline oturumu A koşuludur.
+B ve C koşulları Agentic IDE oturumu içinde
+aynı kod tabanı ve farklı deney flag'leriyle çalışır.
+end note
+
+note right of UC_MeasureUnauthorizedWrite
+"Girişim" ile "başarılı ihlal" ayrıdır.
+Blocked attempt count savunma katmanlarının çalıştığını
+gösteren ikincil rapordur; hedef metrik değildir.
+end note
+
+note bottom of UC_SelectCondition
+B koşulunda yalnızca approval gate kapalıdır.
+Workspace boundary, protected file ve secret kontrolleri
+temel güvenlik katmanı olarak açık kalır.
 end note
 
 @enduml

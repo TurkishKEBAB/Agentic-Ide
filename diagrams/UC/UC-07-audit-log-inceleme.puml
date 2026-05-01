@@ -1,0 +1,77 @@
+@startuml UC_07_audit_log_inceleme
+title Agentic IDE - UC-07 Audit Log İnceleme Use Case Diyagramı
+left to right direction
+skinparam packageStyle rectangle
+skinparam shadowing false
+
+actor "Geliştirici" as Developer
+actor "Danışman / Araştırmacı" as Researcher
+actor "Audit Log\n(~/.agentide/audit.jsonl)" as AuditLog
+actor "Metrik Raporlama" as MetricsReporter
+
+rectangle "Agentic IDE - Audit Log Görüntüleme ve Raporlama" {
+  usecase "Audit geçmişini aç" as UC_OpenAuditView
+  usecase "Eylem türüne göre filtrele" as UC_FilterByAction
+  usecase "Model / görev / tarih\naralığına göre filtrele" as UC_FilterByMetadata
+  usecase "Okuma, retrieval, plan,\nonay ve yazma izini incele" as UC_InspectTrace
+  usecase "Safety trigger kararlarını\nincele" as UC_InspectSafetyDecisions
+  usecase "Rollback geçmişini incele" as UC_InspectRollback
+  usecase "Context kaynaklarını görüntüle" as UC_ViewContextSources
+  usecase "Tez metrik özetini üret" as UC_GenerateMetricsSummary
+  usecase "Koşul etiketlerini gizle\n(blinding)" as UC_BlindConditionLabels
+  usecase "Anonimleştirilmiş rapor\ndışa aktar" as UC_ExportAnonymizedReport
+  usecase "Audit log'u temizle veya\nyeniden başlat" as UC_ResetAuditLog
+}
+
+Developer --> UC_OpenAuditView
+Developer --> UC_FilterByAction
+Developer --> UC_FilterByMetadata
+Developer --> UC_InspectTrace
+Developer --> UC_InspectSafetyDecisions
+Developer --> UC_InspectRollback
+Developer --> UC_ResetAuditLog
+Researcher --> UC_GenerateMetricsSummary
+Researcher --> UC_ExportAnonymizedReport
+
+UC_FilterByAction .> UC_OpenAuditView : <<extend>>
+UC_FilterByMetadata .> UC_OpenAuditView : <<extend>>
+UC_InspectTrace .> UC_ViewContextSources : <<include>>
+UC_InspectSafetyDecisions .> UC_InspectTrace : <<extend>>
+UC_InspectRollback .> UC_InspectTrace : <<extend>>
+UC_GenerateMetricsSummary .> UC_InspectTrace : <<include>>
+UC_ExportAnonymizedReport .> UC_BlindConditionLabels : <<include>>
+UC_ExportAnonymizedReport .> UC_GenerateMetricsSummary : <<include>>
+
+AuditLog --> UC_OpenAuditView
+AuditLog --> UC_InspectTrace
+AuditLog --> UC_InspectSafetyDecisions
+AuditLog --> UC_InspectRollback
+AuditLog --> UC_ResetAuditLog
+MetricsReporter --> UC_GenerateMetricsSummary
+MetricsReporter --> UC_BlindConditionLabels
+MetricsReporter --> UC_ExportAnonymizedReport
+
+note right of UC_InspectTrace
+Audit trace en az şunları kapsar:
+- read_file / retrieval sorguları
+- plan ve diff üretimi
+- kullanıcı kararı
+- write_file / rollback sonucu
+end note
+
+note bottom of UC_ExportAnonymizedReport
+Anonim raporda kaynak kod içeriği yer almaz.
+Dosya adları, zaman damgaları, kararlar, model adı,
+task_id, token/gecikme ve safety trigger türleri korunur.
+Kör değerlendirme export'unda A/B/C koşul etiketleri
+değerlendiriciden gizlenir.
+end note
+
+note bottom of UC_ResetAuditLog
+Kullanıcı yerel log dosyasını silebilir.
+Sistem sonraki olayda audit.jsonl dosyasını yeniden oluşturur.
+Benchmark çalışmasında log reset yalnızca deney kopyası
+dışa aktarıldıktan sonra yapılır.
+end note
+
+@enduml

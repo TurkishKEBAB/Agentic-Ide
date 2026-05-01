@@ -1,4 +1,4 @@
-@startuml
+@startuml UC_02_kod_degisikligi_yasam_dongusu
 title Agentic IDE - Kod Değişikliği Yaşam Döngüsü Use Case Diyagramı
 left to right direction
 skinparam packageStyle rectangle
@@ -8,6 +8,7 @@ actor "Geliştirici" as Developer
 actor "Dosya Sistemi" as FileSystem
 actor "Bağlam Motoru" as ContextEngine
 actor "LLM Sağlayıcı" as ModelProvider
+actor "Reactive Safety Layer" as SafetyLayer
 actor "Audit Log" as AuditLog
 actor "Undo Stack" as UndoStack
 
@@ -15,10 +16,12 @@ rectangle "Agentic IDE - Approval Gated Change Flow" {
   usecase "Kod değişikliği görevi başlat" as UC_StartChangeTask
   usecase "Aktif dosyayı ve\nilgili sembolleri incele" as UC_InspectContext
   usecase "Etkilenecek dosyaları listele" as UC_ListImpacted
-  usecase "Reactive safety check çalıştır\n(apply öncesi — UC-03A)" as UC_ReactiveSafetyCheck
   usecase "Değişiklik planı oluştur" as UC_PlanChange
   usecase "Diff ve gerekçe üret" as UC_GenerateDiff
-  usecase "Kaynak dosyaları ve\nreferansları göster" as UC_ShowReferences
+  usecase "Bağlam kaynaklarını göster" as UC_ShowContextSources
+  usecase "Reactive safety check çalıştır\n(apply öncesi — UC-03A)" as UC_ReactiveSafetyCheck
+  usecase "Safety uyarısını göster\nve kullanıcı kararını al" as UC_ShowSafetyDecision
+  usecase "Diff ve gerekçeyi incelet" as UC_ReviewDiff
   usecase "Kullanıcıdan onay iste" as UC_RequestApproval
   usecase "Planı düzenle / yeniden iste" as UC_RevisePlan
   usecase "Tümünü uygula" as UC_ApplyAll
@@ -28,53 +31,77 @@ rectangle "Agentic IDE - Approval Gated Change Flow" {
   usecase "Sonucu raporla" as UC_ReportResult
   usecase "Rollback başlat" as UC_StartRollback
   usecase "Çakışma kontrolü yap" as UC_CheckConflicts
+  usecase "Önceki snapshot'ı geri yükle" as UC_RestoreSnapshot
   usecase "İptal et" as UC_CancelChange
   usecase "Eylemleri audit log'a yaz" as UC_WriteAudit
 }
 
 Developer --> UC_StartChangeTask
+Developer --> UC_ShowSafetyDecision
+Developer --> UC_ReviewDiff
 Developer --> UC_RequestApproval
+Developer --> UC_RevisePlan
+Developer --> UC_CancelChange
+Developer --> UC_ApplyAll
+Developer --> UC_ApplySelected
 Developer --> UC_StartRollback
 
 UC_StartChangeTask .> UC_InspectContext : <<include>>
 UC_StartChangeTask .> UC_ListImpacted : <<include>>
-UC_StartChangeTask .> UC_ReactiveSafetyCheck : <<include>>
 UC_StartChangeTask .> UC_PlanChange : <<include>>
 UC_PlanChange .> UC_GenerateDiff : <<include>>
-UC_PlanChange .> UC_ShowReferences : <<include>>
-UC_GenerateDiff .> UC_RequestApproval : <<include>>
+UC_PlanChange .> UC_ShowContextSources : <<include>>
+UC_ShowSafetyDecision .> UC_ReactiveSafetyCheck : <<extend>>
+UC_RequestApproval .> UC_ReactiveSafetyCheck : <<include>>
+UC_RequestApproval .> UC_ReviewDiff : <<include>>
+UC_RequestApproval .> UC_WriteAudit : <<include>>
 UC_RevisePlan .> UC_RequestApproval : <<extend>>
 UC_CancelChange .> UC_RequestApproval : <<extend>>
-UC_ApplyAll .> UC_RequestApproval : <<extend>>
-UC_ApplySelected .> UC_RequestApproval : <<extend>>
+UC_ApplyAll .> UC_RequestApproval : <<include>>
+UC_ApplySelected .> UC_RequestApproval : <<include>>
 UC_ApplyAll .> UC_AtomicWrite : <<include>>
 UC_ApplySelected .> UC_AtomicWrite : <<include>>
+UC_ApplyAll .> UC_ReportResult : <<include>>
+UC_ApplySelected .> UC_ReportResult : <<include>>
 UC_AtomicWrite .> UC_CreateUndo : <<include>>
 UC_AtomicWrite .> UC_WriteAudit : <<include>>
-UC_AtomicWrite .> UC_ReportResult : <<include>>
 UC_StartRollback .> UC_CheckConflicts : <<include>>
-UC_StartRollback .> UC_CreateUndo : <<include>>
+UC_StartRollback .> UC_RestoreSnapshot : <<include>>
 UC_StartRollback .> UC_WriteAudit : <<include>>
+UC_StartRollback .> UC_ReportResult : <<include>>
 
 FileSystem --> UC_InspectContext
+FileSystem --> UC_GenerateDiff
 FileSystem --> UC_AtomicWrite
 FileSystem --> UC_CheckConflicts
+FileSystem --> UC_RestoreSnapshot
 ContextEngine --> UC_InspectContext
 ContextEngine --> UC_ListImpacted
+ContextEngine --> UC_ShowContextSources
 ModelProvider --> UC_PlanChange
 ModelProvider --> UC_GenerateDiff
+SafetyLayer --> UC_ReactiveSafetyCheck
 AuditLog --> UC_WriteAudit
 UndoStack --> UC_CreateUndo
 UndoStack --> UC_StartRollback
+UndoStack --> UC_RestoreSnapshot
 
 note right of UC_ReactiveSafetyCheck
-Reactive safety check (UC-03A) — yalnızca
-plan üretildikten sonra, apply öncesi:
+Reactive safety check (UC-03A) plan ve diff üretildikten sonra,
+approval/apply ekranına geçmeden önce çalışır:
 - workspace boundary violation
 - protected file write
 - large edit threshold (>20 dosya / >500 satır)
 - secret-in-diff
 Background scanning MVP DIŞIDIR (UC-03B).
+Detay: UC-03A bu katmanı boundary, write boundary,
+large edit ve secret-in-diff kontrollerine ayırır.
+end note
+
+note bottom of UC_RequestApproval
+Sıra: observe/retrieve -> plan -> diff -> reactive safety
+-> diff inceleme/onay -> yalnızca onaylı dosyaları yazma.
+Use case diyagramı sıra diyagramı değildir; bu not akışı sabitler.
 end note
 
 note bottom of UC_ApplySelected
@@ -84,7 +111,7 @@ end note
 
 note bottom of UC_StartRollback
 Rollback, son 10 değişiklik seti için desteklenir.
-Geçmiş değişiklik varsa çakışma bildirimi üretilir.
+Araya başka değişiklik girdiyse çakışma bildirimi üretilir.
 end note
 
 @enduml

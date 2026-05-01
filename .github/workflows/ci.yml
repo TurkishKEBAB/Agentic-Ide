@@ -1,4 +1,4 @@
-name: Repository Governance
+name: Application CI
 
 on:
   push:
@@ -11,14 +11,76 @@ permissions:
   contents: read
 
 jobs:
-  validate-governance:
-    name: Validate repository governance
+  app-quality-gate:
+    name: App quality gate
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout
         uses: actions/checkout@v6
+        with:
+          persist-credentials: false
 
-      - name: Validate project metadata and seed data
+      - name: Detect application scaffold
+        id: app
+        shell: bash
+        run: |
+          if [[ -f package.json ]]; then
+            echo "exists=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "exists=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Planning-only repository notice
+        if: steps.app.outputs.exists == 'false'
+        run: echo "No package.json yet; application quality gate is armed and will run after the first app scaffold."
+
+      - name: Setup Node
+        if: steps.app.outputs.exists == 'true'
+        uses: actions/setup-node@v6
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+
+      - name: Enforce npm lockfile
+        if: steps.app.outputs.exists == 'true'
+        shell: bash
+        run: |
+          test -f package-lock.json || {
+            echo "package-lock.json is required once package.json exists."
+            exit 1
+          }
+      - name: Install dependencies
+        if: steps.app.outputs.exists == 'true'
+        run: npm ci
+
+      - name: Run declared quality scripts
+        if: steps.app.outputs.exists == 'true'
         shell: pwsh
-        run: ./scripts/validate-github-governance.ps1 -Owner TurkishKEBAB
+        run: |
+          $packageJson = Get-Content -Raw -Path package.json | ConvertFrom-Json
+          $scripts = @()
+          if ($null -ne $packageJson.scripts) {
+            $scripts = @($packageJson.scripts.PSObject.Properties.Name)
+          }
+
+          $requiredScripts = @(
+            'format:check',
+            'lint',
+            'typecheck',
+            'test',
+            'test:security',
+            'build'
+          )
+
+          foreach ($script in $requiredScripts) {
+            if ($scripts -contains $script) {
+              Write-Host "Running npm run $script"
+              npm run $script
+              if ($LASTEXITCODE -ne 0) {
+                throw "npm run $script failed"
+              }
+            } else {
+              Write-Host "Skipping npm run $script; script is not declared yet."
+            }
+          }

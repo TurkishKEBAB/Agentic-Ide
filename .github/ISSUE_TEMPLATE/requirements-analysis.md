@@ -27,3 +27,9 @@ Explain why this matters for the thesis, prototype, or advisor review.
 - Area:
 - Requirement Type:
 - Parent Epic:
+
+## Thesis Tracking Fields
+- MVP Scenario:
+- Risk:
+- Test Target:
+- Thesis Evidence:

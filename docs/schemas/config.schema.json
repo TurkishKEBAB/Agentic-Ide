@@ -1,0 +1,71 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/TurkishKEBAB/Agentic-Ide/schemas/config.schema.json",
+  "title": "Agentic IDE Configuration",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "defaultProviderMode", "providers", "privacy"],
+  "properties": {
+    "schemaVersion": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "defaultProviderMode": {
+      "type": "string",
+      "enum": ["local-only", "manual-hybrid", "cloud-only"]
+    },
+    "providers": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "anthropic": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "enabled": { "type": "boolean" },
+            "defaultModel": { "type": "string" },
+            "apiKeyRef": { "type": "string" }
+          }
+        },
+        "ollama": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "enabled": { "type": "boolean" },
+            "baseUrl": { "type": "string" },
+            "defaultModel": { "type": "string" },
+            "embeddingModel": { "type": "string" }
+          }
+        }
+      }
+    },
+    "privacy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["respectAgentIgnore", "excludeSecretPatterns"],
+      "properties": {
+        "respectAgentIgnore": { "type": "boolean" },
+        "excludeSecretPatterns": {
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      }
+    },
+    "projectOverrides": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["workspaceRoot"],
+        "properties": {
+          "workspaceRoot": { "type": "string" },
+          "providerMode": {
+            "type": "string",
+            "enum": ["local-only", "manual-hybrid", "cloud-only"]
+          },
+          "defaultModel": { "type": "string" }
+        }
+      }
+    }
+  }
+}
