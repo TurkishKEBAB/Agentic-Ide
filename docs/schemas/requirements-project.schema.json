@@ -12,6 +12,22 @@
       "required": ["title", "fields", "views"],
       "properties": {
         "title": { "type": "string", "minLength": 1 },
+        "milestones": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["title", "phase", "description"],
+            "properties": {
+              "title": { "type": "string", "minLength": 1 },
+              "phase": {
+                "type": "string",
+                "enum": ["Faz 1", "Faz 2", "Faz 3"]
+              },
+              "description": { "type": "string", "minLength": 1 }
+            }
+          }
+        },
         "fields": {
           "type": "array",
           "minItems": 1,
@@ -47,11 +63,39 @@
               },
               "filter": { "type": "string" },
               "groupBy": { "type": "string" },
+              "columnBy": { "type": "string" },
+              "swimlanes": { "type": "string" },
+              "sliceBy": { "type": "string" },
+              "dateField": { "type": "string" },
               "sortBy": {
+                "type": "array",
+                "items": {
+                  "oneOf": [
+                    { "type": "string" },
+                    {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "required": ["field"],
+                      "properties": {
+                        "field": { "type": "string", "minLength": 1 },
+                        "direction": {
+                          "type": "string",
+                          "enum": ["asc", "desc", "ASC", "DESC"]
+                        }
+                      }
+                    }
+                  ]
+                }
+              },
+              "visibleFields": {
                 "type": "array",
                 "items": { "type": "string" }
               },
-              "visibleFields": {
+              "fieldSums": {
+                "type": "array",
+                "items": { "type": "string" }
+              },
+              "notes": {
                 "type": "array",
                 "items": { "type": "string" }
               }
@@ -103,6 +147,12 @@
         "properties": {
           "key": { "type": "string", "minLength": 1 },
           "parentKey": { "type": "string", "minLength": 1 },
+          "milestone": { "type": "string", "minLength": 1 },
+          "blockedByKeys": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 },
+            "uniqueItems": true
+          },
           "kind": {
             "type": "string",
             "enum": ["epic", "issue"]

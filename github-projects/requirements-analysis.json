@@ -1,6 +1,23 @@
 {
   "project": {
     "title": "Agentic IDE - Thesis Backlog",
+    "milestones": [
+      {
+        "title": "Faz 1 - Implementation Readiness",
+        "phase": "Faz 1",
+        "description": "Mimari kararlar, ADR'ler, readiness gate, schema'lar, validation CI ve VDD framing - implementasyon oncesi hazirlik fazi."
+      },
+      {
+        "title": "Faz 2 - MVP",
+        "phase": "Faz 2",
+        "description": "Editor, agent loop, diff approval, safety, retrieval ve onboarding - MVP implementasyon fazi."
+      },
+      {
+        "title": "Faz 3 - Evaluation & Thesis",
+        "phase": "Faz 3",
+        "description": "Benchmark calismasi, metric toplama, feature freeze, tez metni ve final deliverables."
+      }
+    ],
     "fields": [
       {
         "name": "Requirement Status",
@@ -100,6 +117,26 @@
           "Blocked",
           "Validated"
         ]
+      },
+      {
+        "name": "Blocked by",
+        "dataType": "TEXT"
+      },
+      {
+        "name": "Blocking",
+        "dataType": "TEXT"
+      },
+      {
+        "name": "Dependency Count",
+        "dataType": "NUMBER"
+      },
+      {
+        "name": "Blocking Count",
+        "dataType": "NUMBER"
+      },
+      {
+        "name": "Child Issue Count",
+        "dataType": "NUMBER"
       }
     ],
     "views": [
@@ -108,67 +145,452 @@
         "layout": "table",
         "groupBy": "Parent Epic",
         "sortBy": [
-          "Priority",
-          "Phase"
+          {
+            "field": "Phase",
+            "direction": "asc"
+          },
+          {
+            "field": "Priority",
+            "direction": "asc"
+          },
+          {
+            "field": "Parent Epic",
+            "direction": "asc"
+          }
         ],
         "visibleFields": [
+          "Title",
+          "Status",
           "Requirement Status",
           "Readiness",
-          "Area",
-          "Requirement Type",
           "Phase",
           "Priority",
+          "Area",
+          "Requirement Type",
+          "Parent issue",
+          "Parent Epic",
+          "Milestone",
           "MVP Scenario",
           "Risk",
           "Test Target",
-          "Thesis Evidence"
+          "Thesis Evidence",
+          "Blocked by",
+          "Blocking",
+          "Dependency Count",
+          "Blocking Count",
+          "Child Issue Count",
+          "Labels",
+          "Sub-issues progress",
+          "Linked pull requests"
+        ],
+        "fieldSums": [
+          "Dependency Count",
+          "Blocking Count",
+          "Child Issue Count"
+        ]
+      },
+      {
+        "name": "Workflow Board",
+        "layout": "board",
+        "columnBy": "Status",
+        "swimlanes": "Parent Epic",
+        "sortBy": [
+          {
+            "field": "Priority",
+            "direction": "asc"
+          }
+        ],
+        "visibleFields": [
+          "Title",
+          "Priority",
+          "Phase",
+          "Readiness",
+          "Parent Epic",
+          "Blocked by",
+          "Milestone",
+          "Labels",
+          "Linked pull requests"
         ]
       },
       {
         "name": "Advisor Review",
-        "layout": "board",
-        "filter": "Requirement Status:Advisor Review",
+        "layout": "table",
+        "filter": "requirement-status:\"Advisor Review\"",
         "groupBy": "Area",
+        "sortBy": [
+          {
+            "field": "Priority",
+            "direction": "asc"
+          },
+          {
+            "field": "Parent Epic",
+            "direction": "asc"
+          }
+        ],
         "visibleFields": [
-          "Priority",
+          "Title",
+          "Status",
+          "Requirement Status",
           "Readiness",
+          "Area",
+          "Priority",
           "Source Doc",
-          "Acceptance Criteria"
+          "Acceptance Criteria",
+          "Risk",
+          "Test Target",
+          "Thesis Evidence",
+          "Blocked by",
+          "Milestone"
         ]
       },
       {
         "name": "By Phase",
         "layout": "board",
-        "groupBy": "Phase",
+        "columnBy": "Phase",
+        "swimlanes": "Parent Epic",
+        "sortBy": [
+          {
+            "field": "Priority",
+            "direction": "asc"
+          }
+        ],
         "visibleFields": [
+          "Title",
+          "Status",
           "Requirement Status",
+          "Readiness",
+          "Priority",
+          "Parent Epic",
+          "Milestone",
+          "Blocked by"
+        ]
+      },
+      {
+        "name": "Evidence Matrix",
+        "layout": "table",
+        "groupBy": "MVP Scenario",
+        "sortBy": [
+          {
+            "field": "Phase",
+            "direction": "asc"
+          },
+          {
+            "field": "Priority",
+            "direction": "asc"
+          }
+        ],
+        "visibleFields": [
+          "Title",
+          "Phase",
+          "MVP Scenario",
+          "Test Target",
+          "Thesis Evidence",
+          "Acceptance Criteria",
+          "Risk",
+          "Requirement Status",
+          "Status",
+          "Readiness"
+        ]
+      },
+      {
+        "name": "Risks",
+        "layout": "table",
+        "filter": "requirement-type:Risk",
+        "groupBy": "Area",
+        "sortBy": [
+          {
+            "field": "Priority",
+            "direction": "asc"
+          }
+        ],
+        "visibleFields": [
+          "Title",
+          "Area",
+          "Phase",
           "Priority",
           "Readiness",
+          "Risk",
+          "Test Target",
+          "Thesis Evidence",
+          "Blocked by",
+          "Blocking",
+          "Labels",
+          "Milestone"
+        ]
+      },
+      {
+        "name": "Dependency Map",
+        "layout": "table",
+        "filter": "-label:epic",
+        "groupBy": "Parent Epic",
+        "sortBy": [
+          {
+            "field": "Phase",
+            "direction": "asc"
+          },
+          {
+            "field": "Priority",
+            "direction": "asc"
+          }
+        ],
+        "visibleFields": [
+          "Title",
+          "Status",
+          "Readiness",
+          "Phase",
+          "Priority",
+          "Parent issue",
+          "Parent Epic",
+          "Blocked by",
+          "Blocking",
+          "Dependency Count",
+          "Blocking Count",
+          "Child Issue Count",
+          "Sub-issues progress",
+          "Milestone",
+          "Labels"
+        ],
+        "fieldSums": [
+          "Dependency Count",
+          "Blocking Count",
+          "Child Issue Count"
+        ]
+      },
+      {
+        "name": "Dependency Map Detailed",
+        "layout": "table",
+        "filter": "-label:epic",
+        "groupBy": "Parent Epic",
+        "sortBy": [
+          {
+            "field": "Phase",
+            "direction": "asc"
+          },
+          {
+            "field": "Priority",
+            "direction": "asc"
+          }
+        ],
+        "visibleFields": [
+          "Title",
+          "Status",
+          "Readiness",
+          "Phase",
+          "Priority",
+          "Parent issue",
+          "Parent Epic",
+          "Blocked by",
+          "Blocking",
+          "Dependency Count",
+          "Blocking Count",
+          "Child Issue Count",
+          "Sub-issues progress",
+          "Milestone",
+          "Labels"
+        ],
+        "fieldSums": [
+          "Dependency Count",
+          "Blocking Count",
+          "Child Issue Count"
+        ],
+        "notes": [
+          "This duplicate detailed view is used when the existing manually-created Dependency Map cannot be updated by the REST API."
+        ]
+      },
+      {
+        "name": "Faz 1 Readiness Gate",
+        "layout": "table",
+        "filter": "phase:\"Faz 1\" priority:P0 -label:epic",
+        "groupBy": "Readiness",
+        "sortBy": [
+          {
+            "field": "Parent Epic",
+            "direction": "asc"
+          },
+          {
+            "field": "Priority",
+            "direction": "asc"
+          }
+        ],
+        "visibleFields": [
+          "Title",
+          "Requirement Status",
+          "Status",
+          "Readiness",
+          "Source Doc",
+          "Acceptance Criteria",
+          "Risk",
+          "Test Target",
+          "Thesis Evidence",
+          "Blocked by",
           "Parent Epic"
         ]
       },
       {
-        "name": "Roadmap",
-        "layout": "roadmap",
-        "groupBy": "Phase",
+        "name": "Implementation Queue",
+        "layout": "table",
+        "filter": "status:Ready -label:epic",
+        "groupBy": "Area",
+        "sortBy": [
+          {
+            "field": "Priority",
+            "direction": "asc"
+          },
+          {
+            "field": "Phase",
+            "direction": "asc"
+          }
+        ],
         "visibleFields": [
-          "Requirement Status",
+          "Title",
+          "Phase",
           "Priority",
-          "Target Date",
-          "Thesis Evidence"
+          "Readiness",
+          "Area",
+          "Parent Epic",
+          "Blocked by",
+          "Linked pull requests",
+          "Labels",
+          "Milestone"
+        ]
+      },
+      {
+        "name": "Implementation Queue Detailed",
+        "layout": "table",
+        "filter": "status:Ready -label:epic",
+        "groupBy": "Area",
+        "sortBy": [
+          {
+            "field": "Priority",
+            "direction": "asc"
+          },
+          {
+            "field": "Phase",
+            "direction": "asc"
+          }
+        ],
+        "visibleFields": [
+          "Title",
+          "Phase",
+          "Priority",
+          "Readiness",
+          "Area",
+          "Parent Epic",
+          "Blocked by",
+          "Linked pull requests",
+          "Labels",
+          "Milestone"
+        ],
+        "notes": [
+          "This duplicate detailed view is used when an earlier manually-created or minimally-created Implementation Queue cannot be patched in place by the REST API."
+        ]
+      },
+      {
+        "name": "VDD Research",
+        "layout": "table",
+        "filter": "label:vdd",
+        "groupBy": "Parent Epic",
+        "sortBy": [
+          {
+            "field": "Priority",
+            "direction": "asc"
+          }
+        ],
+        "visibleFields": [
+          "Title",
+          "Requirement Status",
+          "Readiness",
+          "Priority",
+          "Source Doc",
+          "Thesis Evidence",
+          "Test Target",
+          "Risk",
+          "Blocked by"
+        ]
+      },
+      {
+        "name": "Safety & Privacy",
+        "layout": "table",
+        "filter": "area:Safety",
+        "groupBy": "Readiness",
+        "sortBy": [
+          {
+            "field": "Priority",
+            "direction": "asc"
+          }
+        ],
+        "visibleFields": [
+          "Title",
+          "Risk",
+          "Test Target",
+          "Thesis Evidence",
+          "Labels",
+          "Blocked by",
+          "Blocking",
+          "Acceptance Criteria",
+          "Milestone"
         ]
       },
       {
         "name": "Quality Gates",
         "layout": "table",
-        "filter": "Area:Testing,Evaluation,Safety",
+        "filter": "label:quality-gate",
         "groupBy": "Readiness",
+        "sortBy": [
+          {
+            "field": "Priority",
+            "direction": "asc"
+          }
+        ],
         "visibleFields": [
+          "Title",
+          "Status",
           "Requirement Status",
-          "Priority",
           "Test Target",
           "Thesis Evidence",
-          "Risk"
+          "Source Doc",
+          "Linked pull requests",
+          "Labels",
+          "Blocked by"
+        ]
+      },
+      {
+        "name": "CI / Project Ops",
+        "layout": "table",
+        "filter": "label:github-actions",
+        "groupBy": "Readiness",
+        "sortBy": [
+          {
+            "field": "Priority",
+            "direction": "asc"
+          }
+        ],
+        "visibleFields": [
+          "Title",
+          "Status",
+          "Requirement Status",
+          "Source Doc",
+          "Acceptance Criteria",
+          "Linked pull requests",
+          "Labels",
+          "Blocked by"
+        ]
+      },
+      {
+        "name": "Roadmap",
+        "layout": "roadmap",
+        "filter": "-status:Done",
+        "groupBy": "Milestone",
+        "dateField": "Target Date",
+        "sliceBy": "Phase",
+        "visibleFields": [
+          "Milestone",
+          "Phase",
+          "Priority",
+          "Requirement Status",
+          "Status",
+          "Readiness",
+          "Thesis Evidence"
         ]
       }
     ]
@@ -477,6 +899,12 @@
     {
       "key": "spike-vdd-advisor-open-questions",
       "parentKey": "epic-vdd-research-framing",
+      "blockedByKeys": [
+        "adr-vdd-terminology-and-stance",
+        "req-vdd-independent-verification-agent",
+        "req-vdd-spiral-requirements-control",
+        "req-vdd-student-professional-modes"
+      ],
       "kind": "issue",
       "title": "Spike: Advisor Questions for VDD Scope and Metrics",
       "status": "Advisor Review",
@@ -970,6 +1398,12 @@
     {
       "key": "task-readiness-gate-definition",
       "parentKey": "epic-implementation-readiness",
+      "blockedByKeys": [
+        "adr-approval-gate-ablation-baseline",
+        "adr-workspace-boundary-no-shell",
+        "task-core-planning-schemas",
+        "task-security-threat-incident-retention"
+      ],
       "kind": "issue",
       "title": "TASK: Implementation readiness gate ve DoR/DoD tanimlansin",
       "status": "Advisor Review",
@@ -1064,6 +1498,11 @@
     {
       "key": "task-benchmark-template-evidence-matrix",
       "parentKey": "epic-implementation-readiness",
+      "blockedByKeys": [
+        "adr-approval-gate-ablation-baseline",
+        "task-core-planning-schemas",
+        "adr-prompt-model-versioning"
+      ],
       "kind": "issue",
       "title": "TASK: Benchmark task template ve evidence matrix hazirlansin",
       "status": "Advisor Review",
@@ -1096,6 +1535,20 @@
     {
       "key": "task-faz1-p0-ready-review",
       "parentKey": "epic-implementation-readiness",
+      "blockedByKeys": [
+        "adr-approval-gate-ablation-baseline",
+        "adr-electron-monaco-shell",
+        "adr-manual-model-selection",
+        "adr-node-runtime-target",
+        "adr-workspace-boundary-no-shell",
+        "task-benchmark-template-evidence-matrix",
+        "task-readiness-gate-definition",
+        "task-core-planning-schemas",
+        "task-devops-quality-gates-baseline",
+        "task-reproducible-dev-environment",
+        "task-security-threat-incident-retention",
+        "task-github-project-ops-templates-labels"
+      ],
       "kind": "issue",
       "title": "TASK: Faz 1 P0 kartlari advisor review sonrasi Ready kabul edilsin",
       "status": "Advisor Review",
@@ -1126,6 +1579,11 @@
     {
       "key": "task-devops-quality-gates-baseline",
       "parentKey": "epic-implementation-readiness",
+      "blockedByKeys": [
+        "adr-node-runtime-target",
+        "task-doc-diagram-validation-ci",
+        "task-reproducible-dev-environment"
+      ],
       "kind": "issue",
       "title": "TASK: Pre-implementation CI and quality gates baseline hazir olsun",
       "status": "Advisor Review",
@@ -1161,6 +1619,9 @@
     {
       "key": "task-reproducible-dev-environment",
       "parentKey": "epic-implementation-readiness",
+      "blockedByKeys": [
+        "adr-node-runtime-target"
+      ],
       "kind": "issue",
       "title": "TASK: Reproducible development environment baseline hazir olsun",
       "status": "Advisor Review",
@@ -1269,6 +1730,10 @@
     {
       "key": "adr-prompt-model-versioning",
       "parentKey": "epic-implementation-readiness",
+      "blockedByKeys": [
+        "adr-manual-model-selection",
+        "task-core-planning-schemas"
+      ],
       "kind": "issue",
       "title": "ADR: Prompt ve model versioning stratejisi sabitlensin",
       "status": "Advisor Review",
@@ -1303,6 +1768,10 @@
     {
       "key": "task-accessibility-quality-plan",
       "parentKey": "epic-implementation-readiness",
+      "blockedByKeys": [
+        "adr-electron-monaco-shell",
+        "task-devops-quality-gates-baseline"
+      ],
       "kind": "issue",
       "title": "TASK: Accessibility plan quality gate olarak hazir olsun",
       "status": "Advisor Review",
@@ -1422,6 +1891,12 @@
     {
       "key": "req-editor-shell",
       "parentKey": "epic-editor-foundation",
+      "blockedByKeys": [
+        "adr-electron-monaco-shell",
+        "adr-node-runtime-target",
+        "task-devops-quality-gates-baseline",
+        "task-reproducible-dev-environment"
+      ],
       "kind": "issue",
       "title": "REQ: Electron + Monaco tabanli editor kabugu kurulmalı",
       "status": "Draft",
@@ -1452,6 +1927,10 @@
     {
       "key": "req-editor-file-management",
       "parentKey": "epic-editor-foundation",
+      "blockedByKeys": [
+        "req-editor-shell",
+        "adr-workspace-boundary-no-shell"
+      ],
       "kind": "issue",
       "title": "REQ: Proje klasoru acma, dosya agaci, dosya ac-kaydet ve 5 sekme desteklensin",
       "status": "Draft",
@@ -1481,6 +1960,9 @@
     {
       "key": "req-editor-status-bar",
       "parentKey": "epic-editor-foundation",
+      "blockedByKeys": [
+        "req-editor-shell"
+      ],
       "kind": "issue",
       "title": "REQ: Durum cubugu aktif dosya ve ajan durumunu gostermeli",
       "status": "Draft",
@@ -1510,6 +1992,13 @@
     {
       "key": "req-editor-onboarding-configuration",
       "parentKey": "epic-editor-foundation",
+      "blockedByKeys": [
+        "req-editor-shell",
+        "adr-manual-model-selection",
+        "adr-workspace-boundary-no-shell",
+        "task-security-threat-incident-retention",
+        "task-accessibility-quality-plan"
+      ],
       "kind": "issue",
       "title": "REQ: Ilk acilis onboarding ve guvenli konfigurasyon akisi desteklenmeli",
       "status": "Draft",
@@ -1543,6 +2032,11 @@
     {
       "key": "req-context-always-on",
       "parentKey": "epic-context-retrieval",
+      "blockedByKeys": [
+        "req-editor-shell",
+        "adr-workspace-boundary-no-shell",
+        "task-core-planning-schemas"
+      ],
       "kind": "issue",
       "title": "REQ: Always-on context aktif dosya, ilgili sembol ve proje agacini icermeli",
       "status": "Draft",
@@ -1571,6 +2065,9 @@
     {
       "key": "req-context-on-demand",
       "parentKey": "epic-context-retrieval",
+      "blockedByKeys": [
+        "req-context-index-and-ignore"
+      ],
       "kind": "issue",
       "title": "REQ: On-demand retrieval import-export, sembol arama ve benzer parca bulmayi desteklemeli",
       "status": "Draft",
@@ -1600,6 +2097,11 @@
     {
       "key": "req-context-index-and-ignore",
       "parentKey": "epic-context-retrieval",
+      "blockedByKeys": [
+        "req-context-always-on",
+        "adr-workspace-boundary-no-shell",
+        "task-security-threat-incident-retention"
+      ],
       "kind": "issue",
       "title": "REQ: Arka planda embedding index guncellensin ve .agentignore ile gizli dosyalar dislansin",
       "status": "Draft",
@@ -1631,6 +2133,11 @@
     {
       "key": "req-agent-chat",
       "parentKey": "epic-agent-loop",
+      "blockedByKeys": [
+        "req-editor-shell",
+        "adr-manual-model-selection",
+        "adr-prompt-model-versioning"
+      ],
       "kind": "issue",
       "title": "REQ: Kullanici tetiklemeli sohbet paneli gorev girisi saglamali",
       "status": "Draft",
@@ -1660,6 +2167,11 @@
     {
       "key": "req-agent-plan-first",
       "parentKey": "epic-agent-loop",
+      "blockedByKeys": [
+        "req-agent-chat",
+        "task-core-planning-schemas",
+        "req-vdd-independent-verification-agent"
+      ],
       "kind": "issue",
       "title": "REQ: Ajan plani dosya bazli degisiklik ozeti ve gerekce ile sunmali",
       "status": "Draft",
@@ -1689,6 +2201,11 @@
     {
       "key": "req-agent-tool-whitelist",
       "parentKey": "epic-agent-loop",
+      "blockedByKeys": [
+        "req-agent-plan-first",
+        "adr-workspace-boundary-no-shell",
+        "task-security-threat-incident-retention"
+      ],
       "kind": "issue",
       "title": "REQ: Ajan araclari whitelist yaklasimiyla sinirlansin ve explain-only akis desteklensin",
       "status": "Draft",
@@ -1719,6 +2236,9 @@
     {
       "key": "req-diff-views",
       "parentKey": "epic-diff-approval",
+      "blockedByKeys": [
+        "req-editor-shell"
+      ],
       "kind": "issue",
       "title": "REQ: Diff ekrani side-by-side ve unified gorunum sunmali",
       "status": "Draft",
@@ -1747,6 +2267,11 @@
     {
       "key": "req-diff-selective-approval",
       "parentKey": "epic-diff-approval",
+      "blockedByKeys": [
+        "req-agent-plan-first",
+        "req-diff-views",
+        "adr-approval-gate-ablation-baseline"
+      ],
       "kind": "issue",
       "title": "REQ: Cok dosyali degisikliklerde secmeli onay desteklenmeli",
       "status": "Draft",
@@ -1776,6 +2301,10 @@
     {
       "key": "req-diff-atomic-rollback",
       "parentKey": "epic-diff-approval",
+      "blockedByKeys": [
+        "req-diff-selective-approval",
+        "adr-workspace-boundary-no-shell"
+      ],
       "kind": "issue",
       "title": "REQ: Dosya uygulama atomik olmali ve son 10 degisiklik geri alinabilmeli",
       "status": "Draft",
@@ -1805,6 +2334,10 @@
     {
       "key": "req-safety-sandbox",
       "parentKey": "epic-safety-privacy",
+      "blockedByKeys": [
+        "adr-workspace-boundary-no-shell",
+        "task-security-threat-incident-retention"
+      ],
       "kind": "issue",
       "title": "REQ: Workspace boundary + path normalization yalnizca proje dizini icinde calismali",
       "status": "Draft",
@@ -1834,6 +2367,10 @@
     {
       "key": "req-safety-protected-files",
       "parentKey": "epic-safety-privacy",
+      "blockedByKeys": [
+        "req-safety-sandbox",
+        "task-security-threat-incident-retention"
+      ],
       "kind": "issue",
       "title": "REQ: Protected file kurallari gizli anahtar dosyalarinda indeksleme ve yazmayi engellemeli",
       "status": "Draft",
@@ -1863,6 +2400,11 @@
     {
       "key": "req-safety-audit-log",
       "parentKey": "epic-safety-privacy",
+      "blockedByKeys": [
+        "task-core-planning-schemas",
+        "task-security-threat-incident-retention",
+        "req-safety-reactive-warnings"
+      ],
       "kind": "issue",
       "title": "REQ: Audit log okuma, retrieval, yazma, onay ve rollback kararlarini kaydetmeli",
       "status": "Draft",
@@ -1893,6 +2435,10 @@
     {
       "key": "risk-safety-readonly-fallback",
       "parentKey": "epic-safety-privacy",
+      "blockedByKeys": [
+        "req-safety-reactive-warnings",
+        "req-agent-tool-whitelist"
+      ],
       "kind": "issue",
       "title": "Risk: Kalite veya guvenlik esikleri bozulursa ajan explain-only moda dusurulebilmeli",
       "status": "Draft",
@@ -1922,6 +2468,10 @@
     {
       "key": "req-ux-why-explanation",
       "parentKey": "epic-ux-interaction",
+      "blockedByKeys": [
+        "req-agent-plan-first",
+        "req-diff-selective-approval"
+      ],
       "kind": "issue",
       "title": "REQ: Kullanici diff ekraninda neden aciklamasini gorebilmeli",
       "status": "Draft",
@@ -1950,6 +2500,10 @@
     {
       "key": "req-ux-control-points",
       "parentKey": "epic-ux-interaction",
+      "blockedByKeys": [
+        "req-diff-selective-approval",
+        "req-diff-atomic-rollback"
+      ],
       "kind": "issue",
       "title": "REQ: Her kritik adimda kontrol noktalari approve-reject-edit-undo olarak sunulmali",
       "status": "Draft",
@@ -1978,6 +2532,9 @@
     {
       "key": "req-ux-proactive-guards",
       "parentKey": "epic-ux-interaction",
+      "blockedByKeys": [
+        "req-safety-reactive-warnings"
+      ],
       "kind": "issue",
       "title": "REQ: Reactive safety warnings yalnizca apply oncesi tetiklensin (background analiz MVP disi)",
       "status": "Draft",
@@ -2012,6 +2569,10 @@
     {
       "key": "req-safety-reactive-warnings",
       "parentKey": "epic-safety-privacy",
+      "blockedByKeys": [
+        "req-safety-protected-files",
+        "task-core-planning-schemas"
+      ],
       "kind": "issue",
       "title": "REQ: Apply oncesi reactive safety check 4 trigger'i zorunlu calistirmali",
       "status": "Draft",
@@ -2044,6 +2605,11 @@
     {
       "key": "req-model-provider-abstraction",
       "parentKey": "epic-model-cost",
+      "blockedByKeys": [
+        "adr-manual-model-selection",
+        "adr-node-runtime-target",
+        "adr-prompt-model-versioning"
+      ],
       "kind": "issue",
       "title": "REQ: Bir bulut ve bir yerel model saglayicisi ortak adaptor katmaniyla desteklenmeli",
       "status": "Draft",
@@ -2074,6 +2640,10 @@
     {
       "key": "req-model-user-selection",
       "parentKey": "epic-model-cost",
+      "blockedByKeys": [
+        "req-model-provider-abstraction",
+        "req-editor-onboarding-configuration"
+      ],
       "kind": "issue",
       "title": "REQ: Model secimi kullanici tercihine birakilmali",
       "status": "Draft",
@@ -2105,6 +2675,10 @@
     {
       "key": "req-model-cost-metrics",
       "parentKey": "epic-model-cost",
+      "blockedByKeys": [
+        "req-model-provider-abstraction",
+        "req-evaluation-metrics"
+      ],
       "kind": "issue",
       "title": "REQ: Gecikme ve maliyet yerel-bulut ayrimiyla raporlanmali",
       "status": "Draft",
@@ -2137,6 +2711,9 @@
     {
       "key": "risk-model-local-fallback",
       "parentKey": "epic-model-cost",
+      "blockedByKeys": [
+        "req-model-provider-abstraction"
+      ],
       "kind": "issue",
       "title": "Risk: Bulut maliyeti kritikse local-only fallback plani hazir olmali",
       "status": "Draft",
@@ -2167,6 +2744,11 @@
     {
       "key": "req-test-unit",
       "parentKey": "epic-testing-evaluation",
+      "blockedByKeys": [
+        "task-devops-quality-gates-baseline",
+        "task-core-planning-schemas",
+        "adr-workspace-boundary-no-shell"
+      ],
       "kind": "issue",
       "title": "REQ: Birim testleri diff, workspace boundary, retrieval ve audit modullerini kapsamali",
       "status": "Draft",
@@ -2195,6 +2777,13 @@
     {
       "key": "req-test-integration",
       "parentKey": "epic-testing-evaluation",
+      "blockedByKeys": [
+        "req-test-unit",
+        "req-agent-plan-first",
+        "req-diff-selective-approval",
+        "req-diff-atomic-rollback",
+        "req-safety-reactive-warnings"
+      ],
       "kind": "issue",
       "title": "REQ: Entegrasyon testleri plan-diff-apply-rollback-safety akislarini dogrulamali",
       "status": "Draft",
@@ -2223,6 +2812,11 @@
     {
       "key": "req-test-e2e",
       "parentKey": "epic-testing-evaluation",
+      "blockedByKeys": [
+        "req-test-integration",
+        "req-ux-control-points",
+        "task-accessibility-quality-plan"
+      ],
       "kind": "issue",
       "title": "REQ: Uctan uca testler partial approval, safety stop ve gercek kullanici akislarini simule etmeli",
       "status": "Draft",
@@ -2251,6 +2845,11 @@
     {
       "key": "req-evaluation-benchmark",
       "parentKey": "epic-testing-evaluation",
+      "blockedByKeys": [
+        "task-benchmark-template-evidence-matrix",
+        "adr-approval-gate-ablation-baseline",
+        "req-evaluation-metrics"
+      ],
       "kind": "issue",
       "title": "REQ: Benchmark 20 gorev, ablation tasarimi (A/B/C) ile tanimlanmali",
       "status": "Draft",
@@ -2282,6 +2881,10 @@
     {
       "key": "req-evaluation-metrics",
       "parentKey": "epic-testing-evaluation",
+      "blockedByKeys": [
+        "task-benchmark-template-evidence-matrix",
+        "adr-prompt-model-versioning"
+      ],
       "kind": "issue",
       "title": "REQ: Basari, guvenlik, rollback, halusinasyon, gecikme ve guven metrikleri toplanmali",
       "status": "Draft",
@@ -2313,6 +2916,10 @@
     {
       "key": "req-thesis-phase-gates",
       "parentKey": "epic-thesis-roadmap",
+      "blockedByKeys": [
+        "task-github-project-ops-templates-labels",
+        "task-readiness-gate-definition"
+      ],
       "kind": "issue",
       "title": "REQ: Faz 1, Faz 2 ve Faz 3 cikti kapilari Project icinde izlenmeli",
       "status": "Draft",
@@ -2341,6 +2948,10 @@
     {
       "key": "req-thesis-freeze",
       "parentKey": "epic-thesis-roadmap",
+      "blockedByKeys": [
+        "task-faz1-p0-ready-review",
+        "req-evaluation-benchmark"
+      ],
       "kind": "issue",
       "title": "REQ: Degerlendirme fazi basladiktan sonra yeni ana ozellik alinmamali",
       "status": "Draft",
@@ -2369,6 +2980,11 @@
     {
       "key": "req-thesis-final-deliverables",
       "parentKey": "epic-thesis-roadmap",
+      "blockedByKeys": [
+        "req-evaluation-benchmark",
+        "req-evaluation-metrics",
+        "req-thesis-freeze"
+      ],
       "kind": "issue",
       "title": "REQ: Final teslimler demo, tez metni, sunum ve savunma paketi olarak takip edilmeli",
       "status": "Draft",

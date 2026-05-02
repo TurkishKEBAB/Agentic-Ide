@@ -63,6 +63,43 @@ function Get-Collection {
   return @($Value)
 }
 
+function Get-ViewSortFieldName {
+  param([object]$SortSpec)
+
+  if ($null -eq $SortSpec) {
+    return $null
+  }
+
+  $fieldName = Get-PropertyValue -Object $SortSpec -Name 'field'
+  if (-not [string]::IsNullOrWhiteSpace([string]$fieldName)) {
+    return [string]$fieldName
+  }
+
+  return [string]$SortSpec
+}
+
+function Get-ViewSortDirection {
+  param([object]$SortSpec)
+
+  $direction = Get-PropertyValue -Object $SortSpec -Name 'direction'
+  if ([string]::IsNullOrWhiteSpace([string]$direction)) {
+    return 'asc'
+  }
+
+  $normalized = ([string]$direction).ToLowerInvariant()
+  if ($normalized -notin @('asc', 'desc')) {
+    throw "Unsupported view sort direction: $direction"
+  }
+
+  return $normalized
+}
+
+function Get-ProjectFilterAlias {
+  param([string]$FieldName)
+
+  return $FieldName.Trim().ToLowerInvariant() -replace '\s+', '-'
+}
+
 function Invoke-Gh {
   param(
     [Parameter(Mandatory = $true)]
@@ -214,15 +251,39 @@ function Assert-Spec {
     'Risk',
     'Test Target',
     'Thesis Evidence',
-    'Readiness'
+    'Readiness',
+    'Blocked by',
+    'Blocking',
+    'Dependency Count',
+    'Blocking Count',
+    'Child Issue Count'
+  )
+
+  $standardProjectFields = @(
+    'Title',
+    'Assignees',
+    'Status',
+    'Labels',
+    'Linked pull requests',
+    'Milestone',
+    'Repository',
+    'Reviewers',
+    'Parent issue',
+    'Sub-issues progress'
   )
 
   $projectFieldNames = @{}
+  $knownProjectFieldNames = @{}
+  foreach ($fieldName in $standardProjectFields) {
+    $knownProjectFieldNames[$fieldName] = $true
+  }
+
   $singleSelectOptionsByField = @{}
   foreach ($field in $Spec.project.fields) {
     Assert-TextValue -Value $field.name -Message 'Project field without a name detected.'
     Assert-TextValue -Value $field.dataType -Message "Project field $($field.name) is missing dataType."
     $projectFieldNames[$field.name] = $true
+    $knownProjectFieldNames[$field.name] = $true
 
     if ($field.dataType -eq 'SINGLE_SELECT') {
       $options = @{}
@@ -245,32 +306,78 @@ function Assert-Spec {
     }
   }
 
+  $knownFilterFields = @{}
+  foreach ($fieldName in $knownProjectFieldNames.Keys) {
+    $knownFilterFields[$fieldName.ToLowerInvariant()] = $true
+    $knownFilterFields[(Get-ProjectFilterAlias -FieldName $fieldName)] = $true
+  }
+
+  foreach ($alias in @('label', 'labels', 'assignee', 'assignees', 'repo', 'repository', 'milestone', 'is', 'no', 'type', 'reviewer', 'linked')) {
+    $knownFilterFields[$alias] = $true
+  }
+
+  $milestoneTitles = @{}
+  $milestonePhases = @{}
+  foreach ($milestone in (Get-Collection (Get-PropertyValue -Object $Spec.project -Name 'milestones'))) {
+    Assert-TextValue -Value $milestone.title -Message 'Project milestone without a title detected.'
+    Assert-TextValue -Value $milestone.phase -Message "Project milestone $($milestone.title) is missing phase."
+
+    if (-not $singleSelectOptionsByField['Phase'].ContainsKey($milestone.phase)) {
+      throw "Project milestone $($milestone.title) uses invalid phase: $($milestone.phase)"
+    }
+
+    if ($milestoneTitles.ContainsKey($milestone.title)) {
+      throw "Duplicate project milestone title detected: $($milestone.title)"
+    }
+
+    if ($milestonePhases.ContainsKey($milestone.phase)) {
+      throw "Duplicate project milestone phase mapping detected for $($milestone.phase). Keep exactly one milestone per phase."
+    }
+
+    $milestoneTitles[$milestone.title] = $true
+    $milestonePhases[$milestone.phase] = $true
+  }
+
   foreach ($view in (Get-Collection $Spec.project.views)) {
     Assert-TextValue -Value $view.name -Message 'Project view without a name detected.'
     Assert-TextValue -Value $view.layout -Message "Project view $($view.name) is missing layout."
 
     foreach ($fieldName in (Get-Collection (Get-PropertyValue -Object $view -Name 'visibleFields'))) {
-      if (-not $projectFieldNames.ContainsKey($fieldName) -and $fieldName -ne 'Status') {
+      if (-not $knownProjectFieldNames.ContainsKey($fieldName)) {
         throw "Project view $($view.name) references unknown visible field: $fieldName"
       }
     }
 
-    foreach ($fieldName in (Get-Collection (Get-PropertyValue -Object $view -Name 'sortBy'))) {
-      if (-not $projectFieldNames.ContainsKey($fieldName) -and $fieldName -ne 'Status') {
+    foreach ($sortSpec in (Get-Collection (Get-PropertyValue -Object $view -Name 'sortBy'))) {
+      $fieldName = Get-ViewSortFieldName -SortSpec $sortSpec
+      if (-not $knownProjectFieldNames.ContainsKey($fieldName)) {
         throw "Project view $($view.name) references unknown sort field: $fieldName"
+      }
+
+      $null = Get-ViewSortDirection -SortSpec $sortSpec
+    }
+
+    foreach ($viewFieldProperty in @('groupBy', 'columnBy', 'swimlanes', 'sliceBy', 'dateField')) {
+      $fieldName = Get-PropertyValue -Object $view -Name $viewFieldProperty
+      if (-not [string]::IsNullOrWhiteSpace([string]$fieldName) -and -not $knownProjectFieldNames.ContainsKey($fieldName)) {
+        throw "Project view $($view.name) references unknown ${viewFieldProperty} field: $fieldName"
       }
     }
 
-    $groupBy = Get-PropertyValue -Object $view -Name 'groupBy'
-    if (-not [string]::IsNullOrWhiteSpace([string]$groupBy) -and -not $projectFieldNames.ContainsKey($groupBy) -and $groupBy -ne 'Status') {
-      throw "Project view $($view.name) references unknown groupBy field: $groupBy"
+    foreach ($fieldName in (Get-Collection (Get-PropertyValue -Object $view -Name 'fieldSums'))) {
+      if (-not $knownProjectFieldNames.ContainsKey($fieldName)) {
+        throw "Project view $($view.name) references unknown fieldSums field: $fieldName"
+      }
     }
 
     $filter = Get-PropertyValue -Object $view -Name 'filter'
-    if (-not [string]::IsNullOrWhiteSpace([string]$filter) -and $filter -match '^(?<field>[^:]+):') {
-      $filterField = $Matches.field.Trim()
-      if (-not $projectFieldNames.ContainsKey($filterField) -and $filterField -ne 'Status') {
-        throw "Project view $($view.name) references unknown filter field: $filterField"
+    if (-not [string]::IsNullOrWhiteSpace([string]$filter)) {
+      $filterMatches = [regex]::Matches([string]$filter, '(?<!\S)-?(?<field>[A-Za-z][A-Za-z0-9 -]*):')
+      foreach ($filterMatch in $filterMatches) {
+        $filterField = $filterMatch.Groups['field'].Value.Trim().ToLowerInvariant()
+        if (-not $knownFilterFields.ContainsKey($filterField)) {
+          throw "Project view $($view.name) references unknown filter field: $filterField"
+        }
       }
     }
   }
@@ -351,6 +458,11 @@ function Assert-Spec {
       }
     }
 
+    $explicitMilestone = Get-PropertyValue -Object $issue -Name 'milestone'
+    if (-not [string]::IsNullOrWhiteSpace([string]$explicitMilestone) -and -not $milestoneTitles.ContainsKey($explicitMilestone)) {
+      throw "Issue $($issue.key) references unknown milestone: $explicitMilestone"
+    }
+
     $targetDate = Get-PropertyValue -Object $issue -Name 'targetDate'
     if (-not [string]::IsNullOrWhiteSpace([string]$targetDate)) {
       try {
@@ -372,6 +484,18 @@ function Assert-Spec {
 
     if ($issue.kind -eq 'issue' -and -not $epicKeys.ContainsKey($issue.parentKey)) {
       throw "Child issue $($issue.key) points to unknown epic key $($issue.parentKey)."
+    }
+
+    foreach ($blockedByKey in (Get-Collection (Get-PropertyValue -Object $issue -Name 'blockedByKeys'))) {
+      Assert-TextValue -Value $blockedByKey -Message "Issue $($issue.key) has an empty blockedByKeys item."
+
+      if (-not $seenKeys.ContainsKey($blockedByKey)) {
+        throw "Issue $($issue.key) is blocked by unknown issue key $blockedByKey."
+      }
+
+      if ($blockedByKey -eq $issue.key) {
+        throw "Issue $($issue.key) cannot block itself."
+      }
     }
   }
 }
@@ -560,6 +684,7 @@ query($owner: String!, $number: Int!) {
             __typename
             ... on ProjectV2FieldCommon {
               id
+              databaseId
               name
               dataType
             }
@@ -569,6 +694,16 @@ query($owner: String!, $number: Int!) {
                 name
               }
             }
+          }
+        }
+        views(first: 100) {
+          nodes {
+            id
+            fullDatabaseId
+            name
+            number
+            layout
+            filter
           }
         }
       }
@@ -582,6 +717,7 @@ query($owner: String!, $number: Int!) {
             __typename
             ... on ProjectV2FieldCommon {
               id
+              databaseId
               name
               dataType
             }
@@ -591,6 +727,16 @@ query($owner: String!, $number: Int!) {
                 name
               }
             }
+          }
+        }
+        views(first: 100) {
+          nodes {
+            id
+            fullDatabaseId
+            name
+            number
+            layout
+            filter
           }
         }
       }
@@ -627,6 +773,7 @@ function Get-FieldMap {
 
     $fieldMap[(Get-PropertyValue -Object $field -Name 'name')] = [pscustomobject]@{
       Id = Get-PropertyValue -Object $field -Name 'id'
+      DatabaseId = Get-PropertyValue -Object $field -Name 'databaseId'
       DataType = Get-PropertyValue -Object $field -Name 'dataType'
       Options = $options
     }
@@ -638,14 +785,223 @@ function Get-FieldMap {
 function Get-ExistingIssuesByTitle {
   param([string]$RepoFullName)
 
-  $issues = Get-Collection (Invoke-Gh -Arguments @('issue', 'list', '-R', $RepoFullName, '--state', 'all', '--limit', '500', '--json', 'number,title,url') -AsJson)
+  $issues = Get-Collection (Invoke-Gh -Arguments @('issue', 'list', '-R', $RepoFullName, '--state', 'open', '--limit', '500', '--json', 'number,title,url') -AsJson)
   $map = @{}
 
   foreach ($issue in $issues) {
+    if ($map.ContainsKey($issue.title)) {
+      throw "Duplicate open issue title detected in ${RepoFullName}: $($issue.title). Remove or rename the duplicate before rerunning setup."
+    }
+
     $map[$issue.title] = $issue
   }
 
   return $map
+}
+
+function Set-RepositoryMilestones {
+  param(
+    [object]$Spec,
+    [string]$RepoFullName
+  )
+
+  $milestoneSpec = Get-PropertyValue -Object $Spec.project -Name 'milestones'
+  if ($null -eq $milestoneSpec) { return @{} }
+
+  $existing = Get-Collection (Invoke-Gh -Arguments @('api', "repos/$RepoFullName/milestones?state=all", '--paginate') -AsJson)
+  $byTitle = @{}
+  foreach ($m in $existing) { $byTitle[$m.title] = $m }
+
+  $resolved = @{}
+  foreach ($m in $milestoneSpec) {
+    if ($byTitle.ContainsKey($m.title)) {
+      $existingMilestone = $byTitle[$m.title]
+      if ($existingMilestone.state -ne 'open') {
+        Write-Detail "Reopening milestone: $($m.title) (#$($existingMilestone.number))"
+        $existingMilestone = Invoke-Gh -Arguments @('api', '-X', 'PATCH', "repos/$RepoFullName/milestones/$($existingMilestone.number)", '-f', 'state=open') -AsJson
+      } else {
+        Write-Detail "Milestone exists: $($m.title) (#$($existingMilestone.number))"
+      }
+
+      $resolved[$m.title] = [int]$existingMilestone.number
+      continue
+    }
+
+    Write-Detail "Creating milestone: $($m.title)"
+    $args = @('api', "repos/$RepoFullName/milestones", '-f', "title=$($m.title)", '-f', 'state=open')
+    $description = Get-PropertyValue -Object $m -Name 'description'
+    if (-not [string]::IsNullOrWhiteSpace($description)) {
+      $args += @('-f', "description=$description")
+    }
+    $created = Invoke-Gh -Arguments $args -AsJson
+    $resolved[$m.title] = [int]$created.number
+  }
+
+  return $resolved
+}
+
+function Set-IssueMilestone {
+  param(
+    [string]$RepoFullName,
+    [int]$IssueNumber,
+    [int]$MilestoneNumber
+  )
+
+  if ($MilestoneNumber -le 0) { return }
+  $null = Invoke-Gh -Arguments @('api', '-X', 'PATCH', "repos/$RepoFullName/issues/$IssueNumber", '-F', "milestone=$MilestoneNumber")
+}
+
+function Resolve-MilestoneForIssue {
+  param(
+    [object]$IssueDefinition,
+    [object]$Spec,
+    [hashtable]$MilestonesByTitle
+  )
+
+  $milestoneSpec = Get-PropertyValue -Object $Spec.project -Name 'milestones'
+  if ($null -eq $milestoneSpec) { return 0 }
+
+  $explicit = Get-PropertyValue -Object $IssueDefinition -Name 'milestone'
+  if (-not [string]::IsNullOrWhiteSpace($explicit) -and $MilestonesByTitle.ContainsKey($explicit)) {
+    return [int]$MilestonesByTitle[$explicit]
+  }
+
+  $phase = Get-PropertyValue -Object $IssueDefinition -Name 'phase'
+  foreach ($m in $milestoneSpec) {
+    $phaseLink = Get-PropertyValue -Object $m -Name 'phase'
+    if ($phaseLink -and $phaseLink -eq $phase -and $MilestonesByTitle.ContainsKey($m.title)) {
+      return [int]$MilestonesByTitle[$m.title]
+    }
+  }
+
+  return 0
+}
+
+function Get-IssueNodeId {
+  param(
+    [string]$RepoOwner,
+    [string]$RepoName,
+    [int]$IssueNumber
+  )
+
+  $query = 'query($owner:String!,$repo:String!,$n:Int!){repository(owner:$owner,name:$repo){issue(number:$n){id}}}'
+  $response = Invoke-GhGraphQL -Query $query -Variables @{ owner = $RepoOwner; repo = $RepoName; n = $IssueNumber }
+  $issue = Get-PropertyValue -Object (Get-PropertyValue -Object $response.data -Name 'repository') -Name 'issue'
+  return Get-PropertyValue -Object $issue -Name 'id'
+}
+
+function Get-SubIssueNumbers {
+  param(
+    [string]$RepoOwner,
+    [string]$RepoName,
+    [int]$IssueNumber
+  )
+
+  $query = 'query($owner:String!,$repo:String!,$n:Int!){repository(owner:$owner,name:$repo){issue(number:$n){subIssues(first:100){nodes{number}}}}}'
+  $response = Invoke-GhGraphQL -Query $query -Variables @{ owner = $RepoOwner; repo = $RepoName; n = $IssueNumber }
+  $issue = Get-PropertyValue -Object (Get-PropertyValue -Object $response.data -Name 'repository') -Name 'issue'
+  $subIssues = Get-PropertyValue -Object $issue -Name 'subIssues'
+  $nodes = Get-Collection (Get-PropertyValue -Object $subIssues -Name 'nodes')
+  $numbers = @()
+  foreach ($node in $nodes) { $numbers += [int](Get-PropertyValue -Object $node -Name 'number') }
+  return $numbers
+}
+
+function Set-NativeSubIssueLink {
+  param(
+    [string]$RepoOwner,
+    [string]$RepoName,
+    [int]$ParentIssueNumber,
+    [int]$ChildIssueNumber
+  )
+
+  $existing = Get-SubIssueNumbers -RepoOwner $RepoOwner -RepoName $RepoName -IssueNumber $ParentIssueNumber
+  if ($existing -contains $ChildIssueNumber) {
+    return
+  }
+
+  $parentId = Get-IssueNodeId -RepoOwner $RepoOwner -RepoName $RepoName -IssueNumber $ParentIssueNumber
+  $childId  = Get-IssueNodeId -RepoOwner $RepoOwner -RepoName $RepoName -IssueNumber $ChildIssueNumber
+  if ([string]::IsNullOrWhiteSpace($parentId) -or [string]::IsNullOrWhiteSpace($childId)) {
+    Write-Warning "Sub-issue link skipped (#$ChildIssueNumber -> #$ParentIssueNumber): missing node IDs"
+    return
+  }
+
+  $mutation = 'mutation($p:ID!,$c:ID!){addSubIssue(input:{issueId:$p,subIssueId:$c}){issue{number}subIssue{number}}}'
+  try {
+    $null = Invoke-GhGraphQL -Query $mutation -Variables @{ p = $parentId; c = $childId }
+    Write-Detail "Linked sub-issue: #$ChildIssueNumber -> #$ParentIssueNumber"
+  } catch {
+    if ($_.Exception.Message -match 'already a sub|already exists') {
+      return
+    }
+    Write-Warning "Sub-issue link failed (#$ChildIssueNumber -> #$ParentIssueNumber): $($_.Exception.Message)"
+  }
+}
+
+function Get-BlockedByIssueNumbers {
+  param(
+    [string]$RepoFullName,
+    [int]$IssueNumber
+  )
+
+  $issues = Get-Collection (Invoke-Gh -Arguments @('api', "repos/$RepoFullName/issues/$IssueNumber/dependencies/blocked_by", '--paginate') -AsJson)
+  $numbers = @()
+  foreach ($issue in $issues) {
+    $numbers += [int](Get-PropertyValue -Object $issue -Name 'number')
+  }
+
+  return $numbers
+}
+
+function Get-IssueRestId {
+  param(
+    [string]$RepoFullName,
+    [int]$IssueNumber
+  )
+
+  $issue = Invoke-Gh -Arguments @('api', "repos/$RepoFullName/issues/$IssueNumber") -AsJson
+  return [int](Get-PropertyValue -Object $issue -Name 'id')
+}
+
+function Set-IssueBlockedByDependency {
+  param(
+    [string]$RepoFullName,
+    [int]$IssueNumber,
+    [int]$BlockingIssueNumber
+  )
+
+  $existing = Get-BlockedByIssueNumbers -RepoFullName $RepoFullName -IssueNumber $IssueNumber
+  if ($existing -contains $BlockingIssueNumber) {
+    return
+  }
+
+  $blockingIssueId = Get-IssueRestId -RepoFullName $RepoFullName -IssueNumber $BlockingIssueNumber
+  if ($blockingIssueId -le 0) {
+    Write-Warning "Dependency link skipped (#$IssueNumber blocked by #$BlockingIssueNumber): missing blocking issue REST id"
+    return
+  }
+
+  try {
+    $null = Invoke-Gh -Arguments @(
+      'api',
+      '-X',
+      'POST',
+      "repos/$RepoFullName/issues/$IssueNumber/dependencies/blocked_by",
+      '-H',
+      'Accept: application/vnd.github+json',
+      '-H',
+      'X-GitHub-Api-Version: 2026-03-10',
+      '-F',
+      "issue_id=$blockingIssueId"
+    )
+    Write-Detail "Linked dependency: #$IssueNumber blocked by #$BlockingIssueNumber"
+  } catch {
+    if ($_.Exception.Message -match 'already|Validation failed') {
+      return
+    }
+    Write-Warning "Dependency link failed (#$IssueNumber blocked by #$BlockingIssueNumber): $($_.Exception.Message)"
+  }
 }
 
 function Get-IssueNumberFromUrl {
@@ -749,6 +1105,40 @@ function Set-Issue {
   } finally {
     Remove-Item -LiteralPath $tempFile.FullName -ErrorAction SilentlyContinue
   }
+}
+
+function Set-IssueLabels {
+  param(
+    [object]$IssueDefinition,
+    [object]$Issue,
+    [string]$RepoFullName
+  )
+
+  $desiredLabels = @(Get-Collection (Get-PropertyValue -Object $IssueDefinition -Name 'labels'))
+  if ($desiredLabels.Count -lt 1) { return }
+
+  $current = Invoke-Gh -Arguments @('issue', 'view', ([string]$Issue.number), '-R', $RepoFullName, '--json', 'labels') -AsJson
+  $currentLabels = @{}
+  foreach ($label in (Get-Collection (Get-PropertyValue -Object $current -Name 'labels'))) {
+    $currentLabels[(Get-PropertyValue -Object $label -Name 'name')] = $true
+  }
+
+  $missing = @()
+  foreach ($labelName in $desiredLabels) {
+    if (-not $currentLabels.ContainsKey($labelName)) {
+      $missing += $labelName
+    }
+  }
+
+  if ($missing.Count -lt 1) { return }
+
+  $arguments = @('issue', 'edit', ([string]$Issue.number), '-R', $RepoFullName)
+  foreach ($labelName in $missing) {
+    $arguments += @('--add-label', $labelName)
+  }
+
+  $null = Invoke-Gh -Arguments $arguments
+  Write-Detail "Added missing labels to #$($Issue.number): $($missing -join ', ')"
 }
 
 function Get-ProjectItemIdForIssue {
@@ -877,6 +1267,9 @@ function Set-ProjectFieldValue {
     'DATE' {
       $arguments += @('--date', $Value)
     }
+    'NUMBER' {
+      $arguments += @('--number', $Value)
+    }
     default {
       $arguments += @('--text', $Value)
     }
@@ -897,6 +1290,28 @@ function Set-ProjectFieldValueIfPresent {
   if ($FieldMap.ContainsKey($FieldName)) {
     Set-ProjectFieldValue -ProjectId $ProjectId -ItemId $ItemId -FieldMap $FieldMap -FieldName $FieldName -Value $Value
   }
+}
+
+function Clear-ProjectFieldValueIfPresent {
+  param(
+    [string]$ProjectId,
+    [string]$ItemId,
+    [hashtable]$FieldMap,
+    [string]$FieldName
+  )
+
+  if (-not $FieldMap.ContainsKey($FieldName)) {
+    return
+  }
+
+  $field = $FieldMap[$FieldName]
+  $null = Invoke-Gh -Arguments @(
+    'project', 'item-edit',
+    '--id', $ItemId,
+    '--project-id', $ProjectId,
+    '--field-id', $field.Id,
+    '--clear'
+  )
 }
 
 function Get-WorkflowStatus {
@@ -1052,11 +1467,198 @@ function Get-ThesisEvidence {
   }
 }
 
+function New-BlockedByReverseMap {
+  param([object[]]$Issues)
+
+  $reverseMap = @{}
+  foreach ($issueDefinition in $Issues) {
+    $reverseMap[$issueDefinition.key] = @()
+  }
+
+  foreach ($issueDefinition in $Issues) {
+    foreach ($blockedByKey in (Get-Collection (Get-PropertyValue -Object $issueDefinition -Name 'blockedByKeys'))) {
+      $reverseMap[$blockedByKey] = @($reverseMap[$blockedByKey]) + $issueDefinition.key
+    }
+  }
+
+  return $reverseMap
+}
+
+function New-ChildIssueMap {
+  param([object[]]$Issues)
+
+  $childMap = @{}
+  foreach ($issueDefinition in $Issues) {
+    $childMap[$issueDefinition.key] = @()
+  }
+
+  foreach ($issueDefinition in $Issues) {
+    $parentKey = Get-PropertyValue -Object $issueDefinition -Name 'parentKey'
+    if ([string]::IsNullOrWhiteSpace([string]$parentKey)) {
+      continue
+    }
+
+    $childMap[$parentKey] = @($childMap[$parentKey]) + $issueDefinition.key
+  }
+
+  return $childMap
+}
+
+function Get-IssueReferenceText {
+  param(
+    [object[]]$Keys,
+    [hashtable]$IssueDefinitionsByKey,
+    [hashtable]$ExistingIssuesByTitle
+  )
+
+  $references = @()
+  foreach ($key in $Keys) {
+    if (-not $IssueDefinitionsByKey.ContainsKey($key)) {
+      $references += [string]$key
+      continue
+    }
+
+    $issueDefinition = $IssueDefinitionsByKey[$key]
+    $issue = $ExistingIssuesByTitle[$issueDefinition.title]
+    if ($null -ne $issue -and -not [string]::IsNullOrWhiteSpace([string]$issue.number)) {
+      $references += "#$($issue.number)"
+      continue
+    }
+
+    $references += [string]$key
+  }
+
+  return ($references | Sort-Object -Unique) -join ', '
+}
+
+function Get-ProjectViewsEndpoint {
+  param(
+    [string]$OwnerLogin,
+    [int]$ProjectNumber
+  )
+
+  $ownerData = Invoke-Gh -Arguments @('api', "users/$OwnerLogin") -AsJson
+  $ownerType = Get-PropertyValue -Object $ownerData -Name 'type'
+
+  if ($ownerType -eq 'Organization') {
+    return "/orgs/$OwnerLogin/projectsV2/$ProjectNumber/views"
+  }
+
+  $ownerId = Get-PropertyValue -Object $ownerData -Name 'id'
+  if ($null -eq $ownerId) {
+    throw "Could not resolve numeric GitHub user id for $OwnerLogin."
+  }
+
+  return "/users/$OwnerLogin/projectsV2/$ProjectNumber/views"
+}
+
+function Resolve-ProjectViewFieldDatabaseIds {
+  param(
+    [hashtable]$FieldMap,
+    [object[]]$FieldNames
+  )
+
+  $ids = @()
+  foreach ($fieldName in (Get-Collection $FieldNames)) {
+    if (-not $FieldMap.ContainsKey($fieldName)) {
+      throw "Project view references field that does not exist in the target project: $fieldName"
+    }
+
+    $databaseId = $FieldMap[$fieldName].DatabaseId
+    if ($null -eq $databaseId) {
+      throw "Project field does not expose a numeric database id for view configuration: $fieldName"
+    }
+
+    $ids += [int64]$databaseId
+  }
+
+  return @($ids)
+}
+
+function ConvertTo-ProjectViewPayload {
+  param(
+    [object]$View,
+    [hashtable]$FieldMap,
+    [switch]$Minimal
+  )
+
+  $layout = ([string]$View.layout).ToLowerInvariant()
+  $payload = [ordered]@{
+    name = $View.name
+    layout = $layout
+  }
+
+  $filter = Get-PropertyValue -Object $View -Name 'filter'
+  if (-not [string]::IsNullOrWhiteSpace([string]$filter)) {
+    $payload.filter = [string]$filter
+  }
+
+  if ($layout -ne 'roadmap') {
+    $visibleFieldIds = @(Resolve-ProjectViewFieldDatabaseIds -FieldMap $FieldMap -FieldNames (Get-PropertyValue -Object $View -Name 'visibleFields'))
+    if ($visibleFieldIds.Count -gt 0) {
+      $payload.visible_fields = $visibleFieldIds
+    }
+  }
+
+  if ($Minimal) {
+    return $payload
+  }
+
+  $groupBy = Get-PropertyValue -Object $View -Name 'groupBy'
+  $swimlanes = Get-PropertyValue -Object $View -Name 'swimlanes'
+  if (-not [string]::IsNullOrWhiteSpace([string]$groupBy)) {
+    $payload.group_by = @(Resolve-ProjectViewFieldDatabaseIds -FieldMap $FieldMap -FieldNames @($groupBy))
+  } elseif (-not [string]::IsNullOrWhiteSpace([string]$swimlanes)) {
+    $payload.group_by = @(Resolve-ProjectViewFieldDatabaseIds -FieldMap $FieldMap -FieldNames @($swimlanes))
+  }
+
+  $columnBy = Get-PropertyValue -Object $View -Name 'columnBy'
+  if (-not [string]::IsNullOrWhiteSpace([string]$columnBy)) {
+    $payload.vertical_group_by = @(Resolve-ProjectViewFieldDatabaseIds -FieldMap $FieldMap -FieldNames @($columnBy))
+  }
+
+  $sortBy = @()
+  foreach ($sortSpec in (Get-Collection (Get-PropertyValue -Object $View -Name 'sortBy'))) {
+    $sortFieldName = Get-ViewSortFieldName -SortSpec $sortSpec
+    $sortFieldIds = @(Resolve-ProjectViewFieldDatabaseIds -FieldMap $FieldMap -FieldNames @($sortFieldName))
+    if ($sortFieldIds.Count -lt 1) {
+      continue
+    }
+
+    $sortBy += ,@($sortFieldIds[0], (Get-ViewSortDirection -SortSpec $sortSpec))
+  }
+
+  if ($sortBy.Count -gt 0) {
+    $payload.sort_by = $sortBy
+  }
+
+  return $payload
+}
+
+function Invoke-ProjectViewApi {
+  param(
+    [string]$Method,
+    [string]$Endpoint,
+    [hashtable]$Payload
+  )
+
+  $payloadFile = New-TemporaryFile
+  try {
+    $payloadJson = $Payload | ConvertTo-Json -Depth 10
+    [System.IO.File]::WriteAllText($payloadFile.FullName, $payloadJson, [System.Text.UTF8Encoding]::new($false))
+    return Invoke-Gh -Arguments @('api', '-X', $Method, $Endpoint, '--input', $payloadFile.FullName) -AsJson
+  } finally {
+    Remove-Item -LiteralPath $payloadFile.FullName -ErrorAction SilentlyContinue
+  }
+}
+
 function New-ProjectViews {
   param(
     [object]$Spec,
     [string]$OwnerLogin,
-    [int]$ProjectNumber
+    [int]$ProjectNumber,
+    [object]$ProjectMetadata,
+    [hashtable]$FieldMap
   )
 
   if ($SkipViews) {
@@ -1072,34 +1674,40 @@ function New-ProjectViews {
   }
 
   try {
-    $ownerData = Invoke-Gh -Arguments @('api', "users/$OwnerLogin") -AsJson
-    $ownerId = Get-PropertyValue -Object $ownerData -Name 'id'
-    if ($null -eq $ownerId) {
-      throw "Could not resolve numeric GitHub user id for $OwnerLogin."
-    }
-
-    $existingViews = Get-Collection (Invoke-Gh -Arguments @('api', "/users/$ownerId/projects/$ProjectNumber/views") -AsJson)
+    $viewsEndpoint = Get-ProjectViewsEndpoint -OwnerLogin $OwnerLogin -ProjectNumber $ProjectNumber
+    $existingViews = Get-Collection (Get-PropertyValue -Object (Get-PropertyValue -Object $ProjectMetadata -Name 'views') -Name 'nodes')
     $existingViewNames = @{}
     foreach ($view in $existingViews) {
-      $existingViewNames[(Get-PropertyValue -Object $view -Name 'name')] = $true
+      $existingViewNames[(Get-PropertyValue -Object $view -Name 'name')] = $view
     }
 
     foreach ($view in $Spec.project.views) {
       if ($existingViewNames.ContainsKey($view.name)) {
+        $existingView = $existingViewNames[$view.name]
+        $viewNumber = Get-PropertyValue -Object $existingView -Name 'number'
+        $payload = ConvertTo-ProjectViewPayload -View $view -FieldMap $FieldMap
+        try {
+          $null = Invoke-ProjectViewApi -Method 'PATCH' -Endpoint "$viewsEndpoint/$viewNumber" -Payload $payload
+          Write-Detail "Updated project view: $($view.name)"
+        } catch {
+          Write-Warning "Project view '$($view.name)' already exists but could not be updated automatically. GitHub currently exposes stable creation support, while existing view column/group/sort updates may require the UI. Details: $($_.Exception.Message)"
+        }
+
         continue
       }
 
       Write-Detail "Creating project view: $($view.name)"
-      $payloadFile = New-TemporaryFile
       try {
-        $payload = @{
-          name = $view.name
-          layout = $view.layout
-        } | ConvertTo-Json
-        Set-Content -LiteralPath $payloadFile.FullName -Value $payload -Encoding UTF8
-        $null = Invoke-Gh -Arguments @('api', '-X', 'POST', "/users/$ownerId/projects/$ProjectNumber/views", '--input', $payloadFile.FullName)
-      } finally {
-        Remove-Item -LiteralPath $payloadFile.FullName -ErrorAction SilentlyContinue
+        $payload = ConvertTo-ProjectViewPayload -View $view -FieldMap $FieldMap
+        $null = Invoke-ProjectViewApi -Method 'POST' -Endpoint $viewsEndpoint -Payload $payload
+      } catch {
+        Write-Warning "Full project view creation payload failed for '$($view.name)'. Retrying with the stable documented payload. Details: $($_.Exception.Message)"
+        try {
+          $minimalPayload = ConvertTo-ProjectViewPayload -View $view -FieldMap $FieldMap -Minimal
+          $null = Invoke-ProjectViewApi -Method 'POST' -Endpoint $viewsEndpoint -Payload $minimalPayload
+        } catch {
+          Write-Warning "Project view '$($view.name)' could not be created automatically. Details: $($_.Exception.Message)"
+        }
       }
     }
   } catch {
@@ -1108,7 +1716,7 @@ function New-ProjectViews {
 }
 
 $specFile = Resolve-SpecPath -RequestedPath $SpecPath
-$spec = Get-Content -LiteralPath $specFile -Raw | ConvertFrom-Json
+$spec = Get-Content -LiteralPath $specFile -Raw -Encoding UTF8 | ConvertFrom-Json
 Assert-Spec -Spec $spec
 
 $repoInfo = Get-RepoInfo -RepoOverride $Repo
@@ -1133,6 +1741,9 @@ Assert-GhReady
 Write-Step 'Ensuring repository labels'
 Set-RepositoryLabels -Spec $spec -RepoFullName $repoInfo.FullName
 
+Write-Step 'Ensuring repository milestones'
+$milestonesByTitle = Set-RepositoryMilestones -Spec $spec -RepoFullName $repoInfo.FullName
+
 Write-Step 'Ensuring GitHub Project'
 $project = Get-OrCreateProject -OwnerLogin $ownerLogin -Title $projectName
 $projectNumber = [string](Get-PropertyValue -Object $project -Name 'number')
@@ -1145,7 +1756,7 @@ $projectId = Get-PropertyValue -Object $projectMetadata -Name 'id'
 $fieldMap = Get-FieldMap -ProjectMetadata $projectMetadata
 
 Write-Step 'Ensuring project views'
-New-ProjectViews -Spec $spec -OwnerLogin $ownerLogin -ProjectNumber ([int]$projectNumber)
+New-ProjectViews -Spec $spec -OwnerLogin $ownerLogin -ProjectNumber ([int]$projectNumber) -ProjectMetadata $projectMetadata -FieldMap $fieldMap
 
 Write-Step 'Ensuring issues and project items'
 $existingIssuesByTitle = Get-ExistingIssuesByTitle -RepoFullName $repoInfo.FullName
@@ -1154,6 +1765,8 @@ foreach ($issueDefinition in $spec.issues) {
   $issueDefinitionsByKey[$issueDefinition.key] = $issueDefinition
 }
 
+$itemIdsByKey = @{}
+
 $orderedIssues = @(
   $spec.issues |
     Sort-Object @{ Expression = { if ($_.kind -eq 'epic') { 0 } else { 1 } } }, title
@@ -1161,7 +1774,9 @@ $orderedIssues = @(
 
 foreach ($issueDefinition in $orderedIssues) {
   $issue = Set-Issue -IssueDefinition $issueDefinition -IssueDefinitionsByKey $issueDefinitionsByKey -ExistingIssuesByTitle $existingIssuesByTitle -RepoFullName $repoInfo.FullName
+  Set-IssueLabels -IssueDefinition $issueDefinition -Issue $issue -RepoFullName $repoInfo.FullName
   $itemId = Set-IssueInProject -OwnerLogin $ownerLogin -ProjectNumber $projectNumber -RepoOwner $repoInfo.Owner -RepoName $repoInfo.Name -Issue $issue
+  $itemIdsByKey[$issueDefinition.key] = $itemId
 
   if ($SyncWorkflowStatus) {
     Set-ProjectFieldValueIfPresent -ProjectId $projectId -ItemId $itemId -FieldMap $fieldMap -FieldName 'Status' -Value (Get-WorkflowStatus -IssueDefinition $issueDefinition)
@@ -1189,6 +1804,72 @@ foreach ($issueDefinition in $orderedIssues) {
   $targetDate = Get-PropertyValue -Object $issueDefinition -Name 'targetDate'
   if (-not [string]::IsNullOrWhiteSpace($targetDate)) {
     Set-ProjectFieldValue -ProjectId $projectId -ItemId $itemId -FieldMap $fieldMap -FieldName 'Target Date' -Value $targetDate
+  }
+
+  $milestoneNumber = Resolve-MilestoneForIssue -IssueDefinition $issueDefinition -Spec $spec -MilestonesByTitle $milestonesByTitle
+  if ($milestoneNumber -gt 0) {
+    Set-IssueMilestone -RepoFullName $repoInfo.FullName -IssueNumber $issue.number -MilestoneNumber $milestoneNumber
+  }
+}
+
+Write-Step 'Updating project dependency summary fields'
+$blockingKeysByKey = New-BlockedByReverseMap -Issues $spec.issues
+$childKeysByKey = New-ChildIssueMap -Issues $spec.issues
+foreach ($issueDefinition in $orderedIssues) {
+  if (-not $itemIdsByKey.ContainsKey($issueDefinition.key)) {
+    continue
+  }
+
+  $itemId = $itemIdsByKey[$issueDefinition.key]
+  $blockedByKeys = @(Get-Collection (Get-PropertyValue -Object $issueDefinition -Name 'blockedByKeys'))
+  $blockingKeys = @(Get-Collection $blockingKeysByKey[$issueDefinition.key])
+  $childKeys = @(Get-Collection $childKeysByKey[$issueDefinition.key])
+
+  $blockedByText = Get-IssueReferenceText -Keys $blockedByKeys -IssueDefinitionsByKey $issueDefinitionsByKey -ExistingIssuesByTitle $existingIssuesByTitle
+  $blockingText = Get-IssueReferenceText -Keys $blockingKeys -IssueDefinitionsByKey $issueDefinitionsByKey -ExistingIssuesByTitle $existingIssuesByTitle
+
+  if ([string]::IsNullOrWhiteSpace($blockedByText)) {
+    Clear-ProjectFieldValueIfPresent -ProjectId $projectId -ItemId $itemId -FieldMap $fieldMap -FieldName 'Blocked by'
+  } else {
+    Set-ProjectFieldValueIfPresent -ProjectId $projectId -ItemId $itemId -FieldMap $fieldMap -FieldName 'Blocked by' -Value $blockedByText
+  }
+
+  if ([string]::IsNullOrWhiteSpace($blockingText)) {
+    Clear-ProjectFieldValueIfPresent -ProjectId $projectId -ItemId $itemId -FieldMap $fieldMap -FieldName 'Blocking'
+  } else {
+    Set-ProjectFieldValueIfPresent -ProjectId $projectId -ItemId $itemId -FieldMap $fieldMap -FieldName 'Blocking' -Value $blockingText
+  }
+
+  Set-ProjectFieldValueIfPresent -ProjectId $projectId -ItemId $itemId -FieldMap $fieldMap -FieldName 'Dependency Count' -Value ([string]$blockedByKeys.Count)
+  Set-ProjectFieldValueIfPresent -ProjectId $projectId -ItemId $itemId -FieldMap $fieldMap -FieldName 'Blocking Count' -Value ([string]$blockingKeys.Count)
+  Set-ProjectFieldValueIfPresent -ProjectId $projectId -ItemId $itemId -FieldMap $fieldMap -FieldName 'Child Issue Count' -Value ([string]$childKeys.Count)
+}
+
+Write-Step 'Linking native parent / sub-issue relationships'
+foreach ($issueDefinition in $orderedIssues) {
+  $parentKey = Get-PropertyValue -Object $issueDefinition -Name 'parentKey'
+  if ([string]::IsNullOrWhiteSpace($parentKey)) { continue }
+  $parentDefinition = $issueDefinitionsByKey[$parentKey]
+  $parentIssue = $existingIssuesByTitle[$parentDefinition.title]
+  $childIssue  = $existingIssuesByTitle[$issueDefinition.title]
+  if (-not $parentIssue -or -not $childIssue) { continue }
+  Set-NativeSubIssueLink -RepoOwner $repoInfo.Owner -RepoName $repoInfo.Name -ParentIssueNumber ([int]$parentIssue.number) -ChildIssueNumber ([int]$childIssue.number)
+}
+
+Write-Step 'Linking native issue dependencies'
+foreach ($issueDefinition in $orderedIssues) {
+  $blockedByKeys = @(Get-Collection (Get-PropertyValue -Object $issueDefinition -Name 'blockedByKeys'))
+  if ($blockedByKeys.Count -lt 1) { continue }
+
+  $issue = $existingIssuesByTitle[$issueDefinition.title]
+  if (-not $issue) { continue }
+
+  foreach ($blockedByKey in $blockedByKeys) {
+    $blockingDefinition = $issueDefinitionsByKey[$blockedByKey]
+    $blockingIssue = $existingIssuesByTitle[$blockingDefinition.title]
+    if (-not $blockingIssue) { continue }
+
+    Set-IssueBlockedByDependency -RepoFullName $repoInfo.FullName -IssueNumber ([int]$issue.number) -BlockingIssueNumber ([int]$blockingIssue.number)
   }
 }
 
