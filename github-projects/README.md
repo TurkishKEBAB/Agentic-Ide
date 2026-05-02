@@ -25,8 +25,34 @@ This folder contains the seed data and automation for the `Agentic IDE - Thesis 
   - `Test Target`
   - `Thesis Evidence`
   - `Readiness`
+  - `Blocked by`
+  - `Blocking`
+  - `Dependency Count`
+  - `Blocking Count`
+  - `Child Issue Count`
+- Project views for:
+  - `Requirements Master`
+  - `Workflow Board`
+  - `Advisor Review`
+  - `By Phase`
+  - `Evidence Matrix`
+  - `Risks`
+  - `Dependency Map`
+  - `Dependency Map Detailed`
+  - `Faz 1 Readiness Gate`
+  - `Implementation Queue`
+  - `Implementation Queue Detailed`
+  - `VDD Research`
+  - `Safety & Privacy`
+  - `Quality Gates`
+  - `CI / Project Ops`
+  - `Roadmap`
 - Repository labels for epics, requirements, research items, and risks
 - Operational labels for bugs, dependencies, documentation, security, quality gates, and VDD research framing
+- Repository milestones (`Faz 1 - Implementation Readiness`, `Faz 2 - MVP`, `Faz 3 - Evaluation & Thesis`) auto-assigned from each issue's `Phase` field
+- Native GitHub parent / sub-issue links created from each issue's `parentKey` (epic relationship is wired through the real GraphQL `addSubIssue` mutation, not just the `Parent Epic` text field)
+- Native GitHub issue dependencies created from optional `blockedByKeys` entries (`blocked by` relationships are synced through GitHub's REST issue dependencies API)
+- Readable dependency summary fields are populated from the same source: `Blocked by`, `Blocking`, `Dependency Count`, `Blocking Count`, and `Child Issue Count`
 - Epic issues and requirement issues derived from the current thesis documents
 
 ## Why `Requirement Status` Instead Of `Status`
@@ -86,10 +112,10 @@ powershell -ExecutionPolicy Bypass -File .\scripts\setup-requirements-github-pro
 
 - The script is designed to be safely rerunnable for labels, fields, and issues.
 - Verification-Driven Development planning cards are seeded with `Requirement Status = Advisor Review` so the TDD/VDD stance, spiral requirements control, and implementation-verification separation can be discussed before approval.
-- View metadata in `requirements-analysis.json` records intended filters, grouping, sorting, and visible fields. GitHub's stable automation support for fine-grained Project view layout is limited, so final view tuning may still require one manual UI pass.
+- View metadata in `requirements-analysis.json` records intended filters, visible fields, grouping, sorting, board columns, swimlanes, roadmap date field, slice field, and field-sum intent.
 - Use the built-in GitHub Project `Status` field for workflow execution (`Backlog`, `Ready`, `In Progress`, `Review`, `Done`, `Deferred`). Use `Requirement Status` for thesis requirement maturity only.
-- Project view creation is best-effort because GitHub exposes fewer stable automation hooks for fine-grained view configuration than it does for fields and items.
-- If view creation succeeds, you still may want to fine-tune grouping and visible columns once in the GitHub UI.
+- Project view creation uses GitHub's REST Project views endpoint for user-owned projects (`/users/{user_id}/projectsV2/{project_number}/views`). Creating new views can include `visible_fields`; existing view updates are best-effort because GitHub's documented endpoint is creation-focused.
+- If a view already exists and GitHub rejects the automatic update, use the GitHub UI once to align that view with the seed. The `Dependency Map Detailed` view exists as a clean fallback when an older manually-created `Dependency Map` cannot be patched in place.
 - Recommended workflow columns for the built-in `Status` field are `Backlog`, `Ready`, `In Progress`, `Review`, `Done`, and `Deferred`.
 - `-SyncWorkflowStatus` sets epics to `Review`, Faz 1 P0 child issues to `Ready`, and the rest to `Backlog`; omit it after active development starts so day-to-day status is not reset.
 - `Readiness` is set automatically from the seed: advisor-review or Faz 1 P0 cards become `Ready`, approved/done cards become `Validated`, deferred/blocked cards become `Blocked`, and the rest stay `Needs Clarification`.
