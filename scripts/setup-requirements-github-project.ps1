@@ -785,12 +785,12 @@ function Get-FieldMap {
 function Get-ExistingIssuesByTitle {
   param([string]$RepoFullName)
 
-  $issues = Get-Collection (Invoke-Gh -Arguments @('issue', 'list', '-R', $RepoFullName, '--state', 'open', '--limit', '500', '--json', 'number,title,url') -AsJson)
+  $issues = Get-Collection (Invoke-Gh -Arguments @('issue', 'list', '-R', $RepoFullName, '--state', 'all', '--limit', '500', '--json', 'number,title,url') -AsJson)
   $map = @{}
 
   foreach ($issue in $issues) {
     if ($map.ContainsKey($issue.title)) {
-      throw "Duplicate open issue title detected in ${RepoFullName}: $($issue.title). Remove or rename the duplicate before rerunning setup."
+      throw "Duplicate issue title detected in ${RepoFullName}: $($issue.title). Remove or rename the duplicate before rerunning setup."
     }
 
     $map[$issue.title] = $issue
@@ -1549,7 +1549,7 @@ function Get-ProjectViewsEndpoint {
     throw "Could not resolve numeric GitHub user id for $OwnerLogin."
   }
 
-  return "/users/$OwnerLogin/projectsV2/$ProjectNumber/views"
+  return "/users/$ownerId/projectsV2/$ProjectNumber/views"
 }
 
 function Resolve-ProjectViewFieldDatabaseIds {
