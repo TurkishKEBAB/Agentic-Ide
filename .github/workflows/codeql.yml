@@ -13,9 +13,30 @@ permissions:
   contents: read
   security-events: write
   actions: read
+  packages: read
 
 jobs:
-  analyze:
+  analyze-actions:
+    name: Analyze GitHub Actions
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v4
+        with:
+          languages: actions
+
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v4
+        with:
+          category: "/language:actions"
+
+  analyze-javascript-typescript:
     name: Analyze JavaScript and TypeScript
     runs-on: ubuntu-latest
 
@@ -37,7 +58,7 @@ jobs:
 
       - name: Planning-only repository notice
         if: steps.app.outputs.exists == 'false'
-        run: echo "No package.json yet; CodeQL is armed and will run after the first app scaffold."
+        run: echo "No package.json yet; JavaScript/TypeScript CodeQL is armed and will run after the first app scaffold."
 
       - name: Initialize CodeQL
         if: steps.app.outputs.exists == 'true'
@@ -53,3 +74,5 @@ jobs:
       - name: Perform CodeQL Analysis
         if: steps.app.outputs.exists == 'true'
         uses: github/codeql-action/analyze@v4
+        with:
+          category: "/language:javascript-typescript"
