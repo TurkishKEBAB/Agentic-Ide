@@ -19,14 +19,20 @@
 - Tezin konumlandırılması: güvenli ve açıklanabilir ajan davranışı
 
 ### 1.3 Araştırma Sorusu ve Hipotez
-- Ana araştırma sorusu: Plan-onay döngüsü hata oranı ve güveni iyileştirir mi?
+- Ana araştırma sorusu: Kullanıcı tetiklemeli, plan-first ve approval-gated ajan döngüsü; çok dosyalı kod
+  değişikliklerinde görev başarısını, güvenlik ihlali riskini, rollback davranışını ve kullanıcı güvenini doğrudan LLM
+  çıktısına kıyasla iyileştirir mi?
 - Alt sorular: Retrieval etkinliği, diff etkisi, güvenlik maliyeti, model karşılaştırma
-- Hipotez: Onay mekanizması güvenlik ihlalini sıfıra indirir, rollback oranını %20'nin altına düşürür
+- Hipotez adayı: B/C'de aynı aday ve koruma temeli altında insan incelemesi, hatalı değişikliğin uygulanma oranını
+  azaltabilir; inceleme süresini artırabilir. Birincil hipotez ve analiz formal sonuçlardan önce danışmanla dondurulur.
+- Sıfır gözlenen politika ihlali güvenlik test hedefidir; rollback'in düşük veya yüksek çıkması tek başına hipotezi
+  desteklemez. Kalan kusur, red nedeni ve geri alma doğruluğu ayrı raporlanır.
 
 ### 1.4 Katkılar
 - Açık kaynaklı, ölçülebilir bir ajan destekli editör prototipi
-- Plan-approval döngüsünün etkinliğine ilişkin nicel ve nitel veriler
+- Approval-gated AI coding döngüsünün etkinliğine ilişkin nicel ve nitel veriler
 - Güvenlik modeli tasarım önerisi (workspace boundary + path normalization + write boundary + reactive safety warnings + audit log)
+- Verification-Driven Development'ın kanıt, izlenebilirlik ve rollback dili olarak tez içinde sınırlandırılmış kullanımı
 
 ### 1.5 Belge Organizasyonu
 - Bölümlerin kısa açıklamaları
@@ -76,7 +82,7 @@
 - SWE-bench Verified ve SWE-bench Pro varyantları
 - HumanEval, MBPP: fonksiyon seviyesi değerlendirme
 - ColBench: işbirlikli benchmark (2025)
-- LiveCodeBench: canlı, kontamine olmamış değerlendirme
+- LiveCodeBench: güncel görev toplama ve contamination riskini azaltma yaklaşımı; sıfır contamination garantisi değildir
 
 ---
 
@@ -163,7 +169,9 @@
 - 20 görevlik benchmark seti tanımı
 - Görev kategorileri: tek dosya düzenleme (5), çok dosya refactor (4), hata düzeltme (4), test yazma (3), Q&A (4)
 - Test projesi: ~3.000 satır, 15-20 dosya, TypeScript
-- Baseline tanımı: araçsız geliştirici vs. doğrudan LLM vs. Agentic IDE
+- Baseline tanımı: A standartlaştırılmış doğrudan LLM; B aynı IDE'de deneysel gate-disabled; C tam onaylı akış.
+  A/C toplam iş akışı, B/C kontrol edilen onay politikası farkıdır. Araçsız geliştirici mevcut A değildir;
+  eklenirse ayrı D koşulu ve kaynak planı gerekir. Ayrıntı: [değerlendirme protokolü](docs/EVALUATION_PROTOCOL.md).
 
 ### 5.2 Değerlendirme Metrikleri
 - Görev başarı oranı (task success rate)

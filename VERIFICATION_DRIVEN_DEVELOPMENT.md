@@ -6,9 +6,15 @@ implementation specification, or literature-backed conclusion.
 
 ## Core Position
 
-Agentic IDE should be framed around Verification-Driven Development (VDD): a software development approach where
-AI-assisted implementation is governed by independently captured requirements, evidence, review decisions, rollback
-points, and verification traces.
+Agentic IDE's primary MVP research focus is approval-gated AI coding: a user-triggered agent proposes a plan, shows a
+diff, waits for human approval, applies only approved edits, and records rollback/audit evidence.
+
+Verification-Driven Development (VDD) is the supporting thesis framing for that prototype: a software development
+approach where AI-assisted implementation is governed by independently captured requirements, evidence, review
+decisions, rollback points, and verification traces.
+
+VDD is not a separate MVP product mode and should not replace the narrower research question unless the advisor approves
+that expansion.
 
 The strongest version of the claim is:
 

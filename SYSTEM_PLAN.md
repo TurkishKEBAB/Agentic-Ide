@@ -1,5 +1,10 @@
 # SİSTEM PLANLAMA BELGESİ (SYSTEM_PLAN)
 
+7 Ekim 2026 inceleme eki: onayın patch/base hashlerine bağlanması, dirty-buffer davranışı, Electron IPC sınırı,
+çok dosya journal/recovery ve rollback çakışmaları [değişiklik yaşam döngüsü sözleşmesinde](docs/CHANGE_LIFECYCLE_CONTRACT.md)
+uygulama öncesi öneri olarak tanımlanmıştır. Tek dosya rename'i çok dosya filesystem atomikliği garantisi vermez.
+Bu ek henüz uygulanmış veya şemalara bütünüyle aktarılmış değildir.
+
 > **Belge amacı:** Bu belge, Agentic IDE lisans bitirme projesinin teknik ve mimari boyutunu tanımlar.
 > Nasıl inşa edileceğini, nasıl güvenli hale getirileceğini ve nasıl değerlendirileceğini netleştirir.
 > Ürün kararları için → `PRODUCT_PLAN.md`
@@ -489,15 +494,16 @@ Bu özet bölümü, tüm belgeden çıkan en kritik kararlardır.
 
 ### Tek Cümlelik Net Proje Tanımı
 
-> **"Güvenli, açıklanabilir ve kullanıcı onaylı bir ajan döngüsü kullanan AI destekli kod editörü; çok dosyalı
-değişikliklerde hata oranını ve güven düzeyini, doğrudan LLM çıktısına kıyasla ölçmektedir."**
+> **"Agentic IDE, kullanıcı tetiklemeli, plan-önce-onay-sonra çalışan bir ajan döngüsünün çok dosyalı kod
+değişikliklerinde görev başarısı, güvenlik ihlali, rollback davranışı ve kullanıcı güveni üzerindeki etkisini ölçen
+güvenlik odaklı bir AI kod editörü tez prototipidir."**
 
 ---
 
 ### En Savunulabilir Akademik Araştırma Sorusu
 
-> **"Kullanıcı tetiklemeli, plan-önce-onay-sonra bir ajan döngüsü, çok dosyalı kod değişikliklerinde güvenlik ihlali
-oranını ve kullanıcı rollback davranışını, doğrudan LLM uygulamasına kıyasla istatistiksel olarak anlamlı biçimde
+> **"Kullanıcı tetiklemeli, plan-önce-onay-sonra bir ajan döngüsü, çok dosyalı kod değişikliklerinde görev başarısını,
+güvenlik ihlali riskini, rollback davranışını ve kullanıcı güvenini doğrudan LLM çıktısına kıyasla ölçülebilir biçimde
 iyileştirir mi?"**
 
 ---

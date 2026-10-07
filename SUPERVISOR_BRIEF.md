@@ -7,17 +7,22 @@
 
 ## 1. Proje Özeti
 
-**Agentic IDE**, kod yazma ortamı ile yapay zeka destekli geliştirme akışını tek çatı altında birleştirmeyi hedefleyen
-bir lisans bitirme projesidir.
+**Agentic IDE**, kullanıcı tetiklemeli, plan-önce-onay-sonra çalışan bir ajan döngüsünün çok dosyalı kod
+değişikliklerinde görev başarısı, güvenlik ihlali, rollback davranışı ve kullanıcı güveni üzerindeki etkisini ölçen
+güvenlik odaklı bir AI kod editörü tez prototipidir.
 
-Projenin odak noktası: yalnızca yanıt veren bir sohbet aracı değil; **kullanıcının açık bağlamını anlayan, plan sunan,
-onay alan ve güvenli biçimde değişiklik uygulayan** bir ajan döngüsünü ölçülebilir şekilde değerlendirmek.
+Projenin odak noktası: tam özellikli bir IDE veya Copilot/Cursor alternatifi üretmek değil; **approval-gated AI coding**
+akışını ölçülebilir ve denetlenebilir bir prototip üzerinde değerlendirmek.
 
 Bu çalışma, tam özellikli bir IDE üretmeyi değil, aşağıdaki araştırma sorusunu savunulabilir bir prototip üzerinden
 yanıtlamayı hedefler:
 
-> **"Kullanıcı tetiklemeli, plan-önce-onay-sonra çalışan güvenli bir ajan döngüsü; çok dosyalı değişikliklerde hata
-oranını, güvenlik ihlali riskini ve kullanıcı güvenini doğrudan LLM kullanımına kıyasla iyileştirir mi?"**
+> **"Kullanıcı tetiklemeli, plan-önce-onay-sonra çalışan güvenli bir ajan döngüsü; çok dosyalı kod değişikliklerinde görev
+başarısını, güvenlik ihlali riskini, rollback davranışını ve kullanıcı güvenini doğrudan LLM kullanımına kıyasla
+iyileştirir mi?"**
+
+Bu çerçevede **Agentic IDE** ürün artefact'i, **approval-gated AI coding** ana araştırma odağı, **Verification-Driven
+Development (VDD)** ise kanıt, izlenebilirlik ve rollback kararlarını adlandıran destekleyici tez çerçevesidir.
 
 ---
 
@@ -25,29 +30,36 @@ oranını, güvenlik ihlali riskini ve kullanıcı güvenini doğrudan LLM kulla
 
 ### Problem
 
-- Geliştiriciler günde 1-2 saat bağlam kırılması nedeniyle verimlilik kaybeder
-- Mevcut AI araçları (Copilot, Cursor, Windsurf) hız optimize eder; güvenlik ve şeffaflık arka planda kalır
-- "Plan-first, approval-gated" döngüsü için ölçülebilir akademik çalışma yok
+- Çok dosyalı AI önerilerini gereksinimlere göre incelemek ve doğrulamak ek iş yükü oluşturabilir.
+- Mevcut araçlar diff, izin ve geri alma özellikleri sunar; bunların yokluğu özgünlük gerekçesi olarak kullanılmaz.
+- Bu prototip, plan/onay/kanıt hattının görev doğruluğu, güvenlik ve inceleme maliyetine etkisini ölçmeyi hedefler.
 
 ### Fark
 
-- Copilot/Cursor/Windsurf → hız optimize eder
-- **Agentic IDE → güven optimize eder** (diff önizleme, onay, rollback, audit log)
+- **Katkı adayı:** Gereksinim → plan → diff → onay → değişiklik → kanıt → rollback izlenebilirliği ve kontrollü deney.
+- Güvenlik veya üretkenlik üstünlüğü henüz ölçülmemiştir; kaynaklar ve iddia sınırları
+  [literatür notunda](docs/LITERATURE_AND_CLAIMS.md) belirtilmiştir.
 
 ---
 
-## 3. Netleşen Kararlar
+## 3. Mevcut Teknik Baz Çizgi
+
+Tablodaki teknik kararlar repo içindeki **planlama baz çizgisidir**; danışman onayı veya çalışan uygulama kanıtı
+anlamına gelmez. 8 Ekim 2026 ilk toplantısında araştırma odağı, kapsam ve gerçek teslim takvimi teyit edilecektir.
+
+`PROJECT_REVIEW_TODO.md`, VDD'yi ana odak olarak işaretlerken ana planlar destekleyici çerçeve olarak tanımlar.
+Bu fark [toplantı karar listesinde](ADVISOR_MEETING_AGENDA.md) açık bir karar olarak tutulur.
 
 | Karar                                      | Durum               | Belge                         |
 |--------------------------------------------|---------------------|-------------------------------|
-| Proje süresi: 18 ay                        | ✅ Kesinleşti        | `PROJECT_ROADMAP`             |
-| Platform: Electron + Monaco                | ✅ Kesinleşti        | `ARCHITECTURE_OPTIONS`        |
-| Ajan: Single-agent (ReAct döngüsü)         | ✅ Kesinleşti        | `AGENT_ARCHITECTURE_ANALYSIS` |
-| Değişiklik onayı: Diff + onay zorunlu      | ✅ Kesinleşti        | `SYSTEM_PLAN`                 |
-| Model: 1 bulut (Claude) + 1 yerel (Ollama) | ✅ Kesinleşti        | `TECH_STACK_AND_AI`           |
-| Proaktif analiz: MVP dışı                  | ✅ Kesinleşti        | `PROACTIVE_BEHAVIOR_DESIGN`   |
-| Benchmark: 20 görev, üçlü karşılaştırma    | 🟡 Onay bekliyor    | `EVALUATION_PLAN`             |
-| Terminal entegrasyonu                      | 🟡 Karar bekleniyor | `PRODUCT_PLAN` §6             |
+| Proje süresi: 18 ay taslak                  | Takvim teyidi bekliyor | `PROJECT_ROADMAP`             |
+| Platform: Electron + Monaco                | Repo mimari kararı    | `ARCHITECTURE_OPTIONS`        |
+| Ajan: Single-agent (ReAct döngüsü)          | Repo mimari kararı    | `AGENT_ARCHITECTURE_ANALYSIS` |
+| Değişiklik onayı: Diff + onay zorunlu       | Tasarım baz çizgisi   | `SYSTEM_PLAN`                 |
+| Model: 1 bulut + 1 yerel sağlayıcı          | Tasarım baz çizgisi   | `TECH_STACK_AND_AI`           |
+| Proaktif analiz: MVP dışı                  | Kapsam baz çizgisi    | `PROACTIVE_BEHAVIOR_DESIGN`   |
+| Benchmark: 20 görev, üçlü karşılaştırma     | Danışman incelemesi   | `EVALUATION_PLAN`             |
+| Terminal entegrasyonu                      | MVP dışı              | `PRODUCT_PLAN` §6             |
 
 ---
 
@@ -81,19 +93,20 @@ Danışman incelemesi için önerilen okuma sırası:
 
 Aşağıdaki başlıklar danışman geri bildirimiyle netleştirilecektir:
 
-| # | Konu                     | Seçenekler                                                |
-|---|--------------------------|-----------------------------------------------------------|
-| 1 | Terminal entegrasyonu    | MVP'de mi, gelecek çalışmada mı?                          |
-| 2 | Kullanıcı çalışması      | 5-10 katılımcı zorunlu mu, opsiyonel mi?                  |
-| 3 | Benchmark görev tasarımı | Kim tasarlayacak? (danışman, sınıf arkadaşı, açık kaynak) |
-| 4 | Model version kilitleme  | API güncellemeleri karşısında strateji                    |
-| 5 | Etik kurul onayı         | Bulut modele kod gönderme için gerekli mi?                |
+| # | Karar Başlığı | Danışmandan Beklenen Karar |
+|---|---------------|----------------------------|
+| 1 | Akademik odak | Ana iddia "approval-gated AI coding"; VDD destekleyici çerçeve olsun mu? |
+| 2 | Hedef kullanıcı | Junior developer / üst sınıf bilgisayar mühendisliği öğrencisi profili yeterince net mi? |
+| 3 | MVP dışı sınırlar | Terminal, multi-agent, proaktif/background analiz ve VS Code extension kesin dışarıda kalsın mı? |
+| 4 | Benchmark tasarımı | 20 görevlik A/B/C tasarım ve görev hazırlama yöntemi onaylanıyor mu? |
+| 5 | Güven metrikleri | Rollback davranışı + audit log + kısa anket kullanıcı güveni için yeterli mi? |
+| 6 | VDD/TDD dili | "Testler gerekli ama tek başına yeterli değil" çizgisi tez için uygun mu? |
 
 ---
 
 ## 6. Beklenen Sonuç
 
-18 ay sonunda hedeflenen çıktı:
+Danışmanla başlangıç ve teslim tarihleri teyit edilecek 18 aylık taslak sonunda hedeflenen çıktı:
 
 - **Çalışan prototip:** Güvenli, açıklanabilir, ölçülebilir bir ajan destekli editör
 - **Akademik katkı:** Plan-approval döngüsünün etkinliğine ilişkin nicel veriler

@@ -7,6 +7,11 @@
 
 ## 1. Genel Yapı
 
+**8 Ekim 2026 toplantı notu:** 18 ay göreli bir taslaktır; gerçek başlangıç, teslim/savunma tarihi ve haftalık kapasite
+teyit edilmemiştir. GitHub'daki üç milestone'un tarih alanları da boştur. Aşağıdaki beş teknik faz, üç GitHub fazıyla
+[değerlendirme protokolündeki eşleme](docs/EVALUATION_PROTOCOL.md) üzerinden takip edilir; bunlar aynı adlandırma değildir.
+Milestone tamamlanması takvim ayından ziyade kabul/kanıt kapısına bağlıdır. Danışman kararı olmadan tarih atanmaz.
+
 ```
 Ay 1–3   │ Faz 1: Zemin (Foundation)
 Ay 4–6   │ Faz 2: Editör Çekirdeği (Editor Core)
@@ -35,13 +40,17 @@ Ay 16–18 │ Faz 5: Tez ve Final (Thesis & Final)
 
 ### Faz 1 Kontrol Noktası
 
+Araştırma hazırlığı bu dönemde başlar: protokol/oracle taslağı, her kategoriden birer olmak üzere beş pilot görev
+ve kaynak/iddia matrisi hazırlanır. Faz 4'te görevler ilk kez tasarlanmaz; final 20 görev ve analiz formal veri öncesi dondurulur.
+
 - [ ] Electron + Monaco shell çalışıyor mu?
 - [ ] 5 dosya indekslenip sorgulanabiliyor mu?
 - [ ] Performans kabul edilebilir mi? (açılış < 5 sn)
 
 ### Ne Yapılmaz
 
-Ajan kodu yok. AI entegrasyonu yok. Güvenlik kodu yok.
+Ajan kodu ve AI entegrasyonu yok. İlk dosya erişimiyle birlikte workspace boundary, protected-file kuralları ve
+Electron IPC güvenlik zemini kurulur; güvenlik sonraki faza bırakılmaz.
 
 ---
 
@@ -169,6 +178,16 @@ Bu takvimle ilişkili riskler → `RISK_REGISTER.md`:
 - R5 (TypeScript/Electron öğrenme süresi) → Faz 1'i uzatabilir
 - R11 (kapsam şişmesi) → her faz geçişinde kapsam kontrolü
 - R12 (motivasyon düşüşü) → haftalık küçük hedefler
+
+`CRITICAL_ANALYSIS.md` içindeki kapsam eleştirileri ayrıca şu roadmap kapılarına bağlanır:
+
+| Risk Alanı | Roadmap Kapısı | Backlog / Kanıt |
+|------------|----------------|-----------------|
+| Kapsam şişmesi ve feature parity | Her faz geçişi, özellikle Faz 3 feature freeze | `req-scope-guardrails`, `req-thesis-freeze` |
+| Proaktif/background analiz | Faz 2 UX ve safety scope review | `req-ux-proactive-guards`, `req-safety-reactive-warnings` |
+| Terminal/shell execution | Faz 2 tool whitelist review | `adr-workspace-boundary-no-shell`, `req-agent-tool-whitelist` |
+| Multi-agent karmaşıklığı | Faz 2 agent loop review | `req-agent-plan-first` |
+| Benchmark savunulabilirliği | Faz 4 benchmark readiness | `req-evaluation-benchmark`, `req-evaluation-metrics` |
 
 ---
 

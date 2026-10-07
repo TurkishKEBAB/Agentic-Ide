@@ -9,12 +9,14 @@ actor "Bulut Model Sağlayıcı\n(Claude API)" as CloudModel
 actor "Yerel Model Sağlayıcı\n(Ollama)" as LocalModel
 actor "Tercih Deposu\n(preferences.json)" as PreferenceStore
 actor "Konfigürasyon Deposu\n(~/.agentide/config.json)" as ConfigStore
+actor "OS Credential / Şifreli Secret Store\n(önerilen; ADR-010)" as SecretStore
 actor "Audit ve Metrik Kayıtları\n(audit.jsonl + eval export)" as MetricsStore
 
 rectangle "Agentic IDE - Model Provider Katmanı" {
   usecase "Aktif model sağlayıcısını seç" as UC_SelectProvider
   usecase "Provider erişilebilirliğini\ntest et" as UC_PingProvider
-  usecase "Bulut API anahtarını oku" as UC_LoadCloudKey
+  usecase "Config'den secret referansını oku" as UC_LoadKeyReference
+  usecase "Broker ile bulut API anahtarını\nsecret store'dan kullan" as UC_LoadCloudKey
   usecase "Bulut modelle görevi çalıştır" as UC_RunCloudTask
   usecase "Yerel modelle görevi çalıştır" as UC_RunLocalTask
   usecase "Bulut bağlantı/maliyet\nhatasını göster" as UC_ShowCloudFailure
@@ -33,6 +35,7 @@ Developer --> UC_EnableLocalOnly
 
 UC_SelectProvider .> UC_PingProvider : <<include>>
 UC_RunCloudTask .> UC_LoadCloudKey : <<include>>
+UC_LoadCloudKey .> UC_LoadKeyReference : <<include>>
 UC_ShowCloudFailure .> UC_RunCloudTask : <<extend>>
 UC_ShowCloudFailure .> UC_PingProvider : <<include>>
 UC_ShowCloudFailure .> UC_OfferLocalFallback : <<include>>
@@ -43,7 +46,8 @@ UC_RunCloudTask .> UC_RecordModelMetrics : <<include>>
 UC_RunLocalTask .> UC_RecordModelMetrics : <<include>>
 
 CloudModel --> UC_PingProvider
-ConfigStore --> UC_LoadCloudKey
+ConfigStore --> UC_LoadKeyReference
+SecretStore --> UC_LoadCloudKey
 CloudModel --> UC_RunCloudTask
 LocalModel --> UC_PingProvider
 LocalModel --> UC_RunLocalTask
@@ -73,6 +77,14 @@ note bottom of UC_RecordModelMetrics
 Tez için yerel/bulut gecikmesi, token kullanımı ve
 maliyet ayrı ölçülür. API anahtarları veya secret içerik
 audit/metrik kayıtlarına yazılmaz.
+end note
+
+note bottom of UC_LoadCloudKey
+ADR-010 önerisi: config yalnızca apiKeyRef tutar.
+Ham anahtar main-process broker'da kullanılır;
+renderer/model context/log/export'a döndürülmez.
+Güvenli storage yoksa plaintext fallback yapılmaz.
+Storage mekanizması henüz uygulanmamıştır.
 end note
 
 @enduml

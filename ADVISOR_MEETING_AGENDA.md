@@ -1,126 +1,177 @@
-# DANI^MAN TOPLANTI G�NDEM0 (ADVISOR_MEETING_AGENDA)
+# İlk Danışman Toplantısı — 8 Ekim 2026
 
-> **Belge amac1:** Dan1_man toplant1lar1nda sorulacak karar sorular1n1 ve aksiyon maddelerini haz1rlar.  
-> Bu belge toplant1 �ncesi g�ncellenir, toplant1 sonras1 aksiyonlar eklenir.
+Durum: Toplantı öncesi karar taslağı. Aşağıdaki öneriler danışman onayı değildir.
 
----
+- Tarih: **8 Ekim 2026, Perşembe**.
+- Katılımcılar: [Öğrenci adı] + [Danışman adı].
+- Önerilen süre: **15 dakika sunum + 30 dakika tartışma**; danışmanın ayırdığı süreye göre esnetilebilir.
+- Amaç: Araştırma odağı, uygulanabilir MVP, deney protokolü, insan çalışması ve gerçek takvim hakkında beş karar almak.
+- Mevcut durum: Planlama belgeleri, ADR'ler, schema'lar, diyagramlar ve backlog var; çalışan uygulama ve deney sonucu henüz gösterilemiyor.
 
-## 1. Toplant1 Bilgileri
+## Sunumun 15 Dakikalık Akışı
 
-- **Tarih:** [belirtilecek]
-- **Kat1l1mc1lar:** [�renci] + [dan1_man]
-- **S�re:** ~60 dakika
-- **Format:** Belge tak1m1 �zerinden inceleme + karar alma
+| Süre | Anlatılacak konu | Danışmanın değerlendireceği nokta |
+|---|---|---|
+| 0–3 dk | Problem ve katkı adayı: AI önerisini gereksinime göre doğrulamak, karar ve kanıt üretmek | Tez sorusu yeterince dar ve ölçülebilir mi? |
+| 3–6 dk | VDD önerisi ve mevcut kapsam: gereksinim → plan → diff → doğrulama → onay → uygulama → kanıt/geri alma | VDD ana çerçeve mi, destekleyici anlatım mı? |
+| 6–9 dk | Mimari baz çizgisi: Electron + Monaco, tek yürütücü, sınırlı tool yüzeyi, workspace/protected-file kontrolleri | İlk prototipin en küçük güvenli kapsamı nedir? |
+| 9–12 dk | 20 görevlik önerilen A/B/C değerlendirme ve kanıt planı | Hangi karşılaştırma hangi iddiayı destekler? |
+| 12–15 dk | Açık kararlar ve ilk iki haftanın somut çıktıları | Hangi kararlar şimdi alınmalı, hangileri ertelenebilir? |
 
----
+Sunumda performans, güvenlik üstünlüğü, kullanıcı güveni veya öğrenme artışı elde edilmiş sonuç gibi anlatılmaz.
+Özgünlük, mevcut araçlarda diff/onay/rollback bulunmadığı iddiasına dayandırılmaz.
 
-## 2. Toplant1 Hedefi
+## K1 — Ana Akademik Çerçeve ve Tez İddiası
 
-Bu toplant1n1n amac1, proje belge setindeki ana kararlar1 dan1_man onay1yla netle_tirmektir:
+**Net soru:** “VDD'yi AI destekli geliştirmede gereksinim, doğrulama ve kanıt izlenebilirliğini birleştiren ana tasarım çerçevesi olarak ele alıp, insan onay kapısının etkisini bunun ölçülebilir bileşeni olarak sınırlandırmam uygun mu?”
 
-- Ara_t1rma sorusunun nihai form�lasyonu
-- 18 ayl1k takvimin uygulanabilirli i
-- Electron + Monaco ba_lang1� mimarisi onay1
-- Single-agent stratejisinin yeterlili i
-- De erlendirme metodolojisinin akademik savunulabilirli i
-- MVP kapsam1  dahil edilecek ve �1kar1lacak �zellikler
+**Öneri:** Kullanıcının yerel inceleme notundaki VDD odağını esas alan, sınırları açık bir VDD çerçevesi. Ürün artefact'i Agentic IDE; ölçülebilir ilk katkı gereksinim → plan/diff → karar → değişiklik → kanıt bağlantısı ve onay politikasının kontrollü değerlendirmesi. “Yeni ve üstün evrensel metodoloji” veya “TDD'nin yerine geçen yöntem” iddiası yok.
 
----
+| Seçenek | Kazanç | Bedel / sınır |
+|---|---|---|
+| VDD ana çerçeve, onay kapısı ölçülebilir bileşen — önerilen | Kullanıcının hedefini korur; daha geniş fikri dar prototip ve kanıtla bağlar | VDD'nin her bileşeninin etkinliği aynı deneyle kanıtlanmış sayılamaz |
+| Approval-gated coding ana soru, VDD destekleyici çerçeve | Daha dar araştırma sorusu ve daha az uygulama yükü | VDD ana hedefi daha sınırlı temsil edilir |
+| Tam VDD metodolojisi, öğrenci/profesyonel modları ve çoklu verifier değerlendirmesi | Geniş araştırma programı | İlk tez için kapsam, insan deneyi ve doğrulama yükü belirgin artar |
 
-## 3. Karar Bekleyen Sorular
+**Gerekli çıktı:** Tek cümlelik tez katkısı, ana araştırma sorusu, iki alt soru ve kaçınılacak iddialar listesi. VDD ana/destekleyici seçimi açıkça kaydedilmeli.
 
-### 3.1 Ara_t1rma Sorusu
+İlgili kartlar: [#20](https://github.com/TurkishKEBAB/Agentic-Ide/issues/20), [#66](https://github.com/TurkishKEBAB/Agentic-Ide/issues/66), [#71](https://github.com/TurkishKEBAB/Agentic-Ide/issues/71).
 
-- [ ] Ana ara_t1rma sorusu kabul edildi mi? � _"Plan-first, approval-gated d�ng� hata oran1n1 ve g�veni iyile_tirir
-  mi?"_
-- [ ] Alt ara_t1rma sorular1 (retrieval etkinli i, g�venlik maliyeti) teze dahil mi?
-- [ ] Hipotez net mi? J�ri i�in savunulabilir mi?
+## K2 — MVP Sınırı ve Doğrulamanın Bağımsızlığı
 
-### 3.2 Mimari Karar
+**Net sorular:**
 
-- [ ] Electron + Monaco karar1 kilitlensin mi? Tauri gelecek �al1_ma olarak m1 b1rak1ls1n?
-- [ ] Multi-agent yakla_1m1n1 MVP d1_1 b1rakma karar1 savunulabilir mi?
-- [ ] VS Code extension yerine ba 1ms1z edit�r geli_tirme gerek�esi yeterli mi?
+1. “Tek yürütücü ajan ve MVP içinde shell/terminal çalıştırmama sınırı yeterli mi?”
+2. “Minimum doğrulama kanıtını sabit gereksinim/kabul kriterleri ve harici test oracle'ı ile kurmam; read-only LLM verifier'ı danışman kararına bağlı ek değerlendirme rolü olarak tutmam uygun mu?”
+3. “Onaylanan diff değişirse veya dosya içeriği eskirse yeniden onay; çok dosyalı apply hata verirse recovery; undo sırasında kullanıcı değişikliği varsa conflict politikası zorunlu kabul kriteri olsun mu?”
 
-### 3.3 Kapsam ve Takvim
+**Öneri:** Tek yürütücü; kullanıcı tetiklemeli plan/diff/onay; agent tool yüzeyinde shell/exec/eval yok. Testler geliştirici, CI veya harici benchmark harness tarafından çalıştırılabilir. Deterministik policy testleri ve önceden sabitlenmiş test/kabul oracle'ı temel kanıttır. Read-only verifier, öneri/bulgu üretebilir; dosya değiştiremez ve insan kararının yerini alamaz.
 
-- [ ] 18 ayl1k / 3 fazl1 plan hocam'1n beklentisiyle uyumlu mu?
-- [ ] Proaktif analiz �zelli i kesinlikle MVP d1_1 m1? (PROACTIVE_BEHAVIOR_DESIGN.md "gelecek �al1_ma" olarak
-  belgelendi)
-- [ ] Terminal entegrasyonu tez kapsam1nda m1?
-- [ ] `.exe` paketleme gerekli mi, yoksa demo i�in `npm run dev` yeterli mi?
+| Seçenek | Kazanç | Bedel / sınır |
+|---|---|---|
+| Bağımsız oracle + tek yürütücü; read-only verifier kapsamı ayrıca seçilir — önerilen | Test edilebilir, sınırları açık ve ilk prototipe uygun | Verifier'ın ek yararı ayrı bir deney yapılmadan iddia edilemez |
+| Aynı LLM, ayrı prompt/context ile zorunlu read-only verifier | Rol ve tool yüzeyi ayrımı görünür | Korelasyonlu hatalar mümkündür; farklı prompt doğruluk bağımsızlığını kanıtlamaz |
+| Farklı model verifier + multi-agent koordinasyon veya shell araçları | Daha geniş otomasyon ve araştırma soruları | Ek maliyet, güvenlik yüzeyi ve deney değişkenleri; ilk MVP kapsamını büyütür |
 
-### 3.4 Deerlendirme
+**Gerekli çıktı:** MVP içi/dışı kısa liste; minimum verifier seviyesi; harici test yürütme sınırı; approval/recovery/undo kabul kriterleri. Workspace boundary ve protected-file testleri agent loop'tan önce bulunmalı.
 
-- [ ] 20 g�revlik benchmark seti tez �l�e i i�in yeterli mi?
-- [ ] Baseline ��l� kar_1la_t1rma (do rudan LLM, onays1z ajan, Agentic IDE) uygun mu?
-- [ ] Kullan1c1 �al1_mas1 (5-10 ki_i) zorunlu mu, yoksa opsiyonel mi?
-- [ ] SWE-bench ile kendi benchmark'1m1z1n konumland1rmas1 kabul edilebilir mi?
+İlgili kartlar: [#31](https://github.com/TurkishKEBAB/Agentic-Ide/issues/31), [#68](https://github.com/TurkishKEBAB/Agentic-Ide/issues/68).
 
-### 3.5 G�venlik ve Etik
+## K3 — Deney Tasarımı ve Formal Çalışma Öncesi Dondurma
 
-- [ ] Diff + onay + rollback hatt1 zorunlu tutulmal1 m1?
-- [ ] Audit log mekanizmas1 tez i�in yeterli mi?
-- [ ] Bulut modele kod g�nderme konusunda etik kurul onay1 gerekli mi?
+**Net sorular:**
 
----
+1. “Primary benchmark için aşağıdaki 20 görev ve kategori dağılımı uygun mu?”
+2. “A/C'yi tüm iş akışının karşılaştırması; B/C'yi yalnızca onay politikasının ablation'ı olarak raporlamam doğru mu?”
+3. “Model/prompt/policy sürümleri, fixture reset'i, tekrar sayısı, timeout/bütçe, primary metrik ve analiz planını formal run'lardan önce donduralım mı; gerekli tekrar ve raporlama düzeyi nedir?”
 
-## 4. Toplant1 �ncesi Haz1rl1k Listesi
+**Önerilen primary görev dağılımı:**
 
-- [ ] `SUPERVISOR_BRIEF.md` okundu mu? (hocama g�nderildi mi?)
-- [ ] `PRODUCT_PLAN.md` son haline getirildi mi?
-- [ ] `EVALUATION_PLAN.md` metrik tablosu sade s�r�me indirildi mi?
-- [ ] `SYSTEM_PLAN.md` ajan d�ng�s� k1sa �zeti haz1rland1 m1?
-- [ ] 1 sayfal1k karar �zeti haz1rland1 m1? (karar, alternatif, risk)
-- [ ] Meeting board HTML son s�r�m m�? (PlantUML diyagramlar g�r�n�yor mu?)
+| Kategori | Görev sayısı |
+|---|---:|
+| Bug fix | 5 |
+| Çok dosyalı refactor | 4 |
+| Test yazma | 4 |
+| Codebase Q&A | 3 |
+| Güvenli tek dosya değişikliği | 4 |
+| Toplam | **20** |
 
----
+20 görev bir kapsam önerisidir; yeterli istatistiksel güç sağlandığı iddia edilmez. Görev sayısı, tekrar sayısı ve run sayısı ayrı kaydedilir: **20 × 3 koşul × danışmanla belirlenecek tekrar sayısı**. Adversarial policy fixture'ları ayrı güvenlik paketi olabilir; primary görev paydasına sessizce eklenmez.
 
-## 5. Toplant1 Sonras1 Aksiyon ^ablonu
+| Koşul | Ne ölçer? | Kontrol edilmesi gereken sınır |
+|---|---|---|
+| A — Doğrudan LLM ile görev ve elle uygulama | A/C tüm iş akışını karşılaştırır | Manuel context/review/apply farkları açık yazılır; tek değişkenli karşılaştırma değildir |
+| B — Aynı uygulamada deneysel approval-gate-disabled modu | B/C onay politikasını karşılaştırır | Model, retrieval, prompt/policy sürümleri ve hard safety kontrolleri sabit tutulur |
+| C — Tam kullanıcı onaylı akış | Normal ürün akışını temsil eder | Kullanıcı kararları, uygulanmış değişiklik ve sonuç birlikte kaydedilir |
 
-Toplant1dan sonra a_a 1daki formatla doldurulur:
+**Alternatifler:** 25 primary görev, kategori başına eşit 5 görev sağlar fakat yazım/koşu yükünü artırır. Daha küçük pilot seti protocol/runner hatalarını erken gösterir fakat formal primary benchmark'ın yerini tutmaz. Farklı model/verifier karşılaştırması ek faktördür; ilk A/B/C'den ayrı kapsam kararı gerekir.
 
-### Al1nan Kararlar
+**Gerekli çıktı:** Task taxonomy/count; lisanslı ve dondurulmuş fixture; primary metrik ve denominatörler; tekrar/timeout/bütçe; rubric; model/prompt/policy ve protocol sürümü; analiz planı. Bunlar formal ölçüm öncesi sabitlenmeli. Runner geliştirmek, formal deney başlaması anlamına gelmez.
 
-| #  | Karar | Detay |
-|----|-------|-------|
-| K1 |       |       |
-| K2 |       |       |
-| K3 |       |       |
+Görev başarısı için %60 ve başarılı yetkisiz yazma için 0 gibi değerler varsa **hedef** olarak etiketlenir. Sıfır gözlenen ihlal genel güvenlik garantisi değildir. Reject/rollback oranı bağlamıyla raporlanır; düşük oran tek başına kalite veya kullanıcı güveni artışı sayılmaz.
 
-### Aksiyonlar
+İlgili kartlar: [#25](https://github.com/TurkishKEBAB/Agentic-Ide/issues/25), [#54](https://github.com/TurkishKEBAB/Agentic-Ide/issues/54), [#95](https://github.com/TurkishKEBAB/Agentic-Ide/issues/95), [#99](https://github.com/TurkishKEBAB/Agentic-Ide/issues/99).
 
-| #  | Aksiyon | Sorumlu | Teslim Tarihi |
-|----|---------|---------|---------------|
-| A1 |         |         |               |
-| A2 |         |         |               |
+## K4 — İnsan Çalışması, Güven ve Öğrenme İddiaları
 
-### A�1k Kalan Sorular
+**Net soru:** “Bu tezde insan katılımcılı pilot zorunlu mu? Zorunlu değilse teknik benchmark'ı primary kanıt kabul edip güven/öğrenme artışını test edilmemiş gelecekteki çalışma olarak sınırlamam uygun mu?”
 
-- [ ] 
-- [ ] 
+**Öneri:** İlk kapsamda teknik benchmark ve davranış kanıtları zorunlu; katılımcılı pilot ayrı ve koşullu karar. Pilot yapılmazsa audit/reject/rollback kayıtları kullanıcı kontrolünü gösterir; kullanıcı güvenini veya öğrenmeyi artırdığı sonucunu kanıtlamaz.
 
-### Sonraki Toplant1
+| Seçenek | Kazanç | Bedel / sınır |
+|---|---|---|
+| Teknik değerlendirme primary; pilot kararı kapsam/takvime bağlı — önerilen | İlk prototip ve deney yükü yönetilebilir | İnsan güveni/öğrenmesi hakkında sonuç iddiası sınırlandırılır |
+| Küçük keşifsel pilot | Kullanılabilirlik ve yorumlanabilirlik hakkında nitel geri bildirim | Etik/izin, onam, anonimleştirme ve katılımcı planı gerekir; genelleme sınırlıdır |
+| Öğrenci öğrenmesi veya kullanıcı güveni için formal çalışma | Doğrudan insan çıktısı ölçülebilir | Ek tasarım, ölçüm aracı, örneklem ve takvim gerektirir; teknik benchmark'tan ayrı iş paketi olur |
 
-- **Tarih:**
-- **G�ndem:**
+**Gerekli çıktı:** “Pilot var / yok / şu koşula bağlı” kararı; yapılacaksa etik ve onam sorumlusu, örneklem/ölçüm taslağı ve gereken izin adımları. Yapılmayacaksa tezde kullanılacak açık limitation cümlesi.
 
----
+İlgili kartlar: [#71](https://github.com/TurkishKEBAB/Agentic-Ide/issues/71), [#113](https://github.com/TurkishKEBAB/Agentic-Ide/issues/113).
 
-## 6. 0lgili Belgeler
+## K5 — Gerçek Takvim, Kapasite ve İlk İki Hafta
 
-Okunma s1ras1 �nerisi:
+**Net sorular:**
 
-1. `SUPERVISOR_BRIEF.md`  Genel bak1_
-2. `PRODUCT_PLAN.md`  Problem, ara_t1rma sorusu, MVP kapsam1
-3. `SYSTEM_PLAN.md`  Ajan mimarisi, g�venlik
-4. `EVALUATION_PLAN.md`  Benchmark ve metrikler
-5. `ARCHITECTURE_OPTIONS.md`  Electron vs. Tauri karar1
-6. `TECH_STACK_AND_AI.md`  Model ve teknoloji se�imi
-7. `PROJECT_ROADMAP.md`  18 ayl1k takvim
-8. `CRITICAL_ANALYSIS.md`  Risklerin ele_tirel de erlendirmesi
+1. “Akademik başlangıç ve son teslim/savunma tarihi nedir; mevcut 18 ay / 5 faz taslağı gerçek takvime uyuyor mu?”
+2. “Haftalık ayırabileceğim süreyi ve görüşme sıklığını esas alarak üç GitHub milestone'unu hangi çıkış kanıtlarıyla tamamlanmış sayalım?”
+3. “İlk iki hafta sonunda aşağıdaki güvenli temel prototip ve örnek kanıt paketini göstermem yeterli mi; kapasite düşükse hangi çıktıyı erteleyelim?”
 
----
+**Öneri:** Takvimi gerçek teslim tarihinden geriye kur; 5 fazlı uzun taslağı 3 GitHub milestone'una açık eşle. İlk hedefi çalışan temel shell + workspace güvenlik testi + schema-valid örnek kanıt olarak sınırla. Model/provider entegrasyonu, embedding index, agent loop ve çok dosyalı transaction tümü aynı iki haftanın taahhüdü olmasın.
 
-*Toplant1 g�ndemi i�in � bu belge.*  
-*Dan1_man brifingi i�in � `SUPERVISOR_BRIEF.md`*
+| Seçenek | Kazanç | Bedel / sınır |
+|---|---|---|
+| Kapasiteye göre dar ilk dilim ve kanıt odaklı milestone çıkışları — önerilen | İlerleme danışmana somut ve incelenebilir gösterilir | Geniş ürün özellikleri sonraki dilimlere kalır |
+| Mevcut 18 ay / 5 fazı aynen sürdürmek | Ayrıntılı eski plan korunur | Akademik tarihlerle uyumu önce doğrulanmalı |
+| İki haftada agent/retrieval/approval/rollback'in tümünü istemek | Erken kapsamlı demo hedefi | Güvenlik zemini ve doğrulama için ayrılan süre azalır; kapasite teyidi olmadan taahhüt edilemez |
+
+**Gerekli çıktı:** Gerçek başlangıç/teslim tarihi, haftalık saat, toplantı sıklığı, milestone çıkışları, ilk iki hafta teslim listesi ve bir sonraki görüşme tarihi. Bu alanlar aşağıda boş bırakılmıştır; proje takvimine keyfî tarih atanmaz.
+
+Milestone'lar: [Faz 1 — Implementation Readiness](https://github.com/TurkishKEBAB/Agentic-Ide/milestone/2), [Faz 2 — MVP](https://github.com/TurkishKEBAB/Agentic-Ide/milestone/3), [Faz 3 — Evaluation & Thesis](https://github.com/TurkishKEBAB/Agentic-Ide/milestone/4).
+
+## İlk İki Hafta İçin Önerilen Çıktılar
+
+Başlangıç tarihi ve kapasite K5'te kararlaştırılacak. Aşağıdaki sıralama kapsam önerisidir.
+
+| Dilim | Çıktı | İncelenecek kanıt / durma koşulu |
+|---|---|---|
+| Önce karar ve hazırlık | K1–K5 karar kaydı; minimum MVP ve DoR/DoD; ilk slice için açık dependency'ler | Onay bekleyen kararlar ve çözülemeyen blokajlar görünür; blanket Ready/Done ataması yok |
+| İlk hafta | Electron + Monaco açılışı; workspace seçimi; tek yerel dosyayı görüntüleme | Başlatma/file-open smoke sonucu, runtime manifesti ve review edilebilir küçük PR |
+| İlk hafta / ikinci hafta | Workspace boundary ve protected-file pure kontrolleri | Traversal, sibling-prefix, dış symlink/junction ve protected-file fixture'ları; CI test sonucu |
+| İkinci hafta, kapasite yeterliyse | Her benchmark kategorisinden birer örnek: toplam 5 schema-valid task; fixture/reset ve scoring taslağı | JSON Schema doğrulaması; henüz formal deney sonucu veya başarı oranı yok |
+| Sonraki görüşme | Temel prototip gösterimi, güvenlik test raporu, açık karar/blokaj listesi | Güvenli zemin oluştuysa agent loop için sonraki dar slice seçilir |
+
+İlk uygulama için mevcut kartlar kullanılmalı: [#33](https://github.com/TurkishKEBAB/Agentic-Ide/issues/33), [#44](https://github.com/TurkishKEBAB/Agentic-Ide/issues/44), [#49](https://github.com/TurkishKEBAB/Agentic-Ide/issues/49), [#45](https://github.com/TurkishKEBAB/Agentic-Ide/issues/45), [#27](https://github.com/TurkishKEBAB/Agentic-Ide/issues/27), [#97](https://github.com/TurkishKEBAB/Agentic-Ide/issues/97).
+
+## Toplantı Karar Kaydı — Toplantıda Doldurulacak
+
+Boş karar hücreleri önerinin kabul edildiği anlamına gelmez.
+
+| ID | Danışmanın kararı: kabul / revizyon / erteleme | Karar cümlesi ve gerekçe | İlgili issue / doküman güncellemesi | Sorumlu / takip |
+|---|---|---|---|---|
+| K1 | ____ | ____ | ____ | ____ |
+| K2 | ____ | ____ | ____ | ____ |
+| K3 | ____ | ____ | ____ | ____ |
+| K4 | ____ | ____ | ____ | ____ |
+| K5 | ____ | ____ | ____ | ____ |
+
+- Karar kaydı tarihi: ____.
+- Akademik başlangıç: ____.
+- Son teslim / savunma: ____.
+- Haftalık çalışma kapasitesi: ____ saat.
+- Danışman görüşme sıklığı: ____.
+- İlk iki haftanın seçilen zorunlu çıktıları: ____.
+- İlk iki haftadan ertelenen kapsam: ____.
+- Sonraki görüşme tarihi ve göstereceğim kanıt: ____.
+- Açık kalan soru / karar ve çözüm sahibi: ____.
+
+## Görüşme İçin Okuma Paketi
+
+1. [SUPERVISOR_BRIEF.md](SUPERVISOR_BRIEF.md): kısa proje özeti.
+2. [PRODUCT_PLAN.md](PRODUCT_PLAN.md): kapsam, araştırma sorusu ve başarı ölçütleri.
+3. [VERIFICATION_DRIVEN_DEVELOPMENT.md](VERIFICATION_DRIVEN_DEVELOPMENT.md): VDD/TDD dili ve iddia sınırları.
+4. [SYSTEM_PLAN.md](SYSTEM_PLAN.md): uygulama, tool ve güvenlik sınırları.
+5. [EVALUATION_PLAN.md](EVALUATION_PLAN.md): A/B/C, metrikler ve değerlendirme taslağı.
+6. [docs/REQUIREMENTS_TRACEABILITY.md](docs/REQUIREMENTS_TRACEABILITY.md): davranış → doğrulama → planlanan tez kanıtı.
+7. [PROJECT_ROADMAP.md](PROJECT_ROADMAP.md): gerçek takvimle eşlenecek uzun plan.
+
+Sunumdaki her teknik karar “mevcut öneri / danışman kararı / çalışan kanıt” ayrımını korumalı. Toplantı sonrasında karar kaydı, ilgili issue ve canonical plan birlikte güncellenir.
