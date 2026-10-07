@@ -5,17 +5,17 @@
       {
         "title": "Faz 1 - Implementation Readiness",
         "phase": "Faz 1",
-        "description": "Mimari kararlar, ADR'ler, readiness gate, schema'lar, validation CI ve VDD framing - implementasyon oncesi hazirlik fazi."
+        "description": "Çıkış kapısı: araştırma odağı/MVP sınırı için danışman kararı; ADR ve lifecycle/protokol taslakları; schema/CI doğrulaması; ilk güvenli dikey dilimin DoR kontrolü. Foundation/editör/retrieval kartları bu fazın teknik hazırlığını içerir. Başlangıç, teslim tarihi ve 18 aylık baz çizgi ilk toplantıda teyit edilecek; yalnız P0 veya Advisor Review olmak Ready/Approved kanıtı değildir."
       },
       {
         "title": "Faz 2 - MVP",
         "phase": "Faz 2",
-        "description": "Editor, agent loop, diff approval, safety, retrieval ve onboarding - MVP implementasyon fazi."
+        "description": "Çıkış kapısı: kullanıcı tetiklemeli single-agent/no-shell akışında beş senaryo; diff-onay, korumalı apply, journal recovery/rollback, audit ve gizlilik kontrollerinin kanıtlı testleri. Benchmark formal koşusundan önce özellikler ve güvenlik baz çizgisi dondurulur. Takvim danışman kararından sonra atanır; çalışan uygulama henüz yok."
       },
       {
         "title": "Faz 3 - Evaluation & Thesis",
         "phase": "Faz 3",
-        "description": "Benchmark calismasi, metric toplama, feature freeze, tez metni ve final deliverables."
+        "description": "Çıkış kapısı: dondurulmuş20 görev (5/4/4/3/4), A/B/C protokolü ve rubrik formal veriden önce kayıtlı; gerekirse katılımcı rıza/etik süreci önceden tamamlanmış; sonuçlar, sınırlılıklar, tez, kaynak teslimi ve5dakika demo paketi hazır. Pilot/user-study kararı ilk toplantıda ele alınır. Tarih gerçek tez teslim takvimine göre atanır."
       }
     ],
     "fields": [
@@ -774,29 +774,31 @@
       "phase": "Faz 1",
       "priority": "P0",
       "labels": [
-        "adr",
-        "task:research",
-        "vdd"
+            "adr",
+            "task:research",
+            "vdd"
       ],
       "requirement": "VDD'nin tezde yeni metodoloji, tasarim cercevesi veya proje-ozel surec modeli olarak nasil adlandirilacagi kararlastirilmalidir.",
-      "rationale": "TDD'nin miladinin doldugu iddiasi carpicidir ancak hakem karsisinda savunulabilir akademik sinirlara ihtiyac duyar.",
-      "acceptanceSummary": "Danismanla kullanilacak akademik ifade, provokatif slogan ve kacinilacak iddialar secildi.",
+      "rationale": "TDD'nin sona erdigi veya VDD'nin tamamen yeni bir yontem oldugu iddiasi kaynak ve deneyle desteklenmemistir.",
+      "acceptanceSummary": "7 Ekim inceleme taslagi: PROJECT_REVIEW_TODO ana-VDD notu ile PRODUCT_PLAN destekleyici-VDD baz cizgisi danisman karariyla uzlastirilir.; VDD proje-ozel surec modeli/tasarim cercevesi olarak sinirlanir; genel yeni metodoloji iddiasi literaturden sonra degerlendirilir.; TDD gerekli test kanitini saglar; gereksinim, safety, review ve izlenebilirlik kanitlarinin ek rolu ayrica tanimlanir.; docs/LITERATURE_AND_CLAIMS.md kaynak matrisi ve kacınılacak sonuc/ustunluk ifadeleri incelenir.",
       "acceptanceCriteria": [
-        "En az bir akademik slogan ve bir proje slogani secilir.",
-        "TDD icin kullanilacak kesin ifade belirlenir: tamamen reddetme, sinirlama veya VDD altinda yeniden konumlandirma.",
-        "Makale/tez metninde kacinilacak desteklenmemis iddialar listeye eklenir.",
-        "Karar bir ADR veya thesis planning notu olarak izlenir."
+            "PROJECT_REVIEW_TODO ana-VDD notu ile PRODUCT_PLAN destekleyici-VDD baz cizgisi danisman karariyla uzlastirilir.",
+            "VDD proje-ozel surec modeli/tasarim cercevesi olarak sinirlanir; genel yeni metodoloji iddiasi literaturden sonra degerlendirilir.",
+            "TDD gerekli test kanitini saglar; gereksinim, safety, review ve izlenebilirlik kanitlarinin ek rolu ayrica tanimlanir.",
+            "docs/LITERATURE_AND_CLAIMS.md kaynak matrisi ve kacınılacak sonuc/ustunluk ifadeleri incelenir."
       ],
       "outOfScope": [
-        "Deney sonucu olmadan VDD'nin ustun oldugunu iddia etmek.",
-        "Literatur taramasini bu issue icinde tamamlamak."
+            "Deney sonucu olmadan VDD'nin ustun oldugunu iddia etmek.",
+            "Literatur taramasini bu issue icinde tamamlamak."
       ],
       "sourceDocuments": [
-        "VERIFICATION_DRIVEN_DEVELOPMENT.md",
-        "docs/adr/README.md",
-        "THESIS_OUTLINE.md"
+            "VERIFICATION_DRIVEN_DEVELOPMENT.md",
+            "docs/adr/README.md",
+            "THESIS_OUTLINE.md",
+            "docs/LITERATURE_AND_CLAIMS.md",
+            "ADVISOR_MEETING_AGENDA.md"
       ]
-    },
+},
     {
       "key": "req-vdd-independent-verification-agent",
       "parentKey": "epic-vdd-research-framing",
@@ -808,28 +810,31 @@
       "phase": "Faz 1",
       "priority": "P0",
       "labels": [
-        "req:research",
-        "vdd"
+            "req:research",
+            "vdd"
       ],
-      "requirement": "AI tarafindan uretilen kod ve AI tarafindan uretilen testler tek basina yeterli kabul edilmemeli; implementation ve verification rolleri ayri kanit uretmelidir.",
-      "rationale": "Ayni veya yakin baglamdaki AI hem implementasyonu hem testi urettiginde testler bagimsiz bir oracle gibi davranmayabilir.",
-      "acceptanceSummary": "Implementation agent ve verifier agent rollerinin sorumluluklari, sinirlari ve loglari tanimlandi.",
+      "requirement": "Implementation ve verification rollerinin MVP single-agent mimarisiyle uyumu, yetkileri ve oracle sinirlari danismanla kararlastirilmalidir.",
+      "rationale": "Farkli conversation, temperature veya model istatistiksel bagimsizlik veya dogruluk garantisi saglamaz; kabul oracle'i model onerilerinden bagimsiz tanimlanmalidir.",
+      "acceptanceSummary": "7 Ekim inceleme taslagi: MVP varsayimi tek orchestration loop; verifier varsa read-only asama ve danisman onayli extension'dir, sessiz multi-agent scope artisi yapilmaz.; Implementer patch onerir; kontrollu host disinda dogrudan write/shell yetkisi yoktur; verifier dosya yazamaz veya insan onayini gecersiz kilamaz.; Kabul kriterleri ve benchmark testleri formal generation'dan once dondurulur; modelin kendi testleri bagimsiz oracle olarak sunulmaz.; Ayni/farkli LLM dogrulayici onerileri tavsiye niteligindedir; hata korelasyonu ve maliyet sinirlari raporlanir.; Test execution IDE icinde yok; sabit test harness'i disposable kopyada disaridan calisir ve kanit kaydi uretir.",
       "acceptanceCriteria": [
-        "Implementation agent kod, diff, test ve dokumantasyon onerisi uretir.",
-        "Verification agent requirement, acceptance criteria, risk, rollback ve kanitlari kontrol eder.",
-        "Verifier dogrudan implementation dosyalarini degistirmez; bulgu ve karar onerisi uretir.",
-        "Accept/reject kararlari structured log olarak izlenebilir."
+            "MVP varsayimi tek orchestration loop; verifier varsa read-only asama ve danisman onayli extension'dir, sessiz multi-agent scope artisi yapilmaz.",
+            "Implementer patch onerir; kontrollu host disinda dogrudan write/shell yetkisi yoktur; verifier dosya yazamaz veya insan onayini gecersiz kilamaz.",
+            "Kabul kriterleri ve benchmark testleri formal generation'dan once dondurulur; modelin kendi testleri bagimsiz oracle olarak sunulmaz.",
+            "Ayni/farkli LLM dogrulayici onerileri tavsiye niteligindedir; hata korelasyonu ve maliyet sinirlari raporlanir.",
+            "Test execution IDE icinde yok; sabit test harness'i disposable kopyada disaridan calisir ve kanit kaydi uretir."
       ],
       "outOfScope": [
-        "Ilk mezuniyet kapsaminda birden fazla model kullanmayi zorunlu kilmak.",
-        "Verifier'in insan kararini tamamen otomatik gecersiz kilmasi."
+            "Ilk mezuniyet kapsaminda birden fazla model kullanmayi zorunlu kilmak.",
+            "Verifier'in insan kararini tamamen otomatik gecersiz kilmasi."
       ],
       "sourceDocuments": [
-        "VERIFICATION_DRIVEN_DEVELOPMENT.md",
-        "SYSTEM_PLAN.md",
-        "AGENT_ARCHITECTURE_ANALYSIS.md"
+            "VERIFICATION_DRIVEN_DEVELOPMENT.md",
+            "SYSTEM_PLAN.md",
+            "AGENT_ARCHITECTURE_ANALYSIS.md",
+            "docs/CHANGE_LIFECYCLE_CONTRACT.md",
+            "docs/EVALUATION_PROTOCOL.md"
       ]
-    },
+},
     {
       "key": "req-vdd-spiral-requirements-control",
       "parentKey": "epic-vdd-research-framing",
@@ -900,10 +905,10 @@
       "key": "spike-vdd-advisor-open-questions",
       "parentKey": "epic-vdd-research-framing",
       "blockedByKeys": [
-        "adr-vdd-terminology-and-stance",
-        "req-vdd-independent-verification-agent",
-        "req-vdd-spiral-requirements-control",
-        "req-vdd-student-professional-modes"
+            "adr-vdd-terminology-and-stance",
+            "req-vdd-independent-verification-agent",
+            "req-vdd-spiral-requirements-control",
+            "req-vdd-student-professional-modes"
       ],
       "kind": "issue",
       "title": "Spike: Advisor Questions for VDD Scope and Metrics",
@@ -913,30 +918,32 @@
       "phase": "Faz 1",
       "priority": "P0",
       "labels": [
-        "spike",
-        "task:research",
-        "vdd"
+            "spike",
+            "task:research",
+            "vdd"
       ],
       "requirement": "VDD'nin tez kapsaminda hangi iddia, metrik, baslangic artefakti ve yayin acisiyla ilerleyecegi danismanla netlestirilmelidir.",
       "rationale": "Professional engineering metrikleri, student learning metrikleri ve ilk lifecycle artefakti netlesmeden implementasyon arastirma kaniti uretmekte zayif kalabilir.",
-      "acceptanceSummary": "Danisman gorusmesi icin acik sorular, kararlar ve takip aksiyonlari hazir.",
+      "acceptanceSummary": "7 Ekim inceleme taslagi: K1 VDD konumlandirmasi ve alintilanabilir ana soru; K2 hedef kullanici/MVP siniri; K3 benchmark ve oracle karari kaydedilir.; K4 katilimci/guven calismasi ve kurumun gerekli etik-riza sureci katilimci toplamadan once kararlastirilir.; K5 gercek tez baslangic/teslim tarihleri, haftalik kapasite ve sonraki iki haftalik cikti belirlenir.; Single-agent/no-shell ile verification rollerinin uyumu, TDD dili ve VDD lifecycle artefakti acik karar olarak ele alinir.; ADVISOR_MEETING_AGENDA.md aksiyonlarina sorumlu, tarih ve kanit baglantisi eklenir; onay varmis gibi isaretlenmez.",
       "acceptanceCriteria": [
-        "TDD iddiasinin provokatif ve akademik versiyonlari danismana sunulur.",
-        "Professional metric adaylari ve student learning metric adaylari ayri tartisilir.",
-        "Ilk artefakt secimi tartisilir: stakeholder request, requirement card, acceptance test, use case diagram veya AI plan.",
-        "Implementation-verification ayriminin minimum mezuniyet kapsami kararlastirilir.",
-        "Spiral rollback'in tez icindeki zorunlu kanit seviyesi kararlastirilir."
+            "K1 VDD konumlandirmasi ve alintilanabilir ana soru; K2 hedef kullanici/MVP siniri; K3 benchmark ve oracle karari kaydedilir.",
+            "K4 katilimci/guven calismasi ve kurumun gerekli etik-riza sureci katilimci toplamadan once kararlastirilir.",
+            "K5 gercek tez baslangic/teslim tarihleri, haftalik kapasite ve sonraki iki haftalik cikti belirlenir.",
+            "Single-agent/no-shell ile verification rollerinin uyumu, TDD dili ve VDD lifecycle artefakti acik karar olarak ele alinir.",
+            "ADVISOR_MEETING_AGENDA.md aksiyonlarina sorumlu, tarih ve kanit baglantisi eklenir; onay varmis gibi isaretlenmez."
       ],
       "outOfScope": [
-        "Danisman karari olmadan full conference paper iddiasi yazmak.",
-        "Butun deney altyapisini bu spike icinde implemente etmek."
+            "Danisman karari olmadan full conference paper iddiasi yazmak.",
+            "Butun deney altyapisini bu spike icinde implemente etmek."
       ],
       "sourceDocuments": [
-        "VERIFICATION_DRIVEN_DEVELOPMENT.md",
-        "SUPERVISOR_BRIEF.md",
-        "THESIS_OUTLINE.md"
+            "VERIFICATION_DRIVEN_DEVELOPMENT.md",
+            "SUPERVISOR_BRIEF.md",
+            "THESIS_OUTLINE.md",
+            "ADVISOR_MEETING_AGENDA.md",
+            "docs/LITERATURE_AND_CLAIMS.md"
       ]
-    },
+},
     {
       "key": "epic-editor-foundation",
       "kind": "epic",
@@ -1341,27 +1348,29 @@
       "phase": "Faz 1",
       "priority": "P0",
       "labels": [
-        "adr",
-        "task:research"
+            "adr",
+            "task:research"
       ],
       "requirement": "A/B/C benchmark kosullari ve B kosulunun ayni kod tabaninda approval-gate-disabled flag oldugu ADR ile sabitlenmelidir.",
-      "rationale": "Tezde approval gate etkisini olcmek icin baseline tasarimi implementasyon oncesi net olmalidir.",
-      "acceptanceSummary": "A/B/C ablation tasarimi ADR olarak kayitli.",
+      "rationale": "Approval etkisi yalniz B/C'de izole edilebilir; A/C workflow karsilastirmasidir. Large-edit otomatik devam safety davranisini da degistirir ve tek degisken iddiasini bozar.",
+      "acceptanceSummary": "7 Ekim inceleme taslagi: A, B, C ve her karsilastirmanin destekledigi iddia ayrica tanimlanir.; B ayni app icinde yalniz disposable benchmark fixture'inda etkinlestirilen gate-disabled flag'dir.; B/C model, retrieval, prompt, butceler ve zorunlu safety aynidir; large-edit farki ya giderilir ya bundle olarak raporlanir.; docs/EVALUATION_PROTOCOL.md formal kosu oncesi danisman onayi ve surum dondurma kaydi icin referanstir.",
       "acceptanceCriteria": [
-        "A, B ve C kosullari tek tek tanimlanir.",
-        "B kosulunun ayri sistem degil ayni app icinde experimental flag oldugu yazilir.",
-        "Benchmark task template bu kosullari kaydedebilir."
+            "A, B, C ve her karsilastirmanin destekledigi iddia ayrica tanimlanir.",
+            "B ayni app icinde yalniz disposable benchmark fixture'inda etkinlestirilen gate-disabled flag'dir.",
+            "B/C model, retrieval, prompt, butceler ve zorunlu safety aynidir; large-edit farki ya giderilir ya bundle olarak raporlanir.",
+            "docs/EVALUATION_PROTOCOL.md formal kosu oncesi danisman onayi ve surum dondurma kaydi icin referanstir."
       ],
       "outOfScope": [
-        "Benchmark runner kodunu yazmak."
+            "Benchmark runner kodunu yazmak."
       ],
       "sourceDocuments": [
-        "docs/adr/ADR-007-ablation-baseline-design.md",
-        "EVALUATION_PLAN.md",
-        "docs/benchmark/README.md",
-        "diagrams/UC/UC-04-benchmark-ve-degerlendirme.puml"
+            "docs/adr/ADR-007-ablation-baseline-design.md",
+            "EVALUATION_PLAN.md",
+            "docs/benchmark/README.md",
+            "diagrams/UC/UC-04-benchmark-ve-degerlendirme.puml",
+            "docs/EVALUATION_PROTOCOL.md"
       ]
-    },
+},
     {
       "key": "adr-workspace-boundary-no-shell",
       "parentKey": "epic-implementation-readiness",
@@ -1806,30 +1815,35 @@
       "parentKey": "epic-research-scope",
       "kind": "issue",
       "title": "REQ: Ana ve alt arastirma sorulari resmi backlogda kayit altina alinsin",
-      "status": "Draft",
+      "status": "Advisor Review",
       "area": "Research",
       "requirementType": "Research",
       "phase": "Faz 1",
       "priority": "P0",
       "labels": [
-        "req:research"
+            "req:research"
       ],
-      "requirement": "Backlog, ana arastirma sorusunu ve retrieval ile kullanici guveni alt sorularini resmi issue olarak tasimalidir.",
-      "rationale": "Danisman geri bildirimi once neyin arastirildigi net olmadan backlog anlamli degerlendirme araci olamaz.",
-      "acceptanceSummary": "Ana arastirma sorusu ve alt sorular issue body icinde net.",
+      "requirement": "Ana arastirma sorusu, VDD/approval-gate konumlandirmasi ve olculebilen alt sorular danismanla dondurulmalidir.",
+      "rationale": "VDD ana odak notu ile PRODUCT_PLAN destekleyici cerceve karari celisiyor; deneyde olculemeyen guven iddiasi kurulmamali.",
+      "acceptanceSummary": "7 Ekim inceleme taslagi: Ana soru onerisi: Gereksinim-plan-diff-onay-kanit-rollback hatti, sabit gorev/model kosullarinda gorev dogrulugu ve guvenlik sonuclarini nasil etkiler? Danisman karari ayrica kaydedilir.; B/C approval-gate etkisi ile A/C uctan uca is akisinin farkli karsilastirmalar oldugu belirtilir.; Alt sorular: inceleme maliyeti ve baglam/atif dogrulugu; kullanici guveni yalniz onayli katilimci calismasi varsa olculur.; VDD ana/destekleyici cerceve karari ve ogrenci/junior hedef profili K1/K2 olarak kaydedilir.",
       "acceptanceCriteria": [
-        "Issue body ana arastirma sorusunu acik ve alintilanabilir sekilde yazar.",
-        "En az iki alt arastirma sorusu backlog maddesine dahil edilir."
+            "Ana soru onerisi: Gereksinim-plan-diff-onay-kanit-rollback hatti, sabit gorev/model kosullarinda gorev dogrulugu ve guvenlik sonuclarini nasil etkiler? Danisman karari ayrica kaydedilir.",
+            "B/C approval-gate etkisi ile A/C uctan uca is akisinin farkli karsilastirmalar oldugu belirtilir.",
+            "Alt sorular: inceleme maliyeti ve baglam/atif dogrulugu; kullanici guveni yalniz onayli katilimci calismasi varsa olculur.",
+            "VDD ana/destekleyici cerceve karari ve ogrenci/junior hedef profili K1/K2 olarak kaydedilir."
       ],
       "outOfScope": [
-        "Bu sorularin deneysel cevabini simdiden vermek."
+            "Bu sorularin deneysel cevabini simdiden vermek."
       ],
       "sourceDocuments": [
-        "PRODUCT_PLAN.md",
-        "EVALUATION_PLAN.md",
-        "SUPERVISOR_BRIEF.md"
+            "PRODUCT_PLAN.md",
+            "EVALUATION_PLAN.md",
+            "SUPERVISOR_BRIEF.md",
+            "docs/EVALUATION_PROTOCOL.md",
+            "docs/LITERATURE_AND_CLAIMS.md",
+            "ADVISOR_MEETING_AGENDA.md"
       ]
-    },
+},
     {
       "key": "req-scope-guardrails",
       "parentKey": "epic-research-scope",
@@ -1993,11 +2007,11 @@
       "key": "req-editor-onboarding-configuration",
       "parentKey": "epic-editor-foundation",
       "blockedByKeys": [
-        "req-editor-shell",
-        "adr-manual-model-selection",
-        "adr-workspace-boundary-no-shell",
-        "task-security-threat-incident-retention",
-        "task-accessibility-quality-plan"
+            "req-editor-shell",
+            "adr-manual-model-selection",
+            "adr-workspace-boundary-no-shell",
+            "task-security-threat-incident-retention",
+            "task-accessibility-quality-plan"
       ],
       "kind": "issue",
       "title": "REQ: Ilk acilis onboarding ve guvenli konfigurasyon akisi desteklenmeli",
@@ -2007,28 +2021,30 @@
       "phase": "Faz 1",
       "priority": "P0",
       "labels": [
-        "req:functional"
+            "req:functional"
       ],
       "requirement": "Uygulama ilk acilista workspace secimi, model profili, gizlilik tercihi, guvenli API key saklama ve son projeler akislarini kullaniciya sunmalidir.",
       "rationale": "Onboarding akisi olmadan workspace boundary, model secimi ve gizlilik varsayimlari kullanici tarafindan gorunur ve denetlenebilir olmaz.",
-      "acceptanceSummary": "UC-05 onboarding, model/gizlilik tercihi ve guvenli konfigurasyon akisi backloga tasindi.",
+      "acceptanceSummary": "7 Ekim inceleme taslagi: Ilk acilista secilen kok klasor workspace boundary olarak kaydedilir; protected-file ve cloud-consent varsayimlari gorunur olur.; Kullanici yerel, manuel hibrit veya bulut profilini acikca secer; local-only profilde bulut ag cagrisi yapilmaz.; API anahtari duz metin config.json'a yazilmaz; main-process tarafinda OS credential store / sifreli secret storage kullanilir, desteklenmeyen ortam fail-closed olur.; config.json yalniz secret referansi ve hassas olmayan ayarlari tutar; anahtar renderer, audit, model context ve embedding indeksine giremez.; Son projeler preferences.json ile acilir; anahtar silme ve riza iptali ayri kontrollerdir.",
       "acceptanceCriteria": [
-        "Ilk acilista proje klasoru secilir ve secilen kok klasor workspace boundary olarak kaydedilir.",
-        "Kullanici yerel, manuel hibrit veya bulut model profilini ve gizlilik tercihini acikca secer.",
-        "Bulut API anahtari ~/.agentide/config.json icinde saklanir; audit log, model context veya embedding indeksine yazilmaz.",
-        "Son projeler preferences.json uzerinden tekrar acilabilir."
+            "Ilk acilista secilen kok klasor workspace boundary olarak kaydedilir; protected-file ve cloud-consent varsayimlari gorunur olur.",
+            "Kullanici yerel, manuel hibrit veya bulut profilini acikca secer; local-only profilde bulut ag cagrisi yapilmaz.",
+            "API anahtari duz metin config.json'a yazilmaz; main-process tarafinda OS credential store / sifreli secret storage kullanilir, desteklenmeyen ortam fail-closed olur.",
+            "config.json yalniz secret referansi ve hassas olmayan ayarlari tutar; anahtar renderer, audit, model context ve embedding indeksine giremez.",
+            "Son projeler preferences.json ile acilir; anahtar silme ve riza iptali ayri kontrollerdir."
       ],
       "outOfScope": [
-        "Gorev karmasikligina gore otomatik model router.",
-        "Cloud auth veya hesap sistemi."
+            "Gorev karmasikligina gore otomatik model router.",
+            "Cloud auth veya hesap sistemi."
       ],
       "sourceDocuments": [
-        "diagrams/UC/UC-05-konfigurasyon-ve-onboarding.puml",
-        "PRODUCT_PLAN.md",
-        "DATA_AND_PRIVACY.md",
-        "TECH_STACK_AND_AI.md"
+            "diagrams/UC/UC-05-konfigurasyon-ve-onboarding.puml",
+            "PRODUCT_PLAN.md",
+            "DATA_AND_PRIVACY.md",
+            "TECH_STACK_AND_AI.md",
+            "docs/CHANGE_LIFECYCLE_CONTRACT.md"
       ]
-    },
+},
     {
       "key": "req-context-always-on",
       "parentKey": "epic-context-retrieval",
@@ -2302,8 +2318,8 @@
       "key": "req-diff-atomic-rollback",
       "parentKey": "epic-diff-approval",
       "blockedByKeys": [
-        "req-diff-selective-approval",
-        "adr-workspace-boundary-no-shell"
+            "req-diff-selective-approval",
+            "adr-workspace-boundary-no-shell"
       ],
       "kind": "issue",
       "title": "REQ: Dosya uygulama atomik olmali ve son 10 degisiklik geri alinabilmeli",
@@ -2313,24 +2329,28 @@
       "phase": "Faz 2",
       "priority": "P0",
       "labels": [
-        "req:non-functional"
+            "req:non-functional"
       ],
-      "requirement": "Yazma islemi atomik backup-renaming mantigiyla calismali ve son 10 degisiklik seti undo stack'te tutulmalidir.",
-      "rationale": "Rollback olmadan onay mekanizmasi tek yonlu kalir.",
-      "acceptanceSummary": "Atomik yazma ve 10 adimli rollback sabit.",
+      "requirement": "Onaylanan patch ve base hashlerine bagli recoverable cok dosyali apply, cakisma kontrollu rollback ve son 10 degisiklik seti desteklenmelidir.",
+      "rationale": "Tek dosya rename cok dosya transaction atomikligi saglamaz; stale onay veya dirty buffer kullanici degisikliklerini ezmemelidir.",
+      "acceptanceSummary": "7 Ekim inceleme taslagi: Onay tam patch, secilen dosyalar, workspace ve base hashlerine baglidir; plan veya dosya degisince onay gecersizdir.; Dirty buffer, stale disk hash, symlink/reparse boundary ve partial-approval bagimlilik kontrolleri apply oncesi yapilir.; Staging, kalici journal ve backup ile N'inci dosyada hata/crash enjekte edilir; recovery ya onceki seti geri getirir ya acik recovery-required durumuna gecer.; Undo stack son 10 seti tutar; post-apply manuel degisiklik varsa sessizce ezmek yerine cakisma bildirir.; Apply/rollback sonucu ve hata kaniti audit kaydina baglanir; evrensel cok dosya filesystem atomikligi iddia edilmez.",
       "acceptanceCriteria": [
-        "Issue body `.agentbackup` veya esdeger gecici yedek mantigini aciklar.",
-        "Undo stack kapasitesi 10 degisiklik seti olarak belirtilir."
+            "Onay tam patch, secilen dosyalar, workspace ve base hashlerine baglidir; plan veya dosya degisince onay gecersizdir.",
+            "Dirty buffer, stale disk hash, symlink/reparse boundary ve partial-approval bagimlilik kontrolleri apply oncesi yapilir.",
+            "Staging, kalici journal ve backup ile N'inci dosyada hata/crash enjekte edilir; recovery ya onceki seti geri getirir ya acik recovery-required durumuna gecer.",
+            "Undo stack son 10 seti tutar; post-apply manuel degisiklik varsa sessizce ezmek yerine cakisma bildirir.",
+            "Apply/rollback sonucu ve hata kaniti audit kaydina baglanir; evrensel cok dosya filesystem atomikligi iddia edilmez."
       ],
       "outOfScope": [
-        "Git commit tabanli geri alma."
+            "Git commit tabanli geri alma."
       ],
       "sourceDocuments": [
-        "SYSTEM_PLAN.md",
-        "PRODUCT_PLAN.md",
-        "TESTING_AND_CI.md"
+            "SYSTEM_PLAN.md",
+            "PRODUCT_PLAN.md",
+            "TESTING_AND_CI.md",
+            "docs/CHANGE_LIFECYCLE_CONTRACT.md"
       ]
-    },
+},
     {
       "key": "req-safety-sandbox",
       "parentKey": "epic-safety-privacy",
@@ -2846,38 +2866,42 @@
       "key": "req-evaluation-benchmark",
       "parentKey": "epic-testing-evaluation",
       "blockedByKeys": [
-        "task-benchmark-template-evidence-matrix",
-        "adr-approval-gate-ablation-baseline",
-        "req-evaluation-metrics"
+            "task-benchmark-template-evidence-matrix",
+            "adr-approval-gate-ablation-baseline",
+            "req-evaluation-metrics"
       ],
       "kind": "issue",
       "title": "REQ: Benchmark 20 gorev, ablation tasarimi (A/B/C) ile tanimlanmali",
-      "status": "Draft",
+      "status": "Advisor Review",
       "area": "Evaluation",
       "requirementType": "Research",
       "phase": "Faz 3",
       "priority": "P0",
       "labels": [
-        "req:research"
+            "req:research"
       ],
-      "requirement": "Degerlendirme seti en az 20 gorev icermeli ve ablation tasarimi olarak A (direct LLM), B (Agentic IDE approval-gate-disabled flag) ve C (Agentic IDE tam akis) kosullarini ayni gorevler uzerinden karsilastirmalidir.",
-      "rationale": "B kosulu ayri bir sistem degil, ayni kod tabaninin ablation flag ile calistirilan halidir. Bu sayede onay mekanizmasi tek bagimsiz degisken olur.",
-      "acceptanceSummary": "20 gorev ve uclu ablation tasarimi backlog maddesi olarak acildi.",
+      "requirement": "Birincil benchmark 20 gorev (5 tek dosya, 4 refactor, 4 bugfix, 3 test, 4 Q&A) ve A/B/C kosullariyla, formal kosulardan once dondurulmalidir.",
+      "rationale": "A manuel is akisi farkini olcer. B/C ayni app ve guardlarla yalniz approval farkini sinar; esit kod tabani tek basina deney gecerliligini garanti etmez.",
+      "acceptanceSummary": "7 Ekim inceleme taslagi: Kategori sayilari 5/4/4/3/4 olarak toplam 20; pilot ve adversarial guvenlik setleri ayri raporlanir.; A manuel direct LLM; B ayni app gate-disabled deney kosulu; C normal onayli akis olarak tanimlanir.; B/C retrieval, model/prompt, token/iteration butcesi ve zorunlu safety kurallari sabit; large-edit bypass farki formal deneyden once cozulen karardir.; Onceden tanimli kabul oracle'i, Q&A puanlama, tekrarlar, reset, hata/timeout ve N/A paydalari protokolde yazilir.; Deney flag'i yalniz disposable fixture'da acilir; normal kullanici workspace'inde kapali ve fail-closed olur.",
       "acceptanceCriteria": [
-        "Issue body gorev kategorilerini ve hedef adetlerini listeler.",
-        "Uclu ablation tasarimi (A: direct LLM, B: gate-disabled flag, C: full) ayni issue icinde sabitlenir.",
-        "B kosulu ayri sistem degil, --experimental-disable-approval-gate flag oldugu belirtilir."
+            "Kategori sayilari 5/4/4/3/4 olarak toplam 20; pilot ve adversarial guvenlik setleri ayri raporlanir.",
+            "A manuel direct LLM; B ayni app gate-disabled deney kosulu; C normal onayli akis olarak tanimlanir.",
+            "B/C retrieval, model/prompt, token/iteration butcesi ve zorunlu safety kurallari sabit; large-edit bypass farki formal deneyden once cozulen karardir.",
+            "Onceden tanimli kabul oracle'i, Q&A puanlama, tekrarlar, reset, hata/timeout ve N/A paydalari protokolde yazilir.",
+            "Deney flag'i yalniz disposable fixture'da acilir; normal kullanici workspace'inde kapali ve fail-closed olur."
       ],
       "outOfScope": [
-        "Buyuk olcekli sanayi benchmark'larini MVP kapsamina almak."
+            "Buyuk olcekli sanayi benchmark'larini MVP kapsamina almak."
       ],
       "sourceDocuments": [
-        "EVALUATION_PLAN.md",
-        "PRODUCT_PLAN.md",
-        "TOOLING_AND_REFERENCE_RECOMMENDATIONS.md",
-        "diagrams/UC/UC-04-benchmark-ve-degerlendirme.puml"
+            "EVALUATION_PLAN.md",
+            "PRODUCT_PLAN.md",
+            "TOOLING_AND_REFERENCE_RECOMMENDATIONS.md",
+            "diagrams/UC/UC-04-benchmark-ve-degerlendirme.puml",
+            "docs/EVALUATION_PROTOCOL.md",
+            "docs/benchmark/README.md"
       ]
-    },
+},
     {
       "key": "req-evaluation-metrics",
       "parentKey": "epic-testing-evaluation",
@@ -3010,6 +3034,956 @@
         "THESIS_OUTLINE.md",
         "SUPERVISOR_BRIEF.md"
       ]
-    }
+    },
+    {
+      "key": "epic-mvp-scenario-execution",
+      "kind": "epic",
+      "title": "Epic: MVP Scenario Execution and Demo Coverage",
+      "status": "Draft",
+      "area": "UX",
+      "requirementType": "Functional",
+      "phase": "Faz 2",
+      "priority": "P0",
+      "labels": [
+        "epic",
+        "req:functional"
+      ],
+      "requirement": "MVP kapsamindaki 5 urun senaryosu ayri ayri calistirilabilir, test edilebilir ve demo edilebilir teslimatlara ayrilmalidir.",
+      "rationale": "Concrete scenario deliverables connect product promises to demo and verification evidence.",
+      "acceptanceSummary": "All 5 MVP scenarios are represented as child issues.; Each scenario has success criteria, test target, and thesis evidence.; Demo readiness can be checked scenario-by-scenario.",
+      "acceptanceCriteria": [
+        "All 5 MVP scenarios are represented as child issues.",
+        "Each scenario has success criteria, test target, and thesis evidence.",
+        "Demo readiness can be checked scenario-by-scenario."
+      ],
+      "outOfScope": [
+        "Adding product scenarios outside the approved MVP scope."
+      ],
+      "sourceDocuments": [
+        "PRODUCT_PLAN.md",
+        "PROJECT_ROADMAP.md",
+        "SYSTEM_PLAN.md",
+        "UX_AND_INTERACTION.md",
+        "TESTING_AND_CI.md"
+      ]
+    },
+    {
+      "key": "scenario-bug-fix-end-to-end",
+      "kind": "issue",
+      "title": "Scenario: Bug fix flow is executable end-to-end",
+      "status": "Draft",
+      "area": "Agent",
+      "requirementType": "Functional",
+      "phase": "Faz 2",
+      "priority": "P0",
+      "labels": [
+        "req:functional"
+      ],
+      "requirement": "User can ask for a bug fix, the agent selects relevant context, proposes a plan, shows a diff, waits for approval, applies the approved change, and records evidence.",
+      "rationale": "An end-to-end bug-fix path checks that context, approval, write and evidence components work together.",
+      "acceptanceSummary": "Flow covers: prompt -> context -> plan -> diff -> approval -> apply -> audit.; Failure path is documented when the agent cannot safely propose a patch.; Scenario has at least one E2E or integration test target.",
+      "acceptanceCriteria": [
+        "Flow covers: prompt -> context -> plan -> diff -> approval -> apply -> audit.",
+        "Failure path is documented when the agent cannot safely propose a patch.",
+        "Scenario has at least one E2E or integration test target."
+      ],
+      "outOfScope": [
+        "Automatic shell execution or unapproved file writes."
+      ],
+      "sourceDocuments": [
+        "PRODUCT_PLAN.md",
+        "SYSTEM_PLAN.md",
+        "TESTING_AND_CI.md"
+      ],
+      "parentKey": "epic-mvp-scenario-execution",
+      "blockedByKeys": [
+        "req-editor-shell",
+        "req-agent-chat",
+        "req-context-always-on",
+        "req-agent-plan-first",
+        "req-diff-views",
+        "req-safety-reactive-warnings",
+        "req-safety-audit-log"
+      ]
+    },
+    {
+      "key": "scenario-multi-file-refactor",
+      "kind": "issue",
+      "title": "Scenario: Multi-file refactor flow updates references safely",
+      "status": "Draft",
+      "area": "UX",
+      "requirementType": "Functional",
+      "phase": "Faz 2",
+      "priority": "P0",
+      "labels": [
+        "req:functional"
+      ],
+      "requirement": "User can request a multi-file refactor and review file-by-file proposed changes before applying all or a selected subset.",
+      "rationale": "Reference updates and selective approval need explicit coverage to prevent incomplete refactors.",
+      "acceptanceSummary": "Refactor plan lists all affected files.; User can approve all or selected files.; Partial approval result is explicitly reported.; Undo restores the approved change set.",
+      "acceptanceCriteria": [
+        "Refactor plan lists all affected files.",
+        "User can approve all or selected files.",
+        "Partial approval result is explicitly reported.",
+        "Undo restores the approved change set."
+      ],
+      "outOfScope": [
+        "Refactors outside the selected workspace or automatic approval of unresolved partial-change dependencies."
+      ],
+      "sourceDocuments": [
+        "PRODUCT_PLAN.md",
+        "SYSTEM_PLAN.md",
+        "UX_AND_INTERACTION.md"
+      ],
+      "parentKey": "epic-mvp-scenario-execution",
+      "blockedByKeys": [
+        "req-agent-plan-first",
+        "req-diff-selective-approval",
+        "req-diff-views",
+        "req-diff-atomic-rollback",
+        "req-context-on-demand"
+      ]
+    },
+    {
+      "key": "scenario-test-writing",
+      "kind": "issue",
+      "title": "Scenario: Test writing flow proposes relevant tests with reviewable diff",
+      "status": "Draft",
+      "area": "Testing",
+      "requirementType": "Functional",
+      "phase": "Faz 2",
+      "priority": "P1",
+      "labels": [
+        "req:functional"
+      ],
+      "requirement": "User can ask the agent to write tests for a module, review the generated test diff, approve it, and capture evidence.",
+      "rationale": "Generated tests need reviewable changes and independent verification rather than assuming a test proposal is correct.",
+      "acceptanceSummary": "Test proposal names target behavior and expected coverage.; Diff is reviewable before apply.; Generated tests are tied to benchmark and evidence notes.; No claim is made that the agent automatically runs shell commands in MVP.",
+      "acceptanceCriteria": [
+        "Test proposal names target behavior and expected coverage.",
+        "Diff is reviewable before apply.",
+        "Generated tests are tied to benchmark and evidence notes.",
+        "No claim is made that the agent automatically runs shell commands in MVP."
+      ],
+      "outOfScope": [
+        "Agent-triggered shell test execution in the MVP."
+      ],
+      "sourceDocuments": [
+        "PRODUCT_PLAN.md",
+        "TESTING_AND_CI.md",
+        "docs/adr/ADR-006-no-shell-execution-in-mvp.md"
+      ],
+      "parentKey": "epic-mvp-scenario-execution",
+      "blockedByKeys": [
+        "req-agent-chat",
+        "req-context-on-demand",
+        "req-agent-plan-first",
+        "req-diff-views",
+        "req-test-unit",
+        "req-test-integration"
+      ]
+    },
+    {
+      "key": "scenario-codebase-qa",
+      "kind": "issue",
+      "title": "Scenario: Codebase Q&A flow returns source-cited answers",
+      "status": "Draft",
+      "area": "Retrieval",
+      "requirementType": "Functional",
+      "phase": "Faz 2",
+      "priority": "P0",
+      "labels": [
+        "req:functional"
+      ],
+      "requirement": "User can ask a codebase question and receive an answer with visible source citations from retrieved files.",
+      "rationale": "Visible citations make codebase answers assessable against actual source context.",
+      "acceptanceSummary": "Answer lists context sources.; User can open cited files from the answer.; Missing or low-confidence context is disclosed.; Protected files are never cited from filtered content.",
+      "acceptanceCriteria": [
+        "Answer lists context sources.",
+        "User can open cited files from the answer.",
+        "Missing or low-confidence context is disclosed.",
+        "Protected files are never cited from filtered content."
+      ],
+      "outOfScope": [
+        "Claiming answer correctness without checking source citations."
+      ],
+      "sourceDocuments": [
+        "PRODUCT_PLAN.md",
+        "SYSTEM_PLAN.md",
+        "EVALUATION_PLAN.md"
+      ],
+      "parentKey": "epic-mvp-scenario-execution",
+      "blockedByKeys": [
+        "req-context-always-on",
+        "req-context-index-and-ignore",
+        "req-context-on-demand",
+        "req-safety-protected-files"
+      ]
+    },
+    {
+      "key": "scenario-safe-single-file-edit",
+      "kind": "issue",
+      "title": "Scenario: Safe single-file edit flow prevents unintended changes",
+      "status": "Draft",
+      "area": "Safety",
+      "requirementType": "Functional",
+      "phase": "Faz 2",
+      "priority": "P0",
+      "labels": [
+        "req:functional",
+        "security"
+      ],
+      "requirement": "User can request a safe single-file edit, inspect the diff, approve it, and verify that no unrelated file changed.",
+      "rationale": "A narrow edit scenario establishes the safe write baseline before broader change sets.",
+      "acceptanceSummary": "Only the intended file is changed.; Target-outside change attempts are blocked and logged.; Rollback restores the file.; Scenario evidence includes diff summary and audit event.",
+      "acceptanceCriteria": [
+        "Only the intended file is changed.",
+        "Target-outside change attempts are blocked and logged.",
+        "Rollback restores the file.",
+        "Scenario evidence includes diff summary and audit event."
+      ],
+      "outOfScope": [
+        "Changes to unrelated or protected files."
+      ],
+      "sourceDocuments": [
+        "PRODUCT_PLAN.md",
+        "SYSTEM_PLAN.md",
+        "SAFETY_AND_GUARDRAILS.md"
+      ],
+      "parentKey": "epic-mvp-scenario-execution",
+      "blockedByKeys": [
+        "req-safety-sandbox",
+        "req-safety-protected-files",
+        "req-safety-reactive-warnings",
+        "req-diff-views",
+        "req-diff-atomic-rollback",
+        "req-safety-audit-log"
+      ]
+    },
+    {
+      "key": "epic-benchmark-evidence-pipeline",
+      "kind": "epic",
+      "title": "Epic: Benchmark Evidence Pipeline",
+      "status": "Draft",
+      "area": "Evaluation",
+      "requirementType": "Research",
+      "phase": "Faz 3",
+      "priority": "P0",
+      "labels": [
+        "epic",
+        "req:research",
+        "quality-gate"
+      ],
+      "requirement": "Benchmark evidence must be executable, repeatable, anonymizable, and exportable for thesis evaluation.",
+      "rationale": "Evaluation claims need reproducible tasks, reset procedures and traceable evidence artifacts.",
+      "acceptanceSummary": "Benchmark pipeline is split into concrete child issues.; 20 vs 25 task-count discrepancy is resolved before running evaluation.; Evidence artifacts can be referenced from thesis chapters.",
+      "acceptanceCriteria": [
+        "Benchmark pipeline is split into concrete child issues.",
+        "20 vs 25 task-count discrepancy is resolved before running evaluation.",
+        "Evidence artifacts can be referenced from thesis chapters."
+      ],
+      "outOfScope": [
+        "Claiming experimental results before running the frozen protocol."
+      ],
+      "sourceDocuments": [
+        "EVALUATION_PLAN.md",
+        "docs/benchmark/README.md",
+        "docs/schemas/README.md"
+      ],
+      "blockedByKeys": [
+        "req-evaluation-metrics",
+        "req-evaluation-benchmark"
+      ]
+    },
+    {
+      "key": "task-benchmark-taxonomy-freeze",
+      "kind": "issue",
+      "title": "TASK: Benchmark task count discrepancy resolved and task taxonomy frozen",
+      "status": "Draft",
+      "area": "Evaluation",
+      "requirementType": "Research",
+      "phase": "Faz 3",
+      "priority": "P0",
+      "labels": [
+            "task:research",
+            "quality-gate"
+      ],
+      "requirement": "Birincil gorev sayisi 20 olarak belgeler arasinda uzlastirilir; 5/4/4/3/4 taksonomisi formal deneyden once danismanla dondurulur.",
+      "rationale": "Conflicting task counts change the evaluation denominator and must be resolved before formal runs.",
+      "acceptanceSummary": "7 Ekim inceleme taslagi: EVALUATION_PLAN ve docs/benchmark/README ayni 20 gorev / 5-4-4-3-4 dagilimini tasir.; Pilot, adversarial safety ve Q&A gibi farkli sonuclar uygun paydalarla raporlanir; ek set ana20 basari paydasina katilmaz.; Freeze commit/tag ve danisman karari kaydedilir; gorevler henuz yazilmadiysa tamamlandi denmez.",
+      "acceptanceCriteria": [
+            "EVALUATION_PLAN ve docs/benchmark/README ayni 20 gorev / 5-4-4-3-4 dagilimini tasir.",
+            "Pilot, adversarial safety ve Q&A gibi farkli sonuclar uygun paydalarla raporlanir; ek set ana20 basari paydasina katilmaz.",
+            "Freeze commit/tag ve danisman karari kaydedilir; gorevler henuz yazilmadiysa tamamlandi denmez."
+      ],
+      "outOfScope": [
+            "Changing primary task counts after formal evaluation without recording a protocol revision."
+      ],
+      "sourceDocuments": [
+            "EVALUATION_PLAN.md",
+            "docs/benchmark/README.md",
+            "docs/EVALUATION_PROTOCOL.md"
+      ],
+      "parentKey": "epic-benchmark-evidence-pipeline",
+      "blockedByKeys": [
+            "req-evaluation-benchmark"
+      ]
+},
+    {
+      "key": "task-benchmark-project-freeze",
+      "kind": "issue",
+      "title": "TASK: Frozen benchmark test project selected and tagged",
+      "status": "Draft",
+      "area": "Evaluation",
+      "requirementType": "Research",
+      "phase": "Faz 3",
+      "priority": "P0",
+      "labels": [
+        "task:research"
+      ],
+      "requirement": "Select a license-compatible TypeScript benchmark project, prepare it for evaluation, and freeze it with a reproducible tag or fixture snapshot.",
+      "rationale": "A frozen licensed fixture prevents project drift from confounding benchmark comparisons.",
+      "acceptanceSummary": "Project source and license are documented.; Clean baseline tag or snapshot exists.; Reset procedure is documented.; Project size and structure match evaluation plan assumptions.",
+      "acceptanceCriteria": [
+        "Project source and license are documented.",
+        "Clean baseline tag or snapshot exists.",
+        "Reset procedure is documented.",
+        "Project size and structure match evaluation plan assumptions."
+      ],
+      "outOfScope": [
+        "Using a benchmark fixture without a documented compatible license."
+      ],
+      "sourceDocuments": [
+        "EVALUATION_PLAN.md",
+        "docs/benchmark/README.md"
+      ],
+      "parentKey": "epic-benchmark-evidence-pipeline",
+      "blockedByKeys": [
+        "task-benchmark-taxonomy-freeze"
+      ]
+    },
+    {
+      "key": "task-benchmark-json-examples",
+      "kind": "issue",
+      "title": "TASK: First benchmark task JSON examples validate against schema",
+      "status": "Draft",
+      "area": "Evaluation",
+      "requirementType": "Research",
+      "phase": "Faz 3",
+      "priority": "P0",
+      "labels": [
+        "task:research",
+        "quality-gate"
+      ],
+      "requirement": "Create initial benchmark task JSON examples before implementing the runner so the runner follows real data shape.",
+      "rationale": "Real schema-valid task examples expose data-contract gaps before runner implementation.",
+      "acceptanceSummary": "At least first five task examples exist.; Examples validate against benchmark-task schema.; Each task records expected output, scoring rubric, and safety expectations.",
+      "acceptanceCriteria": [
+        "At least first five task examples exist.",
+        "Examples validate against benchmark-task schema.",
+        "Each task records expected output, scoring rubric, and safety expectations."
+      ],
+      "outOfScope": [
+        "Implementing the full runner in this task."
+      ],
+      "sourceDocuments": [
+        "docs/benchmark/README.md",
+        "docs/schemas/README.md"
+      ],
+      "parentKey": "epic-benchmark-evidence-pipeline",
+      "blockedByKeys": [
+        "task-benchmark-taxonomy-freeze",
+        "task-benchmark-project-freeze"
+      ]
+    },
+    {
+      "key": "task-benchmark-condition-runner",
+      "kind": "issue",
+      "title": "TASK: Benchmark runner records A/B/C condition evidence",
+      "status": "Draft",
+      "area": "Evaluation",
+      "requirementType": "Research",
+      "phase": "Faz 3",
+      "priority": "P0",
+      "labels": [
+        "task:research",
+        "quality-gate"
+      ],
+      "requirement": "Benchmark runner must record run_id, task_id, condition, model identity, selected context, plan, diff, approval, rollback, safety warnings, and final score.",
+      "rationale": "Condition-labelled evidence is required to compare the same tasks across the A/B/C design.",
+      "acceptanceSummary": "Runner records all required evidence fields.; Condition B is clearly marked experimental.; Safety baseline remains active in B where required.; Output can be exported without secrets.",
+      "acceptanceCriteria": [
+        "Runner records all required evidence fields.",
+        "Condition B is clearly marked experimental.",
+        "Safety baseline remains active in B where required.",
+        "Output can be exported without secrets."
+      ],
+      "outOfScope": [
+        "Treating the experimental gate-disabled condition as the default product mode."
+      ],
+      "sourceDocuments": [
+        "EVALUATION_PLAN.md",
+        "docs/benchmark/README.md",
+        "docs/adr/ADR-007-ablation-baseline-design.md",
+        "docs/adr/ADR-009-prompt-model-versioning.md"
+      ],
+      "parentKey": "epic-benchmark-evidence-pipeline",
+      "blockedByKeys": [
+        "task-benchmark-json-examples",
+        "req-evaluation-metrics",
+        "req-evaluation-benchmark",
+        "req-safety-audit-log"
+      ]
+    },
+    {
+      "key": "task-benchmark-rubric-analysis",
+      "kind": "issue",
+      "title": "TASK: Rubric, anonymization, and statistical analysis package prepared",
+      "status": "Draft",
+      "area": "Evaluation",
+      "requirementType": "Research",
+      "phase": "Faz 3",
+      "priority": "P0",
+      "labels": [
+            "documentation",
+            "task:research"
+      ],
+      "requirement": "Rubrik, oracle, anonim puanlama ve istatistiksel analiz protokolu formal deney verisi gorulmeden once dondurulmalidir.",
+      "rationale": "A fixed rubric and analysis plan reduce post-hoc scoring bias and make thesis results reviewable.",
+      "acceptanceSummary": "7 Ekim inceleme taslagi: 0/1/2 puanlamanin kategoriye gore kabul oracle'i ve tam-basari paydasi formal kosudan once kaydedilir.; Reviewer'dan condition etiketi gizlenir; katilimcinin UI approval kosuluna kor olamayacagi belirtilir.; Eslenik gorev tasarimi, tekrarlar, belirsizlik araliklari, eksik/timeout veri ve kesifsel alt analizler tanimlanir.; Precision@5 ve Recall@5 ilgili-dosya goldsetiyle tanimlanir; ulasilamaz genel70% Precision@5 esigi kullanilmaz.; docs/EVALUATION_PROTOCOL.md dondurma kaydi dolmadan formal veri toplanmaz; runner'in hazir olmasi protokol yazimina onkosul degildir.",
+      "acceptanceCriteria": [
+            "0/1/2 puanlamanin kategoriye gore kabul oracle'i ve tam-basari paydasi formal kosudan once kaydedilir.",
+            "Reviewer'dan condition etiketi gizlenir; katilimcinin UI approval kosuluna kor olamayacagi belirtilir.",
+            "Eslenik gorev tasarimi, tekrarlar, belirsizlik araliklari, eksik/timeout veri ve kesifsel alt analizler tanimlanir.",
+            "Precision@5 ve Recall@5 ilgili-dosya goldsetiyle tanimlanir; ulasilamaz genel70% Precision@5 esigi kullanilmaz.",
+            "docs/EVALUATION_PROTOCOL.md dondurma kaydi dolmadan formal veri toplanmaz; runner'in hazir olmasi protokol yazimina onkosul degildir."
+      ],
+      "outOfScope": [
+            "Choosing the primary analysis after inspecting formal results."
+      ],
+      "sourceDocuments": [
+            "EVALUATION_PLAN.md",
+            "THESIS_OUTLINE.md",
+            "docs/EVALUATION_PROTOCOL.md"
+      ],
+      "parentKey": "epic-benchmark-evidence-pipeline",
+      "blockedByKeys": [
+            "req-evaluation-metrics",
+            "req-evaluation-benchmark",
+            "task-benchmark-taxonomy-freeze"
+      ]
+},
+    {
+      "key": "epic-performance-cost-controls",
+      "kind": "epic",
+      "title": "Epic: Performance and Cost Product Controls",
+      "status": "Draft",
+      "area": "Model",
+      "requirementType": "Non-Functional",
+      "phase": "Faz 2",
+      "priority": "P1",
+      "labels": [
+        "epic",
+        "req:non-functional"
+      ],
+      "requirement": "The MVP must expose enough performance and cost controls to keep demo, benchmark, and thesis evidence credible.",
+      "rationale": "Cost and performance controls protect a feasible demo and produce interpretable evaluation evidence.",
+      "acceptanceSummary": "Product controls are split into child issues.; Cost and latency evidence can be exported for Faz 3.; Demo performance risks are visible before final delivery.",
+      "acceptanceCriteria": [
+        "Product controls are split into child issues.",
+        "Cost and latency evidence can be exported for Faz 3.",
+        "Demo performance risks are visible before final delivery."
+      ],
+      "outOfScope": [
+        "Automatic model routing or unmeasured performance claims."
+      ],
+      "sourceDocuments": [
+        "COST_AND_PERFORMANCE.md",
+        "TECH_STACK_AND_AI.md",
+        "EVALUATION_PLAN.md"
+      ],
+      "blockedByKeys": [
+        "req-model-provider-abstraction",
+        "req-model-cost-metrics",
+        "risk-model-local-fallback"
+      ]
+    },
+    {
+      "key": "req-token-cost-dashboard",
+      "kind": "issue",
+      "title": "REQ: Token usage and model cost dashboard is visible to user",
+      "status": "Draft",
+      "area": "Model",
+      "requirementType": "Non-Functional",
+      "phase": "Faz 2",
+      "priority": "P1",
+      "labels": [
+        "req:non-functional"
+      ],
+      "requirement": "User can see task-level and session-level token usage and estimated model cost.",
+      "rationale": "Transparent token and cost records support user control and task-level comparisons.",
+      "acceptanceSummary": "Token usage is tracked per task.; Provider and model identity is recorded.; Local model cost is shown as zero API cost but still records latency.; UI does not hide cloud usage from the user.",
+      "acceptanceCriteria": [
+        "Token usage is tracked per task.",
+        "Provider and model identity is recorded.",
+        "Local model cost is shown as zero API cost but still records latency.",
+        "UI does not hide cloud usage from the user."
+      ],
+      "outOfScope": [
+        "Claiming local inference has no hardware or energy cost; zero refers only to API charges."
+      ],
+      "sourceDocuments": [
+        "COST_AND_PERFORMANCE.md",
+        "TECH_STACK_AND_AI.md",
+        "UX_AND_INTERACTION.md"
+      ],
+      "parentKey": "epic-performance-cost-controls",
+      "blockedByKeys": [
+        "req-model-provider-abstraction",
+        "req-model-cost-metrics"
+      ]
+    },
+    {
+      "key": "req-cloud-daily-hard-cap",
+      "kind": "issue",
+      "title": "REQ: Daily cloud API hard cap prevents budget overrun",
+      "status": "Draft",
+      "area": "Model",
+      "requirementType": "Non-Functional",
+      "phase": "Faz 2",
+      "priority": "P1",
+      "labels": [
+        "req:non-functional"
+      ],
+      "requirement": "Cloud model usage must have a configurable daily hard cap to reduce budget risk.",
+      "rationale": "A configurable usage ceiling reduces the risk of exhausting the benchmark API budget.",
+      "acceptanceSummary": "Default daily cap is documented.; User can configure or inspect the cap.; Cloud calls stop safely when the cap is reached.; Local-only fallback path is offered when available.",
+      "acceptanceCriteria": [
+        "Default daily cap is documented.",
+        "User can configure or inspect the cap.",
+        "Cloud calls stop safely when the cap is reached.",
+        "Local-only fallback path is offered when available."
+      ],
+      "outOfScope": [
+        "Claiming an estimated local cap is a provider billing guarantee."
+      ],
+      "sourceDocuments": [
+        "COST_AND_PERFORMANCE.md",
+        "RISK_REGISTER.md",
+        "TECH_STACK_AND_AI.md"
+      ],
+      "parentKey": "epic-performance-cost-controls",
+      "blockedByKeys": [
+        "req-model-provider-abstraction",
+        "risk-model-local-fallback",
+        "req-editor-onboarding-configuration"
+      ]
+    },
+    {
+      "key": "req-demo-performance-budgets",
+      "kind": "issue",
+      "title": "REQ: Electron and indexing performance budgets are measured before demo",
+      "status": "Draft",
+      "area": "Testing",
+      "requirementType": "Non-Functional",
+      "phase": "Faz 2",
+      "priority": "P1",
+      "labels": [
+        "req:non-functional",
+        "quality-gate"
+      ],
+      "requirement": "Electron startup, idle memory, file-open latency, indexing time, and single-file reindex time must be measured against documented budgets.",
+      "rationale": "Measured startup, memory and indexing budgets make demo readiness assessable.",
+      "acceptanceSummary": "Startup time and idle memory are measured.; Small/medium indexing timings are measured.; Regression threshold is documented.; Results are captured as thesis evidence.",
+      "acceptanceCriteria": [
+        "Startup time and idle memory are measured.",
+        "Small/medium indexing timings are measured.",
+        "Regression threshold is documented.",
+        "Results are captured as thesis evidence."
+      ],
+      "outOfScope": [
+        "Presenting target budgets as measured results before a prototype exists."
+      ],
+      "sourceDocuments": [
+        "COST_AND_PERFORMANCE.md",
+        "PROJECT_ROADMAP.md",
+        "TESTING_AND_CI.md"
+      ],
+      "parentKey": "epic-performance-cost-controls",
+      "blockedByKeys": [
+        "req-editor-shell",
+        "req-context-index-and-ignore",
+        "req-model-cost-metrics"
+      ]
+    },
+    {
+      "key": "epic-data-retention-privacy-controls",
+      "kind": "epic",
+      "title": "Epic: Data Retention and Privacy Product Controls",
+      "status": "Draft",
+      "area": "Safety",
+      "requirementType": "Non-Functional",
+      "phase": "Faz 2",
+      "priority": "P1",
+      "labels": [
+        "epic",
+        "req:non-functional",
+        "security"
+      ],
+      "requirement": "The MVP must provide user-facing controls for workspace data, provider keys, audit logs, and sanitized exports.",
+      "rationale": "Written retention policy needs observable product controls and sanitized evidence handling.",
+      "acceptanceSummary": "Product controls are split into child issues.; User can remove local sensitive data.; Thesis exports are sanitized by design.",
+      "acceptanceCriteria": [
+        "Product controls are split into child issues.",
+        "User can remove local sensitive data.",
+        "Thesis exports are sanitized by design."
+      ],
+      "outOfScope": [
+        "Claiming legal compliance certification from implementing these controls."
+      ],
+      "sourceDocuments": [
+        "DATA_AND_PRIVACY.md",
+        "docs/DATA_RETENTION.md",
+        "docs/THREAT_MODEL.md"
+      ],
+      "blockedByKeys": [
+        "req-context-index-and-ignore",
+        "req-safety-audit-log",
+        "req-safety-protected-files",
+        "req-safety-sandbox"
+      ]
+    },
+    {
+      "key": "req-clear-workspace-index",
+      "kind": "issue",
+      "title": "REQ: Clear workspace index and embeddings action is available",
+      "status": "Draft",
+      "area": "Safety",
+      "requirementType": "Non-Functional",
+      "phase": "Faz 2",
+      "priority": "P1",
+      "labels": [
+        "req:non-functional",
+        "security"
+      ],
+      "requirement": "User can clear workspace index and embeddings for a selected workspace.",
+      "rationale": "Users need a way to remove indexed workspace context and verify that protected content stays excluded.",
+      "acceptanceSummary": "Clear action removes index rows and embedding metadata.; Protected files remain absent before and after reindex.; Action result is visible to user.",
+      "acceptanceCriteria": [
+        "Clear action removes index rows and embedding metadata.",
+        "Protected files remain absent before and after reindex.",
+        "Action result is visible to user."
+      ],
+      "outOfScope": [
+        "Deleting unrelated workspace source files."
+      ],
+      "sourceDocuments": [
+        "docs/DATA_RETENTION.md",
+        "DATA_AND_PRIVACY.md"
+      ],
+      "parentKey": "epic-data-retention-privacy-controls",
+      "blockedByKeys": [
+        "req-context-index-and-ignore",
+        "req-editor-onboarding-configuration"
+      ]
+    },
+    {
+      "key": "req-provider-key-removal-audit-sanitization",
+      "kind": "issue",
+      "title": "REQ: Provider key removal and audit-log sanitization are supported",
+      "status": "Draft",
+      "area": "Safety",
+      "requirementType": "Non-Functional",
+      "phase": "Faz 2",
+      "priority": "P1",
+      "labels": [
+            "req:non-functional",
+            "security"
+      ],
+      "requirement": "Provider key removal, sanitized audit logging and explicit local audit-log clearing controls are supported.",
+      "rationale": "Key removal and audit redaction prevent locally stored credentials from entering review evidence.",
+      "acceptanceSummary": "7 Ekim inceleme taslagi: Provider key is removed from the credential store and in-memory references; config contains no raw key.; Audit logger redacts key-like values; tests prove raw credentials/protected content are absent.; Clear audit log is distinct from key/index deletion; confirmation states which local logs are deleted and that traceability evidence may be lost.; Active transaction/recovery evidence is preserved until recovery completes; thesis exports follow agreed retention separately.; User receives clear key-removal/log-clear confirmation; local deletion does not claim remote-provider deletion.",
+      "acceptanceCriteria": [
+            "Provider key is removed from the credential store and in-memory references; config contains no raw key.",
+            "Audit logger redacts key-like values; tests prove raw credentials/protected content are absent.",
+            "Clear audit log is distinct from key/index deletion; confirmation states which local logs are deleted and that traceability evidence may be lost.",
+            "Active transaction/recovery evidence is preserved until recovery completes; thesis exports follow agreed retention separately.",
+            "User receives clear key-removal/log-clear confirmation; local deletion does not claim remote-provider deletion."
+      ],
+      "outOfScope": [
+            "Logging raw credentials or protected-file content."
+      ],
+      "sourceDocuments": [
+            "docs/DATA_RETENTION.md",
+            "DATA_AND_PRIVACY.md",
+            "docs/THREAT_MODEL.md",
+            "docs/CHANGE_LIFECYCLE_CONTRACT.md"
+      ],
+      "parentKey": "epic-data-retention-privacy-controls",
+      "blockedByKeys": [
+            "req-safety-audit-log",
+            "req-editor-onboarding-configuration",
+            "req-safety-protected-files"
+      ]
+},
+    {
+      "key": "req-sanitized-thesis-evidence-export",
+      "kind": "issue",
+      "title": "REQ: Sanitized thesis evidence export excludes secrets and raw proprietary code",
+      "status": "Draft",
+      "area": "Evaluation",
+      "requirementType": "Research",
+      "phase": "Faz 3",
+      "priority": "P0",
+      "labels": [
+        "req:research",
+        "security"
+      ],
+      "requirement": "Benchmark and advisor/thesis evidence exports must remove secrets, protected file content, and raw proprietary code not intended for disclosure.",
+      "rationale": "Advisor and thesis exports must preserve useful evidence without exposing secrets or unapproved code.",
+      "acceptanceSummary": "Export format is documented.; Secret-like values are redacted.; Raw code inclusion rules are explicit.; Export can be attached to thesis evidence without leaking sensitive data.",
+      "acceptanceCriteria": [
+        "Export format is documented.",
+        "Secret-like values are redacted.",
+        "Raw code inclusion rules are explicit.",
+        "Export can be attached to thesis evidence without leaking sensitive data."
+      ],
+      "outOfScope": [
+        "Publishing unredacted secrets or proprietary source without a disclosure decision."
+      ],
+      "sourceDocuments": [
+        "docs/DATA_RETENTION.md",
+        "DATA_AND_PRIVACY.md",
+        "EVALUATION_PLAN.md"
+      ],
+      "parentKey": "epic-data-retention-privacy-controls",
+      "blockedByKeys": [
+        "req-safety-audit-log",
+        "req-evaluation-metrics"
+      ]
+    },
+    {
+      "key": "epic-final-release-defense-package",
+      "kind": "epic",
+      "title": "Epic: Final Release and Defense Package",
+      "status": "Draft",
+      "area": "Thesis",
+      "requirementType": "Research",
+      "phase": "Faz 3",
+      "priority": "P0",
+      "labels": [
+        "documentation",
+        "epic",
+        "req:research"
+      ],
+      "requirement": "Final delivery must be split into demo, installation, thesis, defense, and evidence package deliverables.",
+      "rationale": "Separate release, source, thesis and defense deliverables avoid treating a working demo as complete thesis delivery.",
+      "acceptanceSummary": "Final delivery child issues exist.; Demo can be rehearsed independently.; Thesis artifacts and source-code delivery are tracked separately.",
+      "acceptanceCriteria": [
+        "Final delivery child issues exist.",
+        "Demo can be rehearsed independently.",
+        "Thesis artifacts and source-code delivery are tracked separately."
+      ],
+      "outOfScope": [
+        "Adding new primary product features during evaluation and defense preparation."
+      ],
+      "sourceDocuments": [
+        "PROJECT_ROADMAP.md",
+        "THESIS_OUTLINE.md",
+        "DEPLOYMENT_AND_PACKAGING.md",
+        "SUPERVISOR_BRIEF.md"
+      ],
+      "blockedByKeys": [
+        "req-thesis-freeze",
+        "req-thesis-phase-gates",
+        "req-thesis-final-deliverables",
+        "req-evaluation-metrics",
+        "req-evaluation-benchmark"
+      ]
+    },
+    {
+      "key": "task-defense-demo-fallback",
+      "kind": "issue",
+      "title": "TASK: Five-minute defense demo script and fallback video prepared",
+      "status": "Draft",
+      "area": "Thesis",
+      "requirementType": "Research",
+      "phase": "Faz 3",
+      "priority": "P0",
+      "labels": [
+        "documentation",
+        "task:planning"
+      ],
+      "requirement": "Prepare a five-minute live demo script plus fallback recorded video for defense.",
+      "rationale": "A rehearsable demo and fallback artifact reduce defense delivery risk.",
+      "acceptanceSummary": "Demo script covers selected MVP scenarios.; Fallback video exists or is explicitly waived.; Demo environment setup checklist is included.; Known failure fallback path is documented.",
+      "acceptanceCriteria": [
+        "Demo script covers selected MVP scenarios.",
+        "Fallback video exists or is explicitly waived.",
+        "Demo environment setup checklist is included.",
+        "Known failure fallback path is documented."
+      ],
+      "outOfScope": [
+        "Claiming a fallback video exists before it is recorded or explicitly waived."
+      ],
+      "sourceDocuments": [
+        "PROJECT_ROADMAP.md",
+        "DEPLOYMENT_AND_PACKAGING.md",
+        "THESIS_OUTLINE.md"
+      ],
+      "parentKey": "epic-final-release-defense-package",
+      "blockedByKeys": [
+        "epic-mvp-scenario-execution",
+        "epic-benchmark-evidence-pipeline",
+        "req-thesis-final-deliverables"
+      ]
+    },
+    {
+      "key": "task-source-installation-guide",
+      "kind": "issue",
+      "title": "TASK: Installation guide and .env.example prepared for source-code delivery",
+      "status": "Draft",
+      "area": "Thesis",
+      "requirementType": "Non-Functional",
+      "phase": "Faz 3",
+      "priority": "P0",
+      "labels": [
+        "documentation",
+        "task:infra"
+      ],
+      "requirement": "Final source-code delivery must include setup instructions and environment variable template.",
+      "rationale": "A clean-clone setup procedure supports reproducible source-code delivery.",
+      "acceptanceSummary": "README setup flow works from clean clone.; .env.example lists required optional variables without secrets.; Node/npm version expectations are stated.; Ollama and cloud-provider setup paths are documented.",
+      "acceptanceCriteria": [
+        "README setup flow works from clean clone.",
+        ".env.example lists required optional variables without secrets.",
+        "Node/npm version expectations are stated.",
+        "Ollama and cloud-provider setup paths are documented."
+      ],
+      "outOfScope": [
+        "Including real API keys in the delivery template."
+      ],
+      "sourceDocuments": [
+        "DEPLOYMENT_AND_PACKAGING.md",
+        "README.md",
+        "TECH_STACK_AND_AI.md"
+      ],
+      "parentKey": "epic-final-release-defense-package",
+      "blockedByKeys": [
+        "req-editor-shell",
+        "req-model-provider-abstraction",
+        "req-editor-onboarding-configuration"
+      ]
+    },
+    {
+      "key": "task-portable-packaging-decision",
+      "kind": "issue",
+      "title": "TASK: Portable build decision and packaging checklist completed",
+      "status": "Draft",
+      "area": "Thesis",
+      "requirementType": "Non-Functional",
+      "phase": "Faz 3",
+      "priority": "P1",
+      "labels": [
+        "documentation",
+        "task:infra"
+      ],
+      "requirement": "Decide whether a portable build is required for defense; if yes, complete packaging checklist.",
+      "rationale": "The defense packaging choice affects native-module validation and reproducibility work.",
+      "acceptanceSummary": "Packaging decision is explicit: dev-run only or portable build.; If portable build is used, native modules are verified.; API keys are not embedded.; Demo fallback path is documented.",
+      "acceptanceCriteria": [
+        "Packaging decision is explicit: dev-run only or portable build.",
+        "If portable build is used, native modules are verified.",
+        "API keys are not embedded.",
+        "Demo fallback path is documented."
+      ],
+      "outOfScope": [
+        "Mandatory cross-platform distribution unless the advisor approves that scope."
+      ],
+      "sourceDocuments": [
+        "DEPLOYMENT_AND_PACKAGING.md",
+        "PROJECT_ROADMAP.md"
+      ],
+      "parentKey": "epic-final-release-defense-package",
+      "blockedByKeys": [
+        "req-editor-shell",
+        "req-thesis-final-deliverables"
+      ]
+    },
+    {
+      "key": "task-thesis-limitations-future-work",
+      "kind": "issue",
+      "title": "TASK: Thesis limitations and future work document prepared",
+      "status": "Draft",
+      "area": "Thesis",
+      "requirementType": "Research",
+      "phase": "Faz 3",
+      "priority": "P0",
+      "labels": [
+        "documentation",
+        "req:research"
+      ],
+      "requirement": "Known limitations, deferred features, optional studies not performed, and future work must be documented before final thesis submission.",
+      "rationale": "Explicit limitations bound the thesis claims and identify deferred research work.",
+      "acceptanceSummary": "Limitations document exists or thesis chapter section is explicitly linked.; Deferred items include proactive analysis, shell execution, MCP, VS Code extension compatibility, and optional pilot study if omitted.; External validity constraints are clearly stated.",
+      "acceptanceCriteria": [
+        "Limitations document exists or thesis chapter section is explicitly linked.",
+        "Deferred items include proactive analysis, shell execution, MCP, VS Code extension compatibility, and optional pilot study if omitted.",
+        "External validity constraints are clearly stated."
+      ],
+      "outOfScope": [
+        "Claiming deferred features or omitted studies have been completed."
+      ],
+      "sourceDocuments": [
+        "EVALUATION_PLAN.md",
+        "PRODUCT_PLAN.md",
+        "PROACTIVE_BEHAVIOR_DESIGN.md",
+        "THESIS_OUTLINE.md"
+      ],
+      "parentKey": "epic-final-release-defense-package",
+      "blockedByKeys": [
+        "req-thesis-freeze",
+        "req-thesis-final-deliverables",
+        "req-evaluation-metrics",
+        "req-evaluation-benchmark"
+      ]
+    },
+    {
+      "key": "spike-pilot-study-ethics-consent",
+      "kind": "issue",
+      "title": "Spike: Optional pilot user study ethics and consent decision",
+      "status": "Advisor Review",
+      "area": "Evaluation",
+      "requirementType": "Research",
+      "phase": "Faz 3",
+      "priority": "P0",
+      "labels": [
+            "task:research",
+            "spike"
+      ],
+      "requirement": "Decide whether the optional pilot user study will be performed, and if so what ethics/consent process is required.",
+      "rationale": "Human participant work requires an explicit scope decision and an agreed consent and anonymization procedure.",
+      "acceptanceSummary": "7 Ekim inceleme taslagi: Ilk danisman gorusmesinde pilot/user study yapma veya gelecege birakma karari kaydedilir.; Yapilacaksa kurumun gerekli etik/riza sureci, gonulluluk, cekilme, anonimlestirme ve retention katilimci toplamadan once tamamlanir.; Katilimci yoksa guven/ogrenme iddialari benchmark sonucu olarak sunulmaz; kapsam daraltilir ve sinirlilik yazilir.; Katılımcı sayisi, gorev/sure butcesi ve sequence planı pilotta belirlenip formal calisma oncesi dondurulur.",
+      "acceptanceCriteria": [
+            "Ilk danisman gorusmesinde pilot/user study yapma veya gelecege birakma karari kaydedilir.",
+            "Yapilacaksa kurumun gerekli etik/riza sureci, gonulluluk, cekilme, anonimlestirme ve retention katilimci toplamadan once tamamlanir.",
+            "Katilimci yoksa guven/ogrenme iddialari benchmark sonucu olarak sunulmaz; kapsam daraltilir ve sinirlilik yazilir.",
+            "Katılımcı sayisi, gorev/sure butcesi ve sequence planı pilotta belirlenip formal calisma oncesi dondurulur."
+      ],
+      "outOfScope": [
+            "Recruiting participants or collecting participant data before the required consent and ethics decision."
+      ],
+      "sourceDocuments": [
+            "EVALUATION_PLAN.md",
+            "DATA_AND_PRIVACY.md",
+            "SUPERVISOR_BRIEF.md",
+            "ADVISOR_MEETING_AGENDA.md",
+            "docs/EVALUATION_PROTOCOL.md"
+      ],
+      "parentKey": "epic-benchmark-evidence-pipeline",
+      "blockedByKeys": [
+            "req-research-question"
+      ]
+}
   ]
 }

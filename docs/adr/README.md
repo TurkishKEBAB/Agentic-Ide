@@ -24,6 +24,7 @@ the trade-offs, and the conditions that should trigger a revisit.
 | [ADR-007](ADR-007-ablation-baseline-design.md) | A/B/C ablation baseline design | Accepted |
 | [ADR-008](ADR-008-workspace-boundary-terminology.md) | Workspace boundary terminology | Accepted |
 | [ADR-009](ADR-009-prompt-model-versioning.md) | Prompt and model versioning | Accepted |
+| [ADR-010](ADR-010-secret-storage-and-ipc-broker.md) | Secret storage and IPC broker | Proposed |
 
 ## How To Add A New ADR
 

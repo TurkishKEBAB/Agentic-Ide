@@ -85,23 +85,36 @@ Kullanıcı aşağıdaki tercihlerden birini seçebilir:
 
 ## 4. API Anahtarı Güvenliği
 
-### 4.1 Mevcut Yaklaşım (MVP)
+### 4.1 Önerilen Saklama Sözleşmesi (MVP — Uygulama Bekliyor)
 
-- API anahtarları `~/.agentide/config.json` dosyasında saklanır
-- Dosya izinleri `600` (yalnızca sahip okuyabilir)
-- Anahtar hiçbir zaman log'a yazılmaz
-- Anahtar hiçbir zaman model context'ine dahil edilmez
+- `~/.agentide/config.json` yalnızca boş olmayan `apiKeyRef` referansı ve sır içermeyen provider ayarlarını saklar;
+  ham API anahtarı config'e yazılmaz.
+- Anahtar OS credential store'da veya anahtarı OS tarafından korunan şifreli secret store'da tutulur. Gerçek
+  mekanizma ve Windows/macOS/Linux davranışı uygulama spike'ında seçilir; kabul edilmiş teknoloji kararı değildir.
+- Anahtarı okuma/kullanma yetkisi main-process broker'dadır. Onboarding girdisi dar preload/IPC çağrısıyla iletilir;
+  anahtar renderer'a geri döndürülmez ve ajan araçlarına açılmaz.
+- Güvenli storage yoksa cloud credential işlemi açık hata verir; plaintext config veya `.env` fallback'i yapılmaz.
+  Kullanıcı yerel profili seçebilir.
+- Anahtar model context'ine, retrieval indeksine, audit log'a, hata mesajına veya benchmark export'a dahil edilmez.
+- Provider silindiğinde secret store kaydı ve config referansı kaldırılır. Dosya silme/credential kaldırma,
+  SSD veya backup üzerinde adli düzeyde geri getirilemezlik garantisi olarak sunulmaz.
 
-### 4.2 İyileştirme Seçenekleri (Gelecek)
+Bu sözleşme [ADR-010 önerisi](docs/adr/ADR-010-secret-storage-and-ipc-broker.md) ve GitHub #52 ile eşleşir.
+Mevcut uygulama kodu olmadığından storage, IPC ve sızıntı kontrolleri henüz çalışma zamanında doğrulanmamıştır.
 
-| Seçenek                  | Güvenlik   | Karmaşıklık |
-|--------------------------|------------|-------------|
-| Ortam değişkeni          | Orta       | Düşük       |
-| `.env` dosyası           | Orta       | Düşük       |
-| OS Keychain (Keytar)     | Yüksek     | Orta        |
-| Hardware Security Module | Çok Yüksek | Yüksek      |
+### 4.2 Uygulama Spike'ı ve Kabul Kriterleri
 
-**MVP kararı:** Dosya bazlı saklama + dosya izinleri yeterli. OS Keychain gelecek çalışma.
+| Kontrol | Beklenen sonuç |
+|---|---|
+| Config/export incelemesi | Ham anahtar yok; config'de yalnızca secret referansı var |
+| Store erişilemez veya şifreleme başarısız | Cloud credential işlemi durur; plaintext fallback yok |
+| IPC'de yanlış sender, kanal veya girdi | Broker isteği reddeder; secret değeri döndürmez |
+| Provider kaldırma / key clear | Secret kaydı ve referansı kaldırılır; sonraki cloud çağrısı credential ister |
+| Platform testi | Seçilen OS storage mekanizmasının erişim/fallback sınırı ve hata davranışı belgelenir |
+
+Electron `safeStorage` değerlendirilebilir; Windows DPAPI ve Linux storage backend davranışları farklıdır.
+Linux `basic_text` güvenli saklama kabul edilmez. Mekanizma seçimi bu sınırlara göre yapılmalıdır.
+[Resmî Electron safeStorage belgesi](https://www.electronjs.org/docs/latest/api/safe-storage).
 
 ---
 

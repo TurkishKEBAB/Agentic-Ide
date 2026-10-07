@@ -115,28 +115,45 @@ Her ajan eylemi zaman damgası ve kullanıcı kararıyla loglanır:
 
 ```json
 {
+  "eventId": "example-event-001",
   "timestamp": "2026-01-15T14:30:00Z",
-  "run_id": "eval-run-001",
-  "task_id": "bugfix-03",
+  "runId": "example-eval-run-001",
+  "taskId": "example-bugfix-03",
   "condition": "C",
-  "action": "write_file",
-  "path": "src/auth/login.ts",
-  "lines_changed": 12,
-  "user_decision": "approved",
-  "context_sources": [
-    "src/auth/types.ts",
-    "src/utils/jwt.ts"
-  ],
-  "model": "claude-sonnet-4-20260514",
-  "token_count": 2847
+  "eventType": "write_applied",
+  "actor": "system",
+  "decision": "approved",
+  "workspaceRoot": "C:/example/workspace",
+  "targetPath": "src/auth/login.ts",
+  "model": {
+    "provider": "example-provider",
+    "name": "example-model",
+    "id": "example-model-id"
+  },
+  "promptVersions": {
+    "implementation": "impl-prompt@0.1.0",
+    "system": "system-prompt@0.1.0"
+  },
+  "policyVersions": {
+    "retrieval": "retrieval@0.1.0",
+    "safety": "safety@0.1.0"
+  },
+  "metadata": {
+    "linesChanged": 12,
+    "contextSources": ["src/auth/types.ts", "src/utils/jwt.ts"],
+    "tokenCount": 2847
+  }
 }
 ```
+
+Bu JSON, `docs/schemas/audit-event.schema.json` ile uyumlu bir **örnektir**; gerçek benchmark sonucu veya uygulanmış
+kontrol kanıtı değildir. Model kimliği örnek değerdir; gerçek çalıştırmada provider/model ve sürüm bilgileri kaydedilir.
 
 - Log dosyası: `~/.agentide/audit.jsonl`
 - Log salt metin, imzasız; kullanıcı istediği zaman inceleyebilir
 - Log silindiyse yeniden oluşturulur (append-only)
-- `run_id`, `task_id` ve `condition` alanları özellikle benchmark/değerlendirme oturumlarında doldurulur; normal
-  kullanımda boş veya yok olabilir
+- `runId` her oturumda zorunludur; `taskId` benchmark/değerlendirme oturumlarında doldurulur. Benchmark dışı normal
+  kullanımda `condition` değeri `not-applicable` olur. Silinen log önceki kanıtın geri kazanıldığı anlamına gelmez.
 
 ---
 
@@ -200,15 +217,18 @@ Trigger'lar kullanıcı tarafından kapatılamaz.
 
 ## 4. OWASP LLM Güvenlik Referansları
 
-OWASP Top 10 for LLM Applications (2025) ile eşleştirme:
+OWASP Top 10 for LLM Applications (2025) ile eşleştirme. Kodlar
+[resmî OWASP 2025 listesi](https://genai.owasp.org/llm-top-10/) üzerinden 7 Ekim 2026'da kontrol edilmiştir.
+Bu tablo planlanan kontrolleri gösterir; uygulama veya güvenlik testi sonucu değildir:
 
 | OWASP Riski                             | Agentic IDE'deki Karşılık                            | Durum                |
 |-----------------------------------------|------------------------------------------------------|----------------------|
-| LLM01: Prompt Injection                 | Sistem prompt'u koruma, input sanitization           | MVP'de temel korunma |
-| LLM02: Insecure Output Handling         | Diff önizleme + onay                                 | ✅ Covered            |
-| LLM03: Training Data Poisoning          | Dış model kullanılıyor, kontrol dışı                 | Belgelenecek sınır   |
-| LLM06: Sensitive Information Disclosure | Gizli dosya filtresi                                 | ✅ Covered            |
-| LLM08: Excessive Agency                 | Workspace boundary + write boundary + en küçük yetki | ✅ Covered            |
+| LLM01:2025 Prompt Injection                 | Repo/model metnini veri olarak ele alma + tool politikası | Planlandı; test bekliyor |
+| LLM02:2025 Sensitive Information Disclosure | Gizli dosya/context filtresi + log redaction               | Planlandı; test bekliyor |
+| LLM04:2025 Data and Model Poisoning         | Dış model ve veri kaynakları; tam kontrol yok              | Belgelenmesi gereken sınır |
+| LLM05:2025 Improper Output Handling         | Diff/onay + broker'da şema, path ve politika doğrulama      | Planlandı; test bekliyor |
+| LLM06:2025 Excessive Agency                 | Workspace boundary + write boundary + no-shell             | Planlandı; test bekliyor |
+| LLM08:2025 Vector and Embedding Weaknesses   | İndeks filtresi + kaynak/freshness doğrulaması              | Sözleşme ve test bekliyor |
 
 ---
 
