@@ -9,6 +9,6 @@ This review prepares the 8 October 2026 first advisor meeting and makes the plan
 
 [Meeting package](https://github.com/TurkishKEBAB/Agentic-Ide/blob/docs/advisor-review-2026-10-08/working-notes/advisor-2026-10-08/README.md) · [Claude Design prompt](https://github.com/TurkishKEBAB/Agentic-Ide/blob/docs/advisor-review-2026-10-08/working-notes/advisor-2026-10-08/CLAUDE_DESIGN_PROMPT.md)
 
-Validation: repository governance, 74 Markdown files, eight PlantUML diagrams, requirements schema/DAG and setup dry run passed. Config schema passed 29 acceptance/rejection cases; the audit example passed full schema/date-time validation. Live GitHub verification reports no mismatches.
+Validation: repository governance, 75 Markdown files, eight PlantUML diagrams, requirements schema/DAG and setup dry run passed. Config schema passed 29 acceptance/rejection cases; the audit example passed full schema/date-time validation. Live GitHub verification reports no mismatches.
 
 The repository is still in planning; no application or experimental results are claimed. Advisor decisions, real milestone dates, schema extensions and runtime evidence remain explicitly open.

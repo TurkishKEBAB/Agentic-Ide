@@ -4,7 +4,7 @@ Tarih: 7 Ekim 2026. Uygulama bulunmadığından runtime benchmark veya app testi
 
 | Kontrol | Sonuç |
 |---------|-------|
-| Markdown yerel linkler | İlk kontrol 73, son yayın paketi 74 dosya; geçti. |
+| Markdown yerel linkler | İlk kontrol 73, son yayın paketi 75 dosya; geçti. |
 | PlantUML yapı kontrolü | 8 dosya; geçti. |
 | Repository governance / workflow guardrails | Geçti. |
 | Requirements setup dry-run | 19 custom field, 20 label, 95 issue; geçti. |
