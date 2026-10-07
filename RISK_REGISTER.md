@@ -57,7 +57,9 @@
 
 - **Olasılık:** Düşük | **Etki:** Yüksek | **Skor:** 🟡 Orta
 - **Azaltma:** Undo'yu transaction tabanlı modellemek; test kapsamını erken yaz
-- **B Planı:** Rollback'i MVP'den çıkar, sadece "dosyayı geri yükle" sun
+- **B Planı:** Güvenilir transaction/recovery doğrulanana kadar write/apply'i kapat ve explain-only akışı kullan.
+  Rollback'i sessizce çıkarıp aynı tez iddiasıyla devam etme; kapsam değişecekse danışmanla araştırma sorusunu,
+  benchmark koşullarını ve başarı ölçütlerini birlikte revize et. Kurtarılamayan değişiklik riski açık karar kapısıdır.
 - **Durum:** [ ] Açık
 
 ### R7 — Güvenlik Duvarı Bypass Edilebiliyor

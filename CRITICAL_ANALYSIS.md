@@ -17,8 +17,8 @@ Eleştiriye başlamadan önce gerçekten değerli olan kısımları teslim etmek
 - **Diff önizleme + geri alma.** Bu iki özellik güven inşa etmek için zorunludur ve doğru tespit edilmiştir.
 - **Hibrit model stratejisi.** Basit görevler için yerel model, karmaşık görevler için bulut modeli mantığı hem maliyet
   hem de gizlilik açısından sağlıklı bir yaklaşımdır.
-- **Akademik katkı potansiyeli.** "Proaktif ajan döngüsü + güvenli dosya değişikliği" kombinasyonu için ölçülebilir bir
-  değerlendirme çerçevesi kurulabilirse, bu gerçek bir akademik katkıya dönüşebilir.
+- **Akademik katkı potansiyeli.** "Plan-first, approval-gated ajan döngüsü + güvenli dosya değişikliği" kombinasyonu için
+  ölçülebilir bir değerlendirme çerçevesi kurulabilirse, bu gerçek bir akademik katkıya dönüşebilir.
 
 ---
 
@@ -44,7 +44,8 @@ Belgeler, ajana "kullanıcı prompt yazmasa bile otomatik analiz" yapma özelli�
 araştırma literatüründe "alert fatigue" (uyarı yorgunluğu) olarak bilinen bir UX tuzağıdır. Yazılımcı bir akışa
 girdiğinde — "flow state" — her kesinti maliyetlidir. Ajan her dosya açıldığında veya her tuşa basıldığında yorum
 yaparsa, kullanıcı birkaç saat içinde ya bu özelliği kapatır ya da uygulamayı siler. Windows'un Clippy asistanı bu
-hatanın en ikonik örneğidir. Çözüm: Proaktif yorumlar yalnızca yüksek güven + yüksek risk kesişiminde tetiklenmelidir.
+hatanın en ikonik örneğidir. Çözüm: Proaktif/background analiz MVP'den çıkarılmalı; güvenlik uyarıları yalnızca kullanıcı
+tetiklemeli plan üretildikten sonra, apply öncesi reactive safety check olarak çalışmalıdır.
 
 ### Risk 4 — Tüm Repo Context Yaklaşımı Hem Yanlış Hem Verimsiz
 
@@ -209,20 +210,39 @@ Aşağıdaki kapsamın 1.5 yılda **gerçekten tamamlanabilir** ve **savunulabil
 
 - Proaktif/otomatik analiz
 - Multi-agent
-- Terminal entegrasyonu (opsiyonel, son 1 ay eklenebilir)
+- Terminal entegrasyonu (MVP dışı; tez sonrası güvenlik modeliyle değerlendirilebilir)
 - 5 model sağlayıcısı (2 ile başlayın)
 - VS Code extension uyumluluğu
 
 ---
 
-## 9. Son Hüküm: Bu Projeyi Neden Bu Haliyle Riskli Buluyorum?
+## 9. Risklerin Roadmap ve Backlog Bağlantısı
+
+Bu eleştiri yalnızca yorum olarak kalmamalı; her yüksek risk, roadmap kontrol noktası ve GitHub Project backlog maddesiyle
+izlenmelidir.
+
+| Eleştiri Riski | Roadmap Kontrolü | Risk Kaydı / Backlog Bağlantısı |
+|----------------|------------------|---------------------------------|
+| Risk 1 - kapsam 1.5 yılı aşıyor | Faz geçişlerinde kapsam dondurma; Faz 3 feature freeze | `R11`, `req-scope-guardrails`, `req-thesis-freeze` |
+| Risk 2 - feature parity hedefi belirsiz | Ürün kapsamı §0.4 dışı liste her danışman toplantısında kontrol edilir | `req-scope-guardrails`, `req-completion-criteria` |
+| Risk 3 - proaktif ajan alert fatigue üretir | Proaktif/background analiz sadece gelecek çalışma; MVP'de reactive safety | `req-ux-proactive-guards`, `req-safety-reactive-warnings` |
+| Risk 4 - tüm repo context yanlış/verimsiz | Faz 2 context v1/v2 kontrol noktaları precision@5 ile izlenir | `R2`, `req-context-on-demand`, `req-context-index-and-ignore` |
+| Risk 5 - multi-agent gereksiz karmaşıklık | Faz 2 ajan döngüsü single-agent olarak kilitlenir | `req-agent-plan-first`, `req-agent-tool-whitelist` |
+| Risk 6 - güvenlik modeli yüzeysel | Faz 2 güvenlik testleri, Faz 4 güvenlik test paketi | `R7`, `adr-workspace-boundary-no-shell`, `req-safety-protected-files`, `req-safety-audit-log` |
+| Risk 7 - kullanıcı güven açığı | Diff, gerekçe, kontrol noktaları ve rollback UI akışlarında izlenir | `req-ux-why-explanation`, `req-ux-control-points`, `req-diff-atomic-rollback` |
+| Risk 8 - demo gerçek kullanımı temsil etmiyor | 20 görevlik benchmark ve A/B/C ablation tasarımı | `R8`, `req-evaluation-benchmark`, `req-evaluation-metrics` |
+| Risk 9 - TypeScript/Electron öğrenme borcu | Faz 1 yalnızca editor shell + embedding demo | `R5`, `adr-electron-monaco-shell`, `task-reproducible-dev-environment` |
+| Risk 10 - başarı kriterleri savunmasız | Ürün/güvenlik/tez metrikleri ayrı raporlanır | `R10`, `req-research-question`, `req-completion-criteria`, `req-evaluation-metrics` |
+
+## 10. Son Hüküm: Bu Projeyi Neden Bu Haliyle Riskli Buluyorum?
 
 Bu proje şu anda üç ayrı tuzak içermektedir ve bunlar birbirini beslemektedir:
 
 **Tuzak 1 — Genişlik-Derinlik Çelişkisi.**
 Belgeler geniş bir kapsam tanımlamakta, ancak akademik katkının nerede olduğunu net biçimde ortaya koymamaktadır. Tez
-jürisi şunu sorar: "Bu araç var olan araçlardan akademik olarak ne öğretiyor?" Eğer cevap "proaktif ajan döngüsü"yse, o
-zaman editör UI'sı, terminal entegrasyonu ve model sağlayıcı çeşitliliği akademik değil, ürün kapsamıdır. Ürün yapmak
+jürisi şunu sorar: "Bu araç var olan araçlardan akademik olarak ne öğretiyor?" Eğer cevap "plan-first, approval-gated ajan
+döngüsünün güvenlik ve güven üzerindeki etkisi"yse, o zaman editör UI'sı, terminal entegrasyonu ve model sağlayıcı
+çeşitliliği akademik değil, ürün kapsamıdır. Ürün yapmak
 mı, yoksa araştırma yapmak mı istediğiniz 1. ayda netleştirilmemişse, 18. ayda ikisi de tamamlanmamış olur.
 
 **Tuzak 2 — Öğrenme Borcu + Teknik Borç + Kapsam Borcu.**

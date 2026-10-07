@@ -1317,25 +1317,29 @@ function Clear-ProjectFieldValueIfPresent {
 function Get-WorkflowStatus {
   param([object]$IssueDefinition)
 
+  if ($IssueDefinition.status -eq 'Done') {
+    return 'Done'
+  }
+
+  if ($IssueDefinition.status -eq 'Deferred') {
+    return 'Deferred'
+  }
+
   if ($IssueDefinition.status -eq 'Advisor Review') {
     return 'Review'
   }
 
-  if ($IssueDefinition.kind -eq 'epic') {
-    return 'Review'
-  }
-
-  if ($IssueDefinition.phase -eq 'Faz 1' -and $IssueDefinition.priority -eq 'P0') {
-    return 'Ready'
-  }
-
+  # Priority, phase and epic membership do not prove the Definition of Ready.
+  # Ready is a deliberate human review outcome, not a seed-derived default.
   return 'Backlog'
 }
 
 function Get-Readiness {
   param([object]$IssueDefinition)
 
-  if ($IssueDefinition.status -in @('Approved', 'Done')) {
+  # Done may be entered only after the evidence-backed Definition of Done.
+  # Approval alone records a decision; it does not validate implementation.
+  if ($IssueDefinition.status -eq 'Done') {
     return 'Validated'
   }
 
@@ -1348,14 +1352,13 @@ function Get-Readiness {
     return 'Blocked'
   }
 
-  if ($IssueDefinition.status -eq 'Advisor Review') {
-    return 'Ready'
+  $blockedByKeys = @(Get-Collection (Get-PropertyValue -Object $IssueDefinition -Name 'blockedByKeys'))
+  if ($blockedByKeys.Count -gt 0) {
+    return 'Blocked'
   }
 
-  if ($IssueDefinition.phase -eq 'Faz 1' -and $IssueDefinition.priority -eq 'P0') {
-    return 'Ready'
-  }
-
+  # An advisor-review card is ready for discussion, not ready for coding.
+  # A reviewer explicitly sets Ready after checking the Definition of Ready.
   return 'Needs Clarification'
 }
 

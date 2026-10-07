@@ -1,6 +1,8 @@
 # Agentic IDE
 
-Agentic IDE is a graduation project and research prototype for a safety-oriented AI coding environment. The project focuses on a plan-first, approval-gated agent loop: the assistant inspects the codebase, proposes a change plan, shows a diff, waits for human approval, applies only approved edits, and keeps rollback/audit information.
+Agentic IDE is a graduation thesis prototype for a safety-oriented AI coding editor that measures whether a user-triggered, plan-first, approval-gated agent loop improves multi-file code changes through diff review, rollback, audit logs, and evidence-backed verification.
+
+[PRODUCT_PLAN.md](PRODUCT_PLAN.md) is the source of truth for product scope and academic positioning. Verification-Driven Development (VDD) is treated as a supporting thesis framing for evidence, traceability, and rollback decisions, not as a separate MVP product.
 
 ## Current Status
 
@@ -9,6 +11,7 @@ This repository is currently in the thesis planning and requirements phase. The 
 ## Core Documents
 
 - [Supervisor brief](SUPERVISOR_BRIEF.md)
+- [Advisor meeting decision list](ADVISOR_MEETING_AGENDA.md)
 - [Product plan](PRODUCT_PLAN.md)
 - [Verification-Driven Development planning draft](VERIFICATION_DRIVEN_DEVELOPMENT.md)
 - [System plan](SYSTEM_PLAN.md)
@@ -25,8 +28,19 @@ This repository is currently in the thesis planning and requirements phase. The 
 - [Safety and guardrails](SAFETY_AND_GUARDRAILS.md)
 - [Testing and CI](TESTING_AND_CI.md)
 - [Evaluation plan](EVALUATION_PLAN.md)
+- [Evaluation protocol for advisor review](docs/EVALUATION_PROTOCOL.md)
+- [Change lifecycle implementation contract proposal](docs/CHANGE_LIFECYCLE_CONTRACT.md)
+- [Requirements traceability](docs/REQUIREMENTS_TRACEABILITY.md)
+- [Literature and claims audit](docs/LITERATURE_AND_CLAIMS.md)
 - [Project roadmap](PROJECT_ROADMAP.md)
 - [Thesis outline](THESIS_OUTLINE.md)
+
+## First Advisor Meeting — 8 October 2026
+
+The [review package](working-notes/advisor-2026-10-08/README.md) contains the detailed architecture, evaluation and
+GitHub backlog reviews, the decision agenda, and a ready-to-copy Claude Design presentation prompt. Recommendations
+are explicitly separated from advisor approvals and implemented evidence. Milestone dates remain pending confirmation
+of the academic calendar.
 
 ## GitHub Project Seed
 
