@@ -1,11 +1,10 @@
 # Pre-Implementation Audit
 
-Status: Updated before first app scaffold
+Status: 4 November 2026 staged baseline; technical document completion is separate from runtime evidence.
 
 ## Verdict
 
-The repository is strong as a thesis planning repository, but implementation should not start until the P0 gates below
-are either complete or explicitly accepted as risk.
+S1 safe scaffold/pure workspace policy may start under IMPLEMENTATION_READINESS.md. Agent write and formal research have later independent gates; they are not enabled by a planning document. Main protection still needs an actual repository configuration check before the first implementation merge.
 
 ## P0 Before First App Scaffold
 

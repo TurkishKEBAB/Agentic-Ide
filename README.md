@@ -2,7 +2,7 @@
 
 Agentic IDE is a graduation thesis prototype for a safety-oriented AI coding editor that measures whether a user-triggered, plan-first, approval-gated agent loop improves multi-file code changes through diff review, rollback, audit logs, and evidence-backed verification.
 
-[PRODUCT_PLAN.md](PRODUCT_PLAN.md) is the source of truth for product scope and academic positioning. Verification-Driven Development (VDD) is treated as a supporting thesis framing for evidence, traceability, and rollback decisions, not as a separate MVP product.
+[PRODUCT_PLAN.md](PRODUCT_PLAN.md) is the source of truth for product scope and academic positioning. The engineering scope and handoff are fixed in [IMPLEMENTATION_BASELINE.md](docs/IMPLEMENTATION_BASELINE.md). VDD is proposed as a bounded traceability framework; the academic name/hypothesis awaits the first advisor meeting on 5 November 2026.
 
 ## Current Status
 
@@ -35,12 +35,15 @@ This repository is currently in the thesis planning and requirements phase. The 
 - [Project roadmap](PROJECT_ROADMAP.md)
 - [Thesis outline](THESIS_OUTLINE.md)
 
-## First Advisor Meeting — 8 October 2026
+## Planning Handoff — 4 November 2026
 
-The [review package](working-notes/advisor-2026-10-08/README.md) contains the detailed architecture, evaluation and
-GitHub backlog reviews, the decision agenda, and a ready-to-copy Claude Design presentation prompt. Recommendations
-are explicitly separated from advisor approvals and implemented evidence. Milestone dates remain pending confirmation
-of the academic calendar.
+[The implementation baseline](docs/IMPLEMENTATION_BASELINE.md) defines the fixed MVP, interfaces, invariants,
+S0–S6 delivery order and the separate advisor/research gates. The [planning closure report](working-notes/planning-2026-11-04/REVIEW.md)
+records the evidence and GitHub reconciliation. Five pilot task examples and strict v2 lifecycle schemas are validated in CI.
+Implementation and experiments have not been run. Milestone deadlines await the academic calendar.
+
+The [7 October preparation archive](working-notes/advisor-2026-10-08/README.md) is historical; its assumed
+8 October meeting date did not occur. The actual first meeting is 5 November 2026.
 
 ## GitHub Project Seed
 

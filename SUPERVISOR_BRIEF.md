@@ -1,122 +1,44 @@
-# PROJE ÖZETİ VE BELGE HARİTASI (SUPERVISOR_BRIEF)
+# İlk danışman görüşmesi: proje özeti
 
-> **Belge amacı:** Danışman incelemesi için hazırlanmış kısa giriş metni.  
-> Projenin neyi hedeflediğini, hangi kararların netleştiğini ve belgelerin nasıl okunması gerektiğini özetler.
+Görüşme: 5 Kasım 2026. Hazırlık: 4 Kasım 2026. Daha önce danışman görüşmesi yapılmadı; onay kaydı yok.
 
----
+## Araştırma teklifi
 
-## 1. Proje Özeti
+Agentic IDE, öğrenci/junior geliştiricinin AI kod değişikliğini gereksinim → plan → diff → insan kararı →
+kontrollü apply → doğrulama kanıtı → rollback hattında inceleyebildiği bir tez prototipidir.
+Dar VDD çerçevesi, izlenebilirlik dilini; approval-gate karşılaştırılabilir bileşeni ifade eder. Akademik ad ve
+ana hipotez danışman kararı bekler. Mevcut araçlarda benzer kontroller bulunduğu için özellik yokluğu/üstünlük iddiası kurulmaz.
 
-**Agentic IDE**, kullanıcı tetiklemeli, plan-önce-onay-sonra çalışan bir ajan döngüsünün çok dosyalı kod
-değişikliklerinde görev başarısı, güvenlik ihlali, rollback davranışı ve kullanıcı güveni üzerindeki etkisini ölçen
-güvenlik odaklı bir AI kod editörü tez prototipidir.
+**Ana soru teklifi:** Bu akış, sabit görev/model koşullarında doğruluğu, hatalı değişikliklerin uygulanmasını ve
+insan inceleme maliyetini nasıl etkiler? Kullanıcı güveni/öğrenmesi ayrı insan çalışması gerektirir.
 
-Projenin odak noktası: tam özellikli bir IDE veya Copilot/Cursor alternatifi üretmek değil; **approval-gated AI coding**
-akışını ölçülebilir ve denetlenebilir bir prototip üzerinde değerlendirmek.
+## Sabit teknik plan
 
-Bu çalışma, tam özellikli bir IDE üretmeyi değil, aşağıdaki araştırma sorusunu savunulabilir bir prototip üzerinden
-yanıtlamayı hedefler:
+Electron + Monaco + TypeScript; Windows ilk demo; tek kullanıcı tetiklemeli ajan; manuel bir bulut/bir yerel
+sağlayıcı; protected workspace, exact-patch onayı, journal/recovery ve son 10 set rollback. Shell, multi-agent,
+arka plan AI başlatma, extension uyumluluğu ve öğrenci/profesyonel ayrı modları MVP dışıdır.
 
-> **"Kullanıcı tetiklemeli, plan-önce-onay-sonra çalışan güvenli bir ajan döngüsü; çok dosyalı kod değişikliklerinde görev
-başarısını, güvenlik ihlali riskini, rollback davranışını ve kullanıcı güvenini doğrudan LLM kullanımına kıyasla
-iyileştirir mi?"**
+Repo planlama dokümanları ve şemaları içerir; uygulama kodu ve ölçülmüş deney sonucu yoktur.
+[Teknik baz çizgi](docs/IMPLEMENTATION_BASELINE.md) S1 güvenli shell/saf policy dilimi için uygulanabilir devri tanımlar.
+Native modül/model sürümlerinin cihazda kilitlenmesi ve runtime testleri uygulama işidir.
 
-Bu çerçevede **Agentic IDE** ürün artefact'i, **approval-gated AI coding** ana araştırma odağı, **Verification-Driven
-Development (VDD)** ise kanıt, izlenebilirlik ve rollback kararlarını adlandıran destekleyici tez çerçevesidir.
+## Değerlendirme planı
 
----
+20 görev: 5 tek dosya, 4 refactor, 4 bugfix, 3 test, 4 Q&A. Beş ayrı geliştirme pilotu hazır; final görev/fixture
+freeze ve dış oracle incelemesi daha sonra. A/C toplam workflow'u, B/C aynı üretim/safety üzerinde genel insan
+gate'ini karşılaştırır. Q&A ve adversarial safety ayrı paydalardadır. Formal protokol veri öncesinde onaylanıp dondurulur.
+Sıfır gözlenen ihlal evrensel güvenlik garantisi; düşük rollback oranı tek başına güven kanıtı değildir.
 
-## 2. Neden Bu Proje?
+## Görüşmede alınacak beş karar
 
-### Problem
+1. Dar VDD ve ana araştırma sorusu yeterli mi? #20/#66.
+2. Single-agent/no-shell ve dar kapsam, verification sorumluluk ayrımıyla uygun mu?
+3. 20 görev, B/C yöntemi, bağımsız oracle ve dış puanlayıcı nasıl onaylanacak? #54/#25.
+4. İnsan katılımcı çalışması gerekli mi; değilse güven/öğrenme iddiası çıkarılacak mı? #113.
+5. Gerçek teslim/savunma tarihi, haftalık kapasite ve ilk iki haftanın kanıtı nedir? #71.
 
-- Çok dosyalı AI önerilerini gereksinimlere göre incelemek ve doğrulamak ek iş yükü oluşturabilir.
-- Mevcut araçlar diff, izin ve geri alma özellikleri sunar; bunların yokluğu özgünlük gerekçesi olarak kullanılmaz.
-- Bu prototip, plan/onay/kanıt hattının görev doğruluğu, güvenlik ve inceleme maliyetine etkisini ölçmeyi hedefler.
+18 ay eski göreli taslaktır; üniversite takvimi veya geçmişte başlamış süre olduğu varsayılmaz.
+İlk teslim önerisi güvenli shell + workspace policy testleri + beş pilotun schema kanıtıdır.
 
-### Fark
-
-- **Katkı adayı:** Gereksinim → plan → diff → onay → değişiklik → kanıt → rollback izlenebilirliği ve kontrollü deney.
-- Güvenlik veya üretkenlik üstünlüğü henüz ölçülmemiştir; kaynaklar ve iddia sınırları
-  [literatür notunda](docs/LITERATURE_AND_CLAIMS.md) belirtilmiştir.
-
----
-
-## 3. Mevcut Teknik Baz Çizgi
-
-Tablodaki teknik kararlar repo içindeki **planlama baz çizgisidir**; danışman onayı veya çalışan uygulama kanıtı
-anlamına gelmez. 8 Ekim 2026 ilk toplantısında araştırma odağı, kapsam ve gerçek teslim takvimi teyit edilecektir.
-
-`PROJECT_REVIEW_TODO.md`, VDD'yi ana odak olarak işaretlerken ana planlar destekleyici çerçeve olarak tanımlar.
-Bu fark [toplantı karar listesinde](ADVISOR_MEETING_AGENDA.md) açık bir karar olarak tutulur.
-
-| Karar                                      | Durum               | Belge                         |
-|--------------------------------------------|---------------------|-------------------------------|
-| Proje süresi: 18 ay taslak                  | Takvim teyidi bekliyor | `PROJECT_ROADMAP`             |
-| Platform: Electron + Monaco                | Repo mimari kararı    | `ARCHITECTURE_OPTIONS`        |
-| Ajan: Single-agent (ReAct döngüsü)          | Repo mimari kararı    | `AGENT_ARCHITECTURE_ANALYSIS` |
-| Değişiklik onayı: Diff + onay zorunlu       | Tasarım baz çizgisi   | `SYSTEM_PLAN`                 |
-| Model: 1 bulut + 1 yerel sağlayıcı          | Tasarım baz çizgisi   | `TECH_STACK_AND_AI`           |
-| Proaktif analiz: MVP dışı                  | Kapsam baz çizgisi    | `PROACTIVE_BEHAVIOR_DESIGN`   |
-| Benchmark: 20 görev, üçlü karşılaştırma     | Danışman incelemesi   | `EVALUATION_PLAN`             |
-| Terminal entegrasyonu                      | MVP dışı              | `PRODUCT_PLAN` §6             |
-
----
-
-## 4. Belge Okuma Sırası
-
-Danışman incelemesi için önerilen okuma sırası:
-
-### Öncelik 1 — Karar Belgeleri (toplam ~20 dakika okuma)
-
-1. **Bu belge** (SUPERVISOR_BRIEF) — genel bakış
-2. **PRODUCT_PLAN** — problem, araştırma sorusu, MVP kapsamı
-3. **SYSTEM_PLAN** — ajan mimarisi, güvenlik katmanları
-
-### Öncelik 2 — Detay Belgeleri (toplam ~30 dakika okuma)
-
-1. **EVALUATION_PLAN** — benchmark yapısı, metrikler
-2. **PROJECT_ROADMAP** — 18 aylık takvim
-3. **ARCHITECTURE_OPTIONS** — Electron vs. Tauri kararı
-4. **TECH_STACK_AND_AI** — model seçimi, soyutlama katmanı
-
-### Öncelik 3 — Destek Belgeleri (ihtiyaçta okunabilir)
-
-1. **AGENT_ARCHITECTURE_ANALYSIS** — single-agent gerekçesi
-2. **CRITICAL_ANALYSIS** — kapsam ve risk eleştirisi
-3. **THESIS_OUTLINE** — tez bölüm yapısı
-4. **Diğer belgeler** — güvenlik, gizlilik, test, maliyet
-
----
-
-## 5. Bu Aşamada Açık Olan Konular
-
-Aşağıdaki başlıklar danışman geri bildirimiyle netleştirilecektir:
-
-| # | Karar Başlığı | Danışmandan Beklenen Karar |
-|---|---------------|----------------------------|
-| 1 | Akademik odak | Ana iddia "approval-gated AI coding"; VDD destekleyici çerçeve olsun mu? |
-| 2 | Hedef kullanıcı | Junior developer / üst sınıf bilgisayar mühendisliği öğrencisi profili yeterince net mi? |
-| 3 | MVP dışı sınırlar | Terminal, multi-agent, proaktif/background analiz ve VS Code extension kesin dışarıda kalsın mı? |
-| 4 | Benchmark tasarımı | 20 görevlik A/B/C tasarım ve görev hazırlama yöntemi onaylanıyor mu? |
-| 5 | Güven metrikleri | Rollback davranışı + audit log + kısa anket kullanıcı güveni için yeterli mi? |
-| 6 | VDD/TDD dili | "Testler gerekli ama tek başına yeterli değil" çizgisi tez için uygun mu? |
-
----
-
-## 6. Beklenen Sonuç
-
-Danışmanla başlangıç ve teslim tarihleri teyit edilecek 18 aylık taslak sonunda hedeflenen çıktı:
-
-- **Çalışan prototip:** Güvenli, açıklanabilir, ölçülebilir bir ajan destekli editör
-- **Akademik katkı:** Plan-approval döngüsünün etkinliğine ilişkin nicel veriler
-- **Tez:** 66-81 sayfalık savunulmuş akademik belge
-- **Demo:** 5 dakikalık jüri önünde canlı demo
-
-Başarının ölçütü: yalnızca çalışan demo değil; **hangi koşullarda güvenilir çalıştığını ve hangi sınırları olduğunu
-sistematik biçimde gösterebilmek.**
-
----
-
-*Danışman brifingi için → bu belge.*  
-*Detaylı belge hariyası için → yukarıdaki §4 okuma sırası.*
+Okuma sırası: [toplantı gündemi](ADVISOR_MEETING_AGENDA.md), [uygulama baz çizgisi](docs/IMPLEMENTATION_BASELINE.md),
+[değerlendirme protokolü](docs/EVALUATION_PROTOCOL.md), [kaynak/iddia matrisi](docs/LITERATURE_AND_CLAIMS.md).

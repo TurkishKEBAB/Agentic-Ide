@@ -1,0 +1,20 @@
+{
+  "schemaVersion": 2,
+  "patchSetId": "patch-example",
+  "planId": "plan-example",
+  "planRevision": 1,
+  "workspaceId": "workspace-example",
+  "fingerprint": "63bd122f6d02f747340456b248dd6ad49e0190ed5305ddd61623997193cd08c7",
+  "safetyPolicyVersion": "example@1",
+  "createdAt": "2026-11-04T12:00:00Z",
+  "files": [
+    {
+      "path": "src/total.ts",
+      "operation": "modify",
+      "baseHash": "0739219ff1302eacd47db855b5c2e4a0db33ec756c3945074284df2d0b89361f",
+      "proposedHash": "5c4e5381562992105cbd178ac698c782560a95e1c352a66d7f9e15d355d9dfaa",
+      "stagedContentRef": "stage-example",
+      "dependencyGroup": "group-1"
+    }
+  ]
+}

@@ -1,6 +1,6 @@
 # Literatür ve iddia denetimi
 
-İnceleme tarihi: 7 Ekim 2026. İlk danışman toplantısı: 8 Ekim 2026.
+Kaynak tarama tarihi: 7 Ekim 2026. Toplantı bilgisi güncellemesi: 4 Kasım 2026; ilk danışman toplantısı 5 Kasım'dadır.
 Durum: İlk kaynak taraması; sistematik literatür incelemesi ve özgünlük kanıtı değildir.
 
 ## Savunulabilir katkı adayı

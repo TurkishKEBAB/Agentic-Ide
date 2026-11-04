@@ -56,10 +56,9 @@ schema is not a complete run-result schema.
 
 ## Before Implementation
 
-Create the first five benchmark tasks as plain JSON examples that validate
-against `docs/schemas/benchmark-task.schema.json`. Do this before building the
-benchmark runner so the runner is shaped by real task data, not the other way
-around.
+Five [development-pilot tasks](pilot/README.md), an original synthetic fixture and an external oracle specification
+are now supplied and schema-validated. [TASK_CATALOG.md](TASK_CATALOG.md) defines the planned final taxonomy.
+The runner can use these concrete inputs; a schema-valid pilot is not a completed model experiment.
 
 Keep these five development pilot examples separate from the final 20. Freeze
 independent acceptance/regression checks before main runs; generated tests are

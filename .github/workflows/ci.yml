@@ -81,6 +81,6 @@ jobs:
                 throw "npm run $script failed"
               }
             } else {
-              Write-Host "Skipping npm run $script; script is not declared yet."
+              throw "Required npm script '$script' is missing; the application quality gate cannot pass."
             }
           }

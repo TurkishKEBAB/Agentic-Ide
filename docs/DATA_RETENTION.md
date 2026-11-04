@@ -1,34 +1,22 @@
-# Data Retention And Secure Deletion
+# Yerel veri yaşam döngüsü
 
-Status: Pre-implementation baseline
+4 Kasım 2026 teknik kontratı; runtime enforcement uygulanmadı. Aktif kaynak:
+[IMPLEMENTATION_BASELINE](IMPLEMENTATION_BASELINE.md), [ADR-010](adr/ADR-010-secret-storage-and-ipc-broker.md).
 
-This document complements `DATA_AND_PRIVACY.md` by defining concrete retention expectations.
+| Veri | Yer | Tutma | Silme/koruma davranışı |
+|------|-----|-------|-----------------------|
+| Index/embedding/cache | Main broker'ın opaque workspace-ID uygulama dizini | Kullanıcı temizleyene veya workspace kaldırılana kadar | Aktif index işi iptal edilir; DB kapanır; ilgili index/vector/cache silinir; agent yeniden indekslemeyi otomatik başlatmaz. |
+| Audit | Yerel uygulama verisi | Default 30 gün; kullanıcı kısaltabilir/temizleyebilir | Aktif recovery ve retained son 10 setin zorunlu metadata'sı çözülene kadar korunur. |
+| Committed backup | Agent context'inden dışlanan broker deposu | Son 10 committed değişiklik seti | Daha eski snapshot yalnız aktif recovery referansı yoksa temizlenir. |
+| In-flight journal/staging | Broker deposu; stage aynı filesystem'de geçici korumalı konum | Recovery tamamlanana kadar | Clear/audit retention tarafından sessiz silinemez; yeni write çözümden önce bloklanır. |
+| API key | OS credential/OS-backed encrypted store | Provider kaldırılana kadar | Secret ve config referansı silinir, bellekten erişim bırakılır; plaintext fallback yoktur. |
+| Chat | Oturum belleği | Kalıcı history default kapalı | Run/oturum sonu bırakılır; opt-in history eklenirse ayrı veri kararı gerekir. |
+| Thesis export | Kullanıcının seçtiği sanitized export | Akademik teslim ihtiyacına göre kullanıcı kontrolü | Raw key/kod/kimlik yok; insan verisi retention kararı #113'e bağlıdır. |
 
-## Retention Matrix
+Index, audit, key ve backup temizleme **ayrı** kontrollerdir. Kullanıcıya hangi verinin silineceği ve evidence kaybı
+anlatılır. Aktif transaction/recovery varken geri dönüşsüz clear kabul edilmez; güvenli sonuç veya açık recovery-required
+gerekir. Kullanıcı workspace dosyaları veri temizleme adıyla silinmez. Staging dizinleri her read/index/provider yolunda
+mandatory exclusions içindedir; hedef dışı app state yazması broker'ın kendi sabit capability'sidir.
 
-| Data              | Default Location                   | Default Retention                              | Secure Deletion Expectation                   |
-|-------------------|------------------------------------|------------------------------------------------|-----------------------------------------------|
-| Workspace index   | Local app data                     | Until workspace is removed                     | Delete index for selected workspace           |
-| Embeddings        | Local app data                     | Until workspace is removed                     | Delete vector rows and metadata               |
-| Audit log         | Local app data                     | User-controlled; thesis export can be separate | Delete local log or export sanitized copy     |
-| API keys          | Proposed OS credential/encrypted secret store; config has `apiKeyRef` only | Until user removes provider | Remove secret-store record and config reference; no plaintext fallback |
-| Chat history      | Local app data                     | Optional; off by default for MVP if uncertain  | Delete conversation file/row                  |
-| Benchmark exports | `docs` or evaluation output folder | Keep sanitized thesis evidence                 | Never include secrets or raw proprietary code |
-
-## Minimum Product Controls
-
-- clear workspace data action
-- clear provider key action
-- clear audit log action, with warning that thesis evidence may be lost
-- sanitized export for advisor/thesis review
-
-## Verification
-
-- test that protected files are absent from index and embeddings
-- test that API keys are absent from audit logs
-- test that config and exports contain only a secret reference, and clearing a provider removes the secret record and reference
-- test that clear workspace data removes index, embeddings, and workspace audit entries
-
-Secret storage is a proposed, unimplemented contract; the platform mechanism must be selected and tested in the
-implementation spike. See [ADR-010](adr/ADR-010-secret-storage-and-ipc-broker.md). Removal is logical deletion;
-forensic erasure from SSDs, OS backups, or external copies is not guaranteed by this prototype.
+Silme, yerel mantıksal silmedir; SSD/OS backup'tan adli silme veya uzaktaki sağlayıcı verisini kaldırma garantisi değildir.
+Testler ayrı clear eylemlerini, korunan recovery kayıtlarını, credential/log redaction'ını ve export temizliğini gözlemlemelidir.

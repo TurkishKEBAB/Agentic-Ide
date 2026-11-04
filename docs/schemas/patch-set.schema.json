@@ -1,0 +1,130 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/TurkishKEBAB/Agentic-Ide/schemas/patch-set.schema.json",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "patchSetId",
+    "planId",
+    "planRevision",
+    "workspaceId",
+    "fingerprint",
+    "safetyPolicyVersion",
+    "createdAt",
+    "files"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "const": 2
+    },
+    "patchSetId": {
+      "$ref": "contract-types.schema.json#/$defs/id"
+    },
+    "planId": {
+      "$ref": "contract-types.schema.json#/$defs/id"
+    },
+    "planRevision": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "workspaceId": {
+      "$ref": "contract-types.schema.json#/$defs/id"
+    },
+    "fingerprint": {
+      "$ref": "contract-types.schema.json#/$defs/hash"
+    },
+    "safetyPolicyVersion": {
+      "type": "string",
+      "minLength": 1
+    },
+    "createdAt": {
+      "type": "string",
+      "minLength": 1,
+      "format": "date-time"
+    },
+    "files": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "path",
+          "operation",
+          "baseHash",
+          "proposedHash",
+          "stagedContentRef",
+          "dependencyGroup"
+        ],
+        "properties": {
+          "path": {
+            "$ref": "contract-types.schema.json#/$defs/relativePath"
+          },
+          "operation": {
+            "type": "string",
+            "enum": [
+              "modify",
+              "create"
+            ]
+          },
+          "baseHash": {
+            "anyOf": [
+              {
+                "$ref": "contract-types.schema.json#/$defs/hash"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "proposedHash": {
+            "$ref": "contract-types.schema.json#/$defs/hash"
+          },
+          "stagedContentRef": {
+            "type": "string",
+            "minLength": 1
+          },
+          "dependencyGroup": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "allOf": [
+          {
+            "if": {
+              "properties": {
+                "operation": {
+                  "const": "modify"
+                }
+              }
+            },
+            "then": {
+              "properties": {
+                "baseHash": {
+                  "$ref": "contract-types.schema.json#/$defs/hash"
+                }
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "operation": {
+                  "const": "create"
+                }
+              }
+            },
+            "then": {
+              "properties": {
+                "baseHash": {
+                  "type": "null"
+                }
+              }
+            }
+          }
+        ]
+      },
+      "minItems": 1
+    }
+  }
+}

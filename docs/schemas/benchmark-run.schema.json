@@ -1,0 +1,377 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/TurkishKEBAB/Agentic-Ide/schemas/benchmark-run.schema.json",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "runId",
+    "taskId",
+    "taskCategory",
+    "condition",
+    "status",
+    "fixtureCommit",
+    "protocolVersion",
+    "versions",
+    "model",
+    "operatorPseudonym",
+    "repeatIndex",
+    "randomizationSeed",
+    "budget",
+    "candidateFingerprint",
+    "finalFingerprint",
+    "score",
+    "humanDecision",
+    "metrics",
+    "criterionResults",
+    "deviations",
+    "failureReason"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "const": 1
+    },
+    "runId": {
+      "type": "string",
+      "minLength": 1
+    },
+    "taskId": {
+      "type": "string",
+      "minLength": 1
+    },
+    "taskCategory": {
+      "$ref": "benchmark-task.schema.json#/properties/category"
+    },
+    "condition": {
+      "type": "string",
+      "enum": [
+        "A",
+        "B",
+        "C"
+      ]
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "not-run",
+        "completed",
+        "failed",
+        "timeout",
+        "cancelled"
+      ]
+    },
+    "fixtureCommit": {
+      "type": "string",
+      "minLength": 40,
+      "maxLength": 40,
+      "pattern": "^[a-f0-9]{40}$"
+    },
+    "protocolVersion": {
+      "type": "string",
+      "minLength": 1
+    },
+    "versions": {
+      "$ref": "contract-types.schema.json#/$defs/versions"
+    },
+    "model": {
+      "$ref": "contract-types.schema.json#/$defs/model"
+    },
+    "operatorPseudonym": {
+      "type": "string",
+      "minLength": 1
+    },
+    "repeatIndex": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "randomizationSeed": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "budget": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "maxIterations",
+        "maxInputTokens",
+        "maxWallClockSeconds"
+      ],
+      "properties": {
+        "maxIterations": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "maxInputTokens": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "maxWallClockSeconds": {
+          "type": "integer",
+          "minimum": 1
+        }
+      }
+    },
+    "candidateFingerprint": {
+      "anyOf": [
+        {
+          "$ref": "contract-types.schema.json#/$defs/hash"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "finalFingerprint": {
+      "anyOf": [
+        {
+          "$ref": "contract-types.schema.json#/$defs/hash"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "score": {
+      "anyOf": [
+        {
+          "type": "integer",
+          "enum": [
+            0,
+            1,
+            2
+          ]
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "humanDecision": {
+      "type": "string",
+      "enum": [
+        "approved",
+        "rejected",
+        "revised",
+        "not-presented",
+        "not-applicable",
+        "not-run"
+      ]
+    },
+    "metrics": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "totalMs",
+        "reviewMs",
+        "ttftMs",
+        "inputTokens",
+        "outputTokens",
+        "estimatedCost",
+        "appliedPolicyViolations"
+      ],
+      "properties": {
+        "totalMs": {
+          "anyOf": [
+            {
+              "type": "number",
+              "minimum": 0
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "reviewMs": {
+          "anyOf": [
+            {
+              "type": "number",
+              "minimum": 0
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "ttftMs": {
+          "anyOf": [
+            {
+              "type": "number",
+              "minimum": 0
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "inputTokens": {
+          "anyOf": [
+            {
+              "type": "number",
+              "minimum": 0
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "outputTokens": {
+          "anyOf": [
+            {
+              "type": "number",
+              "minimum": 0
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "estimatedCost": {
+          "anyOf": [
+            {
+              "type": "number",
+              "minimum": 0
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "appliedPolicyViolations": {
+          "anyOf": [
+            {
+              "type": "number",
+              "minimum": 0
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      }
+    },
+    "criterionResults": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "criterionId",
+          "verdict",
+          "evidenceId"
+        ],
+        "properties": {
+          "criterionId": {
+            "type": "string",
+            "minLength": 1
+          },
+          "verdict": {
+            "type": "string",
+            "enum": [
+              "passed",
+              "failed",
+              "not-run"
+            ]
+          },
+          "evidenceId": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    "deviations": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "failureReason": {
+      "anyOf": [
+        {
+          "type": "string",
+          "minLength": 1
+        },
+        {
+          "type": "null"
+        }
+      ]
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "status": {
+            "const": "not-run"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "score": {
+            "type": "null"
+          },
+          "humanDecision": {
+            "const": "not-run"
+          },
+          "candidateFingerprint": {
+            "type": "null"
+          },
+          "finalFingerprint": {
+            "type": "null"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "status": {
+            "const": "completed"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "score": {
+            "type": "integer",
+            "enum": [
+              0,
+              1,
+              2
+            ]
+          },
+          "criterionResults": {
+            "minItems": 1
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "taskCategory": {
+            "const": "codebase-qa"
+          },
+          "status": {
+            "const": "completed"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "humanDecision": {
+            "const": "not-applicable"
+          },
+          "candidateFingerprint": {
+            "type": "null"
+          },
+          "finalFingerprint": {
+            "type": "null"
+          }
+        }
+      }
+    }
+  ]
+}

@@ -1,5 +1,10 @@
 # AJAN MİMARİSİ ANALİZİ (AGENT_ARCHITECTURE_ANALYSIS)
 
+> 4 Kasım 2026 güncel teknik kaynak: [IMPLEMENTATION_BASELINE.md](docs/IMPLEMENTATION_BASELINE.md).
+> Kapsam/slice, local-only varsayılanı, recoverable apply ve v2 kayıt sözleşmelerinde bu baz çizgi geçerlidir.
+> Ayrı model verifier, öğrenci/profesyonel modları ve shell MVP dışıdır; akademik kararlar 5 Kasım ilk görüşmesinde bekler.
+
+
 > **Belge amacı:** Bu belge, Agentic IDE projesi için single-agent ve multi-agent mimari seçeneklerini
 > karşılaştırır; projenin kısıtları (1.5 yıl, tek geliştirici, lisans tezi) altında en savunulabilir
 > mimariyi önerir.  

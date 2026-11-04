@@ -1,19 +1,18 @@
 # Değişiklik Yaşam Döngüsü Sözleşmesi
 
-**Durum:** 7 Ekim 2026 tarihli uygulama sözleşmesi önerisi; danışman ve uygulama incelemesine açık.
+**Durum:** 4 Kasım 2026 teknik baz çizgisi; akademik onaydan ayrı repo uygulama sözleşmesi.
 **Kanıt düzeyi:** Belgelendi; uygulanmadı ve çalışma zamanı testleriyle doğrulanmadı.
 
-Bu belge [SYSTEM_PLAN](../SYSTEM_PLAN.md) §9–10, [güvenlik katmanları](../SAFETY_AND_GUARDRAILS.md)
+Bu belge [SYSTEM_PLAN](../SYSTEM_PLAN.md) uygulama akışı ve [güvenlik katmanları](../SAFETY_AND_GUARDRAILS.md)
 §2 ve [UC-02](../diagrams/UC/UC-02-kod-degisikligi-yasam-dongusu.puml) akışındaki onay,
 çok dosya uygulama, kesinti ve geri alma boşluklarını kapatır. Mevcut kabul edilmiş kararları değiştirmez:
 [ADR-006](adr/ADR-006-no-shell-execution-in-mvp.md) uyarınca ajan shell, test komutu veya keyfî süreç
 çalıştıramaz; [ADR-004](adr/ADR-004-manual-model-selection.md) uyarınca sağlayıcı seçimi kullanıcıya aittir.
 
-**Şema uzantısı bekliyor:** Aşağıdaki transaction, approval ve verification alanlarının tamamı mevcut
-[plan](schemas/plan.schema.json) ve [audit](schemas/audit-event.schema.json) şemalarında tanımlı değildir.
-Bu belge tek başına şemayı değiştirmez. Uygulamaya geçmeden önce ilgili kartta sürümlü şema, geçiş
-kuralları ve uyumlu örnekler hazırlanmalıdır. Mevcut şema `additionalProperties: false` olduğundan yeni
-alanlar top-level'a sessizce eklenemez. Geçici evidence metadata kullanımı da açık bir sözleşmeyle doğrulanmalıdır.
+**Şema sözleşmesi tamamlandı:** [v2 kataloğu](schemas/README.md), plan/patch/approval/transaction/evidence/audit
+alanlarını ve uyumlu sentetik örneklerini tanımlar; cross-record validator CI'da çalışır. Eski v1 kayıtları yazma
+yetkisi vermez. [Uygulama baz çizgisi](IMPLEMENTATION_BASELINE.md) kapsam ve slice kararlarında güncel kaynaktır.
+Bu kontroller runtime enforcement veya tamamlanmış uygulama kanıtı değildir.
 
 ## 1. Yetki ve bileşen sınırı
 
@@ -106,9 +105,9 @@ kontrol edilerek güncellenir; bu sırada oluşmuş yeni kullanıcı düzenlemes
 3. Yeni fingerprint ile nihai diff tekrar onaya sunulur. Önceki “tüm plan” onayı kullanılamaz.
 4. Uygulanan ve reddedilen dosyalar ayrı raporlanır. Kalan dosyalar otomatik uygulanmaz.
 
-İlk çalışan dilimde bağlı çok dosyalı refactor için yalnızca “Tümünü Uygula / İptal” sunmak önerilir.
-Bağımlılık kontrolü hazır olduğunda seçerek uygulama eklenir. Bu bir kapsam önerisidir; mevcut UC-02'deki
-seçerek uygulama gereksinimini kendiliğinden kaldırmaz. Danışman/backlog kararında sonucu kaydedilmelidir.
+İlk S3 tek-dosya diliminde “Tümünü Uygula / İptal” sunulur. S4'te bağımsız dependency group seçimi eklenir;
+bağlı refactor grubunun bir kısmı seçilemez. Son MVP seçmeli onay gereksinimini korur. Önce seçilen kapsamla yeni
+patch set/fingerprint hazırlanır, ardından o kesin set onaylanır; eski tüm-plan onayı kullanılmaz.
 
 ## 6. Preflight, uygulama ve kesinti kurtarma
 
@@ -173,15 +172,14 @@ kendi çıktısını incelemesi “bağımsız doğruluk kanıtı” olarak adla
 
 ## 9. Audit ve deney koşulları
 
-Mevcut camelCase [audit şeması](schemas/audit-event.schema.json) kayıt biçimi için başlangıç referansıdır.
+Güncel camelCase [v2 audit şeması](schemas/audit-event-v2.schema.json) yeni runtime kayıt biçimidir.
 `runId` normal oturumlarda da oluşturulur; benchmark dışı condition `not-applicable` olur. Model ve prompt,
 retrieval, safety, benchmark sürümleri [ADR-009](adr/ADR-009-prompt-model-versioning.md) gereği deney
-çıktılarında zorunlu tutulur; mevcut şemanın optional alanları runtime doğrulamayla tamamlanmalıdır.
+çıktılarında zorunlu tutulur; v2 versions manifesti şemada zorunludur. Gerekli runtime sürümleri unknown değerle sessizce geçilemez.
 
 Yeni event ihtiyaçları `transaction_prepared`, `transaction_committed`, `transaction_failed`,
 `recovery_started`, `recovery_completed`, `rollback_conflict`, `verification_recorded` olarak önerilir.
-**Bunlar mevcut event enum'da yoktur; sürümlü şema güncellemesi beklemektedir.** Uyumsuz eventler eski
-şemayla geçerliymiş gibi üretilmez. Ortak correlation alanları plan/patch/approval/transaction/evidence
+**Bunlar v2 audit enum'unda tanımlıdır; v1'e yazılmaz.** Ortak correlation alanları plan/patch/approval/transaction/evidence
 kimlikleridir. Raw key, prompt, proprietary code, snapshot veya secret-in-diff eşleşmesinin kendisi audit'e yazılmaz.
 
 Log append-only davranışı uygulama politikasıdır; mevcut imzasız yerel dosya kurcalamaya dayanıklı

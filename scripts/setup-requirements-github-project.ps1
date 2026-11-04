@@ -1077,6 +1077,12 @@ function Set-Issue {
     [string]$RepoFullName
   )
 
+  $stableNumber = Get-PropertyValue -Object $IssueDefinition -Name 'githubIssueNumber'
+  if ($null -ne $stableNumber) {
+    # Resolve the stable identity first. A renamed issue must never create a duplicate.
+    return Invoke-Gh -Arguments @('issue', 'view', ([string]$stableNumber), '-R', $RepoFullName, '--json', 'number,title,url') -AsJson
+  }
+
   if ($ExistingIssuesByTitle.ContainsKey($IssueDefinition.title)) {
     return $ExistingIssuesByTitle[$IssueDefinition.title]
   }
@@ -1317,6 +1323,9 @@ function Clear-ProjectFieldValueIfPresent {
 function Get-WorkflowStatus {
   param([object]$IssueDefinition)
 
+  $explicitStatus = Get-PropertyValue -Object $IssueDefinition -Name 'workflowStatus'
+  if (-not [string]::IsNullOrWhiteSpace([string]$explicitStatus)) { return [string]$explicitStatus }
+
   if ($IssueDefinition.status -eq 'Done') {
     return 'Done'
   }
@@ -1336,6 +1345,9 @@ function Get-WorkflowStatus {
 
 function Get-Readiness {
   param([object]$IssueDefinition)
+
+  $explicitReadiness = Get-PropertyValue -Object $IssueDefinition -Name 'readiness'
+  if (-not [string]::IsNullOrWhiteSpace([string]$explicitReadiness)) { return [string]$explicitReadiness }
 
   # Done may be entered only after the evidence-backed Definition of Done.
   # Approval alone records a decision; it does not validate implementation.
@@ -1393,6 +1405,9 @@ function Get-MvpScenario {
 function Get-RiskTrace {
   param([object]$IssueDefinition)
 
+  $explicitRisk = Get-PropertyValue -Object $IssueDefinition -Name 'risk'
+  if (-not [string]::IsNullOrWhiteSpace([string]$explicitRisk)) { return [string]$explicitRisk }
+
   if ($IssueDefinition.requirementType -eq 'Risk') {
     return $IssueDefinition.acceptanceSummary
   }
@@ -1421,6 +1436,9 @@ function Get-RiskTrace {
 function Get-TestTarget {
   param([object]$IssueDefinition)
 
+  $explicitTarget = Get-PropertyValue -Object $IssueDefinition -Name 'testTarget'
+  if (-not [string]::IsNullOrWhiteSpace([string]$explicitTarget)) { return [string]$explicitTarget }
+
   if ($IssueDefinition.kind -eq 'epic') {
     return 'Child issue completion and advisor review checklist'
   }
@@ -1448,6 +1466,9 @@ function Get-TestTarget {
 
 function Get-ThesisEvidence {
   param([object]$IssueDefinition)
+
+  $explicitEvidence = Get-PropertyValue -Object $IssueDefinition -Name 'thesisEvidence'
+  if (-not [string]::IsNullOrWhiteSpace([string]$explicitEvidence)) { return [string]$explicitEvidence }
 
   switch ($IssueDefinition.area) {
     'Research' { return 'Advisor-approved scope notes and linked planning documents' }
@@ -1534,110 +1555,6 @@ function Get-IssueReferenceText {
   return ($references | Sort-Object -Unique) -join ', '
 }
 
-function Get-ProjectViewsEndpoint {
-  param(
-    [string]$OwnerLogin,
-    [int]$ProjectNumber
-  )
-
-  $ownerData = Invoke-Gh -Arguments @('api', "users/$OwnerLogin") -AsJson
-  $ownerType = Get-PropertyValue -Object $ownerData -Name 'type'
-
-  if ($ownerType -eq 'Organization') {
-    return "/orgs/$OwnerLogin/projectsV2/$ProjectNumber/views"
-  }
-
-  $ownerId = Get-PropertyValue -Object $ownerData -Name 'id'
-  if ($null -eq $ownerId) {
-    throw "Could not resolve numeric GitHub user id for $OwnerLogin."
-  }
-
-  return "/users/$ownerId/projectsV2/$ProjectNumber/views"
-}
-
-function Resolve-ProjectViewFieldDatabaseIds {
-  param(
-    [hashtable]$FieldMap,
-    [object[]]$FieldNames
-  )
-
-  $ids = @()
-  foreach ($fieldName in (Get-Collection $FieldNames)) {
-    if (-not $FieldMap.ContainsKey($fieldName)) {
-      throw "Project view references field that does not exist in the target project: $fieldName"
-    }
-
-    $databaseId = $FieldMap[$fieldName].DatabaseId
-    if ($null -eq $databaseId) {
-      throw "Project field does not expose a numeric database id for view configuration: $fieldName"
-    }
-
-    $ids += [int64]$databaseId
-  }
-
-  return @($ids)
-}
-
-function ConvertTo-ProjectViewPayload {
-  param(
-    [object]$View,
-    [hashtable]$FieldMap,
-    [switch]$Minimal
-  )
-
-  $layout = ([string]$View.layout).ToLowerInvariant()
-  $payload = [ordered]@{
-    name = $View.name
-    layout = $layout
-  }
-
-  $filter = Get-PropertyValue -Object $View -Name 'filter'
-  if (-not [string]::IsNullOrWhiteSpace([string]$filter)) {
-    $payload.filter = [string]$filter
-  }
-
-  if ($layout -ne 'roadmap') {
-    $visibleFieldIds = @(Resolve-ProjectViewFieldDatabaseIds -FieldMap $FieldMap -FieldNames (Get-PropertyValue -Object $View -Name 'visibleFields'))
-    if ($visibleFieldIds.Count -gt 0) {
-      $payload.visible_fields = $visibleFieldIds
-    }
-  }
-
-  if ($Minimal) {
-    return $payload
-  }
-
-  $groupBy = Get-PropertyValue -Object $View -Name 'groupBy'
-  $swimlanes = Get-PropertyValue -Object $View -Name 'swimlanes'
-  if (-not [string]::IsNullOrWhiteSpace([string]$groupBy)) {
-    $payload.group_by = @(Resolve-ProjectViewFieldDatabaseIds -FieldMap $FieldMap -FieldNames @($groupBy))
-  } elseif (-not [string]::IsNullOrWhiteSpace([string]$swimlanes)) {
-    $payload.group_by = @(Resolve-ProjectViewFieldDatabaseIds -FieldMap $FieldMap -FieldNames @($swimlanes))
-  }
-
-  $columnBy = Get-PropertyValue -Object $View -Name 'columnBy'
-  if (-not [string]::IsNullOrWhiteSpace([string]$columnBy)) {
-    $payload.vertical_group_by = @(Resolve-ProjectViewFieldDatabaseIds -FieldMap $FieldMap -FieldNames @($columnBy))
-  }
-
-  $sortBy = @()
-  foreach ($sortSpec in (Get-Collection (Get-PropertyValue -Object $View -Name 'sortBy'))) {
-    $sortFieldName = Get-ViewSortFieldName -SortSpec $sortSpec
-    $sortFieldIds = @(Resolve-ProjectViewFieldDatabaseIds -FieldMap $FieldMap -FieldNames @($sortFieldName))
-    if ($sortFieldIds.Count -lt 1) {
-      continue
-    }
-
-    $sortBy += ,@($sortFieldIds[0], (Get-ViewSortDirection -SortSpec $sortSpec))
-  }
-
-  if ($sortBy.Count -gt 0) {
-    $payload.sort_by = $sortBy
-  }
-
-  return $payload
-}
-
 function Invoke-ProjectViewApi {
   param(
     [string]$Method,
@@ -1664,58 +1581,53 @@ function New-ProjectViews {
     [hashtable]$FieldMap
   )
 
-  if ($SkipViews) {
-    Write-Detail 'Skipping view creation by request.'
-    return
-  }
-
+  if ($SkipViews) { return }
   if ($DryRun) {
-    foreach ($view in $Spec.project.views) {
-      Write-Host ("[dry-run] would ensure view: {0} ({1})" -f $view.name, $view.layout) -ForegroundColor DarkGray
-    }
+    foreach ($view in $Spec.project.views) { Write-Detail "Would ensure GraphQL view: $($view.name)" }
     return
   }
 
-  try {
-    $viewsEndpoint = Get-ProjectViewsEndpoint -OwnerLogin $OwnerLogin -ProjectNumber $ProjectNumber
-    $existingViews = Get-Collection (Get-PropertyValue -Object (Get-PropertyValue -Object $ProjectMetadata -Name 'views') -Name 'nodes')
-    $existingViewNames = @{}
-    foreach ($view in $existingViews) {
-      $existingViewNames[(Get-PropertyValue -Object $view -Name 'name')] = $view
-    }
-
-    foreach ($view in $Spec.project.views) {
-      if ($existingViewNames.ContainsKey($view.name)) {
-        $existingView = $existingViewNames[$view.name]
-        $viewNumber = Get-PropertyValue -Object $existingView -Name 'number'
-        $payload = ConvertTo-ProjectViewPayload -View $view -FieldMap $FieldMap
-        try {
-          $null = Invoke-ProjectViewApi -Method 'PATCH' -Endpoint "$viewsEndpoint/$viewNumber" -Payload $payload
-          Write-Detail "Updated project view: $($view.name)"
-        } catch {
-          Write-Warning "Project view '$($view.name)' already exists but could not be updated automatically. GitHub currently exposes stable creation support, while existing view column/group/sort updates may require the UI. Details: $($_.Exception.Message)"
-        }
-
-        continue
-      }
-
-      Write-Detail "Creating project view: $($view.name)"
-      try {
-        $payload = ConvertTo-ProjectViewPayload -View $view -FieldMap $FieldMap
-        $null = Invoke-ProjectViewApi -Method 'POST' -Endpoint $viewsEndpoint -Payload $payload
-      } catch {
-        Write-Warning "Full project view creation payload failed for '$($view.name)'. Retrying with the stable documented payload. Details: $($_.Exception.Message)"
-        try {
-          $minimalPayload = ConvertTo-ProjectViewPayload -View $view -FieldMap $FieldMap -Minimal
-          $null = Invoke-ProjectViewApi -Method 'POST' -Endpoint $viewsEndpoint -Payload $minimalPayload
-        } catch {
-          Write-Warning "Project view '$($view.name)' could not be created automatically. Details: $($_.Exception.Message)"
-        }
-      }
-    }
-  } catch {
-    Write-Warning "Project view creation was skipped because the GitHub API call failed: $($_.Exception.Message)"
+  $existing = @{}
+  foreach ($view in (Get-Collection (Get-PropertyValue -Object $ProjectMetadata.views -Name 'nodes'))) {
+    $existing[$view.name] = $view
   }
+  $aliases = @{
+    'Blocked Work' = 'Dependency Map Detailed'
+    'First Slice' = 'Implementation Queue Detailed'
+    'Delivery Order' = 'Roadmap'
+  }
+  foreach ($definition in $Spec.project.views) {
+    $name = [string]$definition.name
+    $current = $null
+    if ($existing.ContainsKey($name)) { $current = $existing[$name] }
+    elseif ($aliases.ContainsKey($name) -and $existing.ContainsKey($aliases[$name])) { $current = $existing[$aliases[$name]] }
+    $ids = @()
+    foreach ($fieldName in (Get-Collection (Get-PropertyValue -Object $definition -Name 'visibleFields'))) {
+      if (-not $FieldMap.ContainsKey([string]$fieldName)) { throw "Unknown visible view field: $fieldName" }
+      $ids += [string]$FieldMap[[string]$fieldName].Id
+    }
+    $layout = @{ table = 'TABLE_LAYOUT'; board = 'BOARD_LAYOUT'; roadmap = 'ROADMAP_LAYOUT' }[[string]$definition.layout]
+    $input = @{ name = $name; layout = $layout }
+    if ($ids.Count -gt 0 -and $layout -ne 'ROADMAP_LAYOUT') { $input.configuration = @{ visibleFieldIds = $ids } }
+    if ($null -eq $current) {
+      $input.projectId = [string]$ProjectMetadata.id
+      $created = Invoke-ProjectViewApi -Method 'POST' -Endpoint 'graphql' -Payload @{
+        query = 'mutation($input:CreateProjectV2ViewInput!){createProjectV2View(input:$input){projectV2View{id name number}}}'
+        variables = @{ input = $input }
+      }
+      $current = $created.data.createProjectV2View.projectV2View
+    }
+    $input.Remove('projectId')
+    $input.viewId = [string]$current.id
+    $filter = Get-PropertyValue -Object $definition -Name 'filter'
+    $input.filter = if ($null -eq $filter) { '' } else { [string]$filter }
+    $null = Invoke-ProjectViewApi -Method 'POST' -Endpoint 'graphql' -Payload @{
+      query = 'mutation($input:UpdateProjectV2ViewInput!){updateProjectV2View(input:$input){projectV2View{id name filter layout}}}'
+      variables = @{ input = $input }
+    }
+    Write-Detail "Configured view/filter/visible fields: $name"
+  }
+  # Current GraphQL configuration exposes visible fields. Existing grouping/sorting is preserved.
 }
 
 $specFile = Resolve-SpecPath -RequestedPath $SpecPath
@@ -1796,7 +1708,16 @@ foreach ($issueDefinition in $orderedIssues) {
   Set-ProjectFieldValueIfPresent -ProjectId $projectId -ItemId $itemId -FieldMap $fieldMap -FieldName 'Risk' -Value (Get-RiskTrace -IssueDefinition $issueDefinition)
   Set-ProjectFieldValueIfPresent -ProjectId $projectId -ItemId $itemId -FieldMap $fieldMap -FieldName 'Test Target' -Value (Get-TestTarget -IssueDefinition $issueDefinition)
   Set-ProjectFieldValueIfPresent -ProjectId $projectId -ItemId $itemId -FieldMap $fieldMap -FieldName 'Thesis Evidence' -Value (Get-ThesisEvidence -IssueDefinition $issueDefinition)
-  Set-ProjectFieldValueIfPresent -ProjectId $projectId -ItemId $itemId -FieldMap $fieldMap -FieldName 'Readiness' -Value (Get-Readiness -IssueDefinition $issueDefinition)
+  # Operational readiness is preserved unless a deliberate baseline/reset sync is requested.
+  if ($SyncWorkflowStatus) {
+    Set-ProjectFieldValueIfPresent -ProjectId $projectId -ItemId $itemId -FieldMap $fieldMap -FieldName 'Readiness' -Value (Get-Readiness -IssueDefinition $issueDefinition)
+  }
+  foreach ($mapping in @(@('Workstream', 'workstream'), @('Delivery Slice', 'deliverySlice'), @('Owner Role', 'ownerRole'), @('Decision Status', 'decisionStatus'))) {
+    $fieldValue = Get-PropertyValue -Object $issueDefinition -Name $mapping[1]
+    if (-not [string]::IsNullOrWhiteSpace([string]$fieldValue)) {
+      Set-ProjectFieldValueIfPresent -ProjectId $projectId -ItemId $itemId -FieldMap $fieldMap -FieldName $mapping[0] -Value ([string]$fieldValue)
+    }
+  }
 
   $parentKey = Get-PropertyValue -Object $issueDefinition -Name 'parentKey'
   if (-not [string]::IsNullOrWhiteSpace($parentKey)) {

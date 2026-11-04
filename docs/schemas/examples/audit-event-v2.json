@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 2,
+  "eventId": "event-example",
+  "timestamp": "2026-11-04T12:00:00Z",
+  "eventType": "transaction_committed",
+  "runId": "run-example",
+  "condition": "C",
+  "workspaceId": "workspace-example",
+  "actor": "system",
+  "decision": "none",
+  "versions": {
+    "implementationPrompt": "example@1",
+    "verificationPolicy": "example@1",
+    "retrievalPolicy": "example@1",
+    "safetyPolicy": "example@1",
+    "taskVersion": "example@1",
+    "requirementsVersion": "example@1"
+  },
+  "patchSetId": "patch-example",
+  "transactionId": "transaction-example"
+}
