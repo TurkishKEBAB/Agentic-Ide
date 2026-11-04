@@ -1,0 +1,69 @@
+{
+  "verified_date": "2026-11-05 Europe/Istanbul",
+  "issues": 95,
+  "seed_issues": 95,
+  "project_items": 95,
+  "open": 72,
+  "closed": 23,
+  "workflow": {
+    "Backlog": 63,
+    "Review": 6,
+    "Ready": 2,
+    "Done": 23,
+    "Deferred": 1
+  },
+  "native_parents": 78,
+  "native_dependencies": 198,
+  "total_views": 19,
+  "canonical_views": 18,
+  "ready_issues": [
+    33,
+    49
+  ],
+  "comments": 0,
+  "required_main_checks": [
+    "Validate repository governance",
+    "Validate documentation and diagrams",
+    "Secret scan",
+    "App quality gate"
+  ],
+  "milestones": [
+    {
+      "number": 2,
+      "open": 6,
+      "closed": 23,
+      "due_on": null
+    },
+    {
+      "number": 3,
+      "open": 49,
+      "closed": 0,
+      "due_on": null
+    },
+    {
+      "number": 4,
+      "open": 17,
+      "closed": 0,
+      "due_on": null
+    }
+  ],
+  "milestone_count_source": "Per-issue relations agree with GraphQL milestone counts; REST aggregate counters are stale.",
+  "rest_milestone_counters": [
+    {
+      "number": 2,
+      "open": 36,
+      "closed": 0
+    },
+    {
+      "number": 3,
+      "open": 39,
+      "closed": 0
+    },
+    {
+      "number": 4,
+      "open": 20,
+      "closed": 0
+    }
+  ],
+  "errors": []
+}
