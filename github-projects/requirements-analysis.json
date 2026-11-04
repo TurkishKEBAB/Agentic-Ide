@@ -670,6 +670,20 @@
           "Workstream",
           "Delivery Slice"
         ]
+      },
+      {
+        "name": "Faz 1 Readiness",
+        "layout": "board",
+        "filter": "phase:\"Faz 1\" -status:Done -label:epic",
+        "visibleFields": [
+          "Title",
+          "Status",
+          "Requirement Status",
+          "Decision Status",
+          "Readiness",
+          "Workstream",
+          "Delivery Slice"
+        ]
       }
     ]
   },

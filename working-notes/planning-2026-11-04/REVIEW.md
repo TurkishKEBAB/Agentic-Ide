@@ -31,9 +31,11 @@ Başlangıçta 95 issue açık, 60 Backlog/35 Review ve sıfır Ready idi; tamam
 - User-owned REST view endpoint varsayımı yerine desteklenen GraphQL view update kullanılır; kişisel görünüm korunur.
 - Gerçek tez takvimi bilinmediği için boş tarihli roadmap yerine Delivery Order slice görünümü kullanılır.
 
-## Canonical GitHub kapanış hedefi
+## Doğrulanmış GitHub kapanış durumu
 
-Bu bölüm uygulanacak ve read-back ile doğrulanacak canonical durumu tanımlar:
+5 Kasım 2026 canlı read-back tamamlandı: 95 issue, 95 seed kaydı, 95 Project item ve 18 yönetilen görünümde
+alan/ilişki/filter/layout uyuşmazlığı yoktur. Kişisel görünümle toplam 19 view korunmuştur.
+[Doğrulama özeti](VERIFICATION.json) son durumu kaydeder:
 
 | Durum | Adet | Anlam |
 |-------|-----:|-------|
@@ -43,10 +45,13 @@ Bu bölüm uygulanacak ve read-back ile doğrulanacak canonical durumu tanımlar
 | Deferred | 1 | #70 ayrı öğrenci/profesyonel modları |
 | Backlog | 63 | Henüz uygulanmamış ürün, araştırma ve teslim işleri/epic'ler |
 
-Toplam 95; yeni issue açılması gerekmiyor. Native dependency hedefi 198 (26 eski link kaldırılır, 31 gerekli link
-eklenir); parent sayısı 78 olarak kalır, #113 karar epic'ine taşınır. Tüm kartlarda source, acceptance, owner role,
+Toplam 95; yeni issue açılmadı. Native dependency sayısı 198 (26 eski link kaldırıldı, 31 gerekli link
+eklendi); parent sayısı 78 kaldı, #113 karar epic'ine taşındı. Tüm kartlarda source, acceptance, owner role,
 workstream, slice, risk, test ve evidence vardır. Yalnız ilk iki Ready iş repo sahibine atanır; danışman hesabı uydurulmaz.
-Üç milestone teknik doküman / S1–S4 ürün / S5–S6 araştırma-teslim kapsamına hizalanır; gerçek due date henüz yoktur.
+Üç milestone teknik doküman / S1–S4 ürün / S5–S6 araştırma-teslim kapsamına hizalandı; gerçek due date henüz yoktur.
+GraphQL ve tek tek issue ilişkileri: Faz 1 altı açık/23 kapalı, Faz 2 49 açık, Faz 3 17 açık. REST aggregate sayaçları
+eski toplamları döndürmektedir; bu sağlayıcı tutarsızlığı ayrıca kaydedildi ve doğru issue ilişkileri yerine kullanılmadı.
+Main korumasında dört gerçek CI check'i zorunlu; review/admin/force-push/deletion ayarları korundu.
 
 ## Danışmanla açık kalması gerekenler
 
@@ -63,7 +68,7 @@ sonucu yok, formal veri yok. Güvenli S1 read-only foundation başlayabilir. Olu
 `scripts/validate-planning-contracts.py`: gerçek Draft202012Validator ve format checker; path testleri fingerprint'ten
 bağımsız da çalışır. `scripts/test-planning-sync.ps1`: 10 identity/workflow/evidence regresyon kontrolü; mock dışında
 network çalıştırmaz. Governance, link, PlantUML ve diff kontrolleri yayın öncesi çalıştırılır. Bunlar uygulamanın runtime
-doğruluğunu kanıtlamaz. Final canlı karşılaştırma özeti yerel `after-verification.json` dosyasına kaydedilir.
+doğruluğunu kanıtlamaz. Final canlı karşılaştırma özeti [VERIFICATION.json](VERIFICATION.json) ve yerel ham read-back'te kayıtlıdır.
 
 Ham before snapshot'ları ve tek-seferlik prepare/apply yardımcıları yerel inceleme klasöründedir; repo'ya büyük ham
 çıktılar veya geçmiş kişisel görüşme mektuplarının kopyaları yayımlanmaz. Kapanış commit'i/PR ve Project read-back
