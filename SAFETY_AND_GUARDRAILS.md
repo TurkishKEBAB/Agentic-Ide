@@ -1,5 +1,10 @@
 # GÜVENLİK VE KORUMA KATMANLARI (SAFETY_AND_GUARDRAILS)
 
+> 4 Kasım 2026 güncel teknik kaynak: [IMPLEMENTATION_BASELINE.md](docs/IMPLEMENTATION_BASELINE.md).
+> Kapsam/slice, local-only varsayılanı, recoverable apply ve v2 kayıt sözleşmelerinde bu baz çizgi geçerlidir.
+> Ayrı model verifier, öğrenci/profesyonel modları ve shell MVP dışıdır; akademik kararlar 5 Kasım ilk görüşmesinde bekler.
+
+
 > **Belge amacı:** Ajanın dosya sistemi üzerindeki eylemlerini kısıtlayan güvenlik modelini tanımlar.  
 > Mimari detaylar için → `SYSTEM_PLAN.md`
 

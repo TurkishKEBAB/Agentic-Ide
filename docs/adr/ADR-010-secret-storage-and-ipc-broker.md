@@ -2,7 +2,7 @@
 
 ## Status
 
-Proposed — 2026-10-07. Documented contract; no runtime implementation or platform validation yet.
+Accepted engineering baseline — 2026-11-04. Not an advisor approval; no runtime implementation/platform validation yet.
 
 ## Context
 
@@ -10,7 +10,7 @@ The former privacy plan put raw provider keys in `~/.agentide/config.json`, whil
 `apiKeyRef`. The updated provider-setup requirement in GitHub #52 requires a secret reference rather than a raw key.
 Electron renderer/main boundaries also need a clear owner for credentials and privileged file actions.
 
-## Proposed Decision
+## Engineering Decision
 
 - Store cloud keys in an OS credential store, or encrypted secret storage whose encryption key is protected by the OS.
   Select the exact library/mechanism through an implementation spike and record its supported-platform behavior.

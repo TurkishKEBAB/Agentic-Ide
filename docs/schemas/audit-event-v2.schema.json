@@ -1,0 +1,213 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/TurkishKEBAB/Agentic-Ide/schemas/audit-event-v2.schema.json",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "eventId",
+    "timestamp",
+    "eventType",
+    "runId",
+    "condition",
+    "workspaceId",
+    "actor",
+    "decision",
+    "versions"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "const": 2
+    },
+    "eventId": {
+      "$ref": "contract-types.schema.json#/$defs/id"
+    },
+    "timestamp": {
+      "type": "string",
+      "minLength": 1,
+      "format": "date-time"
+    },
+    "eventType": {
+      "type": "string",
+      "enum": [
+        "run_started",
+        "run_cancelled",
+        "plan_created",
+        "file_read",
+        "retrieval_query",
+        "diff_created",
+        "approval_requested",
+        "approval_decision",
+        "write_attempted",
+        "write_blocked",
+        "write_applied",
+        "rollback_applied",
+        "safety_warning",
+        "transaction_prepared",
+        "transaction_committed",
+        "transaction_failed",
+        "recovery_started",
+        "recovery_completed",
+        "rollback_conflict",
+        "verification_recorded"
+      ]
+    },
+    "runId": {
+      "$ref": "contract-types.schema.json#/$defs/id"
+    },
+    "condition": {
+      "$ref": "contract-types.schema.json#/$defs/condition"
+    },
+    "workspaceId": {
+      "$ref": "contract-types.schema.json#/$defs/id"
+    },
+    "actor": {
+      "type": "string",
+      "enum": [
+        "user",
+        "agent",
+        "system",
+        "external-harness"
+      ]
+    },
+    "decision": {
+      "type": "string",
+      "enum": [
+        "none",
+        "approved",
+        "rejected",
+        "blocked",
+        "rolled-back"
+      ]
+    },
+    "versions": {
+      "$ref": "contract-types.schema.json#/$defs/versions"
+    },
+    "planId": {
+      "$ref": "contract-types.schema.json#/$defs/id"
+    },
+    "patchSetId": {
+      "$ref": "contract-types.schema.json#/$defs/id"
+    },
+    "approvalId": {
+      "$ref": "contract-types.schema.json#/$defs/id"
+    },
+    "transactionId": {
+      "$ref": "contract-types.schema.json#/$defs/id"
+    },
+    "evidenceId": {
+      "$ref": "contract-types.schema.json#/$defs/id"
+    },
+    "targetPath": {
+      "$ref": "contract-types.schema.json#/$defs/relativePath"
+    },
+    "model": {
+      "$ref": "contract-types.schema.json#/$defs/model"
+    },
+    "metadata": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [],
+      "properties": {
+        "reasonCode": {
+          "type": "string",
+          "minLength": 1
+        },
+        "durationMs": {
+          "type": "number",
+          "minimum": 0
+        },
+        "inputTokens": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "outputTokens": {
+          "type": "integer",
+          "minimum": 0
+        }
+      }
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "eventType": {
+            "enum": [
+              "transaction_prepared",
+              "transaction_committed",
+              "transaction_failed",
+              "recovery_started",
+              "recovery_completed",
+              "rollback_conflict",
+              "rollback_applied"
+            ]
+          }
+        }
+      },
+      "then": {
+        "required": [
+          "transactionId",
+          "patchSetId"
+        ]
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "eventType": {
+            "const": "verification_recorded"
+          }
+        }
+      },
+      "then": {
+        "required": [
+          "evidenceId",
+          "patchSetId"
+        ]
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "eventType": {
+            "const": "approval_decision"
+          }
+        }
+      },
+      "then": {
+        "required": [
+          "approvalId",
+          "patchSetId"
+        ],
+        "properties": {
+          "actor": {
+            "const": "user"
+          },
+          "decision": {
+            "enum": [
+              "approved",
+              "rejected"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "eventType": {
+            "const": "write_blocked"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "decision": {
+            "const": "blocked"
+          }
+        }
+      }
+    }
+  ]
+}

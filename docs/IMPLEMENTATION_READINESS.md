@@ -1,73 +1,35 @@
-# Implementation Readiness
+# Staged implementation readiness
 
-This document defines what must be true before the project moves from planning
-into implementation. It is intentionally strict because the project has a high
-safety and thesis-evidence burden.
+4 November 2026 technical handoff. [IMPLEMENTATION_BASELINE](IMPLEMENTATION_BASELINE.md) is the active contract.
+No advisor meeting has occurred; first meeting is 5 November. Academic approval is never inferred from priority or an ADR.
 
-## Readiness Gate
+## S1 safe foundation gate
 
-Implementation may start when these conditions are true:
+- Repo ADR-001–009, typed lifecycle contracts, privacy/accessibility/threat baselines and active G0 CI exist.
+- A single slice has explicit scope, acceptance cases, source, risk, owner, test and evidence target.
+- The slice's real upstream dependencies are completed. Merely listing an unresolved blocker does not satisfy DoR.
+- #33 safe Electron/Monaco shell and #49 pure workspace policy are the first ready implementation items.
+- No model execution, agent write or human study is part of S1. Formal benchmark approval does not block this read-only foundation.
 
-- The active GitHub Project has the fields `Status`, `Requirement Status`,
-  `Readiness`, `Phase`, `Priority`, `MVP Scenario`, `Risk`, `Test Target`, and
-  `Thesis Evidence`.
-- Faz 1 P0 cards are either `Ready` or explicitly marked `Blocked`.
-- All accepted architectural decisions have an ADR.
-- The first implementation slice has a written Definition of Ready and
-  Definition of Done.
-- Safety terminology is consistent: workspace boundary, path normalization,
-  protected file, approval gate, audit log.
-- Benchmark and audit evidence schemas exist before the agent loop is built.
-- Repository governance, docs, diagram, and security checks pass locally.
-- `docs/QUALITY_GATES.md` and `docs/PRE_IMPLEMENTATION_AUDIT.md` show which gates are active, armed, manual, or deferred.
-- Runtime is pinned through `.nvmrc`, and application CI is present before `package.json` is introduced.
-- Threat model, incident response, data retention, and accessibility baselines exist before UI/security-sensitive code starts.
+## Later gates
 
-## Definition Of Ready
+S2 adds typed IPC/credentials/read-only providers and context only after security boundaries exist.
+S3 actual write requires current v2 plan/patch/approval, mandatory policy, audit, durable journal and fault/recovery tests.
+S4 adds dependency-aware partial approval and multi-file transactions after single-file recovery evidence.
+S5 formal research requires real #20/#54/#66/#25 decisions, #113 participant decision, independent oracle and immutable
+model/task/fixture/protocol freeze. No participant data collection precedes the required consent process.
 
-A card is `Ready` when:
+## Definition of Ready
 
-- It has one clear user or thesis outcome.
-- Acceptance criteria are testable.
-- Source documents are linked.
-- The risk is named.
-- Test target is named.
-- Thesis evidence is named.
-- Dependencies and blocked decisions are either resolved or written down.
-- The expected implementation scope is small enough for one pull request.
-- The card identifies which quality gate will verify the change.
+One PR-sized outcome; testable positive/negative/error criteria; linked authoritative source; explicit non-goals;
+owner/risk/test/evidence/quality gate; all real upstream prerequisites resolved. Epics and future umbrella test
+coverage are not automatically Ready. A discussion-ready question can be Review while implementation readiness is unknown.
 
-## Definition Of Done
+## Definition of Done
 
-A card is `Done` when:
+Relevant change merged, acceptance evidence captured, applicable validation passed, issue/seed/Project consistent.
+Document tasks close on merged document/schema evidence; application tasks need runtime acceptance evidence.
+Done does not mean advisor approved or a model benchmark succeeded. Ready is explicit, never priority-derived.
 
-- Code or document changes are merged.
-- The relevant local validation passes.
-- User-visible behavior, safety behavior, or thesis evidence is captured.
-- Project fields are updated.
-- Any new decision is recorded as an ADR or linked to an existing ADR.
-- Any benchmark/evaluation impact is reflected in the task evidence notes.
-- If the change touches prompts, model settings, retrieval policy, or verifier behavior, the prompt/model version record is updated.
-
-## First Implementation Slice
-
-The first implementation slice should be deliberately narrow:
-
-1. Electron shell starts.
-2. Monaco opens a local file.
-3. Workspace root is selected and normalized.
-4. Protected-file and workspace-boundary checks exist as pure functions.
-5. Governance and security tests run in CI.
-
-The agent loop should wait until the workspace boundary and protected-file tests
-exist. This keeps the project from building exciting behavior on a weak floor.
-
-## Manual Advisor Checkpoint
-
-Before coding the agent loop, ask the advisor to confirm:
-
-- The A/B/C evaluation design is acceptable.
-- "No shell execution in MVP" is acceptable.
-- Manual model selection is acceptable.
-- Workspace boundary terminology is accurate enough for the thesis.
-- The first 20 benchmark task categories are reasonable.
+Ordinary metadata sync preserves live Status/Readiness. `-SyncWorkflowStatus` is an intentional reviewed reset;
+keep canonical stable issue numbers, explicit workflow/readiness and completion evidence current when using it.

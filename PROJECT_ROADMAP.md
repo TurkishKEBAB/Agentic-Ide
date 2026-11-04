@@ -7,7 +7,7 @@
 
 ## 1. Genel Yapı
 
-**8 Ekim 2026 toplantı notu:** 18 ay göreli bir taslaktır; gerçek başlangıç, teslim/savunma tarihi ve haftalık kapasite
+**5 Kasım 2026 toplantı notu:** 18 ay göreli bir taslaktır; gerçek başlangıç, teslim/savunma tarihi ve haftalık kapasite
 teyit edilmemiştir. GitHub'daki üç milestone'un tarih alanları da boştur. Aşağıdaki beş teknik faz, üç GitHub fazıyla
 [değerlendirme protokolündeki eşleme](docs/EVALUATION_PROTOCOL.md) üzerinden takip edilir; bunlar aynı adlandırma değildir.
 Milestone tamamlanması takvim ayından ziyade kabul/kanıt kapısına bağlıdır. Danışman kararı olmadan tarih atanmaz.

@@ -1,8 +1,9 @@
-# İlk Danışman Toplantısı — 8 Ekim 2026
+<!-- Current meeting: 2026-11-05; no previous advisor meeting has occurred. -->
+# İlk Danışman Toplantısı — 5 Kasım 2026
 
 Durum: Toplantı öncesi karar taslağı. Aşağıdaki öneriler danışman onayı değildir.
 
-- Tarih: **8 Ekim 2026, Perşembe**.
+- Tarih: **5 Kasım 2026, Perşembe**.
 - Katılımcılar: [Öğrenci adı] + [Danışman adı].
 - Önerilen süre: **15 dakika sunum + 30 dakika tartışma**; danışmanın ayırdığı süreye göre esnetilebilir.
 - Amaç: Araştırma odağı, uygulanabilir MVP, deney protokolü, insan çalışması ve gerçek takvim hakkında beş karar almak.

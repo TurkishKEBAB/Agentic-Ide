@@ -1,6 +1,6 @@
 # Requirements, Verification and Thesis Evidence
 
-Status: Planning traceability baseline prepared for the 8 October 2026 advisor meeting.
+Status: 4 November 2026 technical baseline; first advisor meeting is 5 November. No prior advisor approval is recorded.
 
 This matrix connects the existing backlog to observable behavior, verification
 targets and thesis evidence. All targets below are planned. A linked issue, schema

@@ -13,25 +13,27 @@ Bu belge, ürün kapsamı ve akademik konumlandırma için tek doğru kaynaktır
 
 ### 0.1 Tek Cümlelik Proje Tanımı
 
-> **Agentic IDE, kullanıcı tetiklemeli, plan-önce-onay-sonra çalışan bir ajan döngüsünün çok dosyalı kod
-değişikliklerinde görev başarısı, güvenlik ihlali, rollback davranışı ve kullanıcı güveni üzerindeki etkisini ölçen
-güvenlik odaklı bir AI kod editörü tez prototipidir.**
+Agentic IDE, öğrenci/junior geliştiricinin çok dosyalı AI kod değişikliğini gereksinim, plan, kesin diff,
+insan kararı, doğrulama kanıtı ve geri alma iziyle yönetebildiği bir tez prototipidir.
 
-### 0.2 Akademik Odak Kararı
+### 0.2 Akademik Teklif ve Teknik Baz Çizgi
 
-Bu tablo mevcut planlama baz çizgisidir. `PROJECT_REVIEW_TODO.md` içindeki "ana odak VDD" notuyla farklılık,
-8 Ekim 2026 toplantısında [K1 kararı](ADVISOR_MEETING_AGENDA.md) olarak çözülecektir. VDD adı tek başına yeni
-metodoloji veya özgünlük kanıtı sayılmaz.
+4 Kasım 2026 teknik planı [IMPLEMENTATION_BASELINE.md](docs/IMPLEMENTATION_BASELINE.md) ile kapatılmıştır.
+İlk danışman görüşmesi **5 Kasım 2026**; akademik onay henüz yoktur. Önceki 8 Ekim paketi tarihsel hazırlıktır.
 
-| Aday Konumlandırma | Karar | Bu Projedeki Rolü |
-| -------------------- | ------- | ------------------- |
-| Agentic IDE | Ürün artefact'i | Ölçüm yapılacak çalışan editör prototipi. |
-| Approval-gated AI coding | Ana araştırma odağı | Plan, diff, insan onayı, güvenlik kontrolü, rollback ve audit hattının etkisi ölçülür. |
-| Verification-Driven Development (VDD) | Destekleyici tez çerçevesi | Gereksinim, kanıt, karar, rollback ve izlenebilirlik dilini sağlar; MVP'de ayrı bir ürün modu değildir. |
+| Başlık | Güncel rol | Karar düzeyi |
+|--------|------------|--------------|
+| Agentic IDE | Ölçüm prototipi | Repo ürün kapsamı |
+| VDD | Gereksinim–kanıt–karar izini adlandıran dar çerçeve önerisi | #20/#66 danışman kararı bekliyor |
+| Approval-gated coding | Aynı güvenlik temelinde karşılaştırılacak bileşen | #54 yöntem kararı bekliyor |
+| Ayrı model verifier / öğrenci-profesyonel modları | MVP dışında; gerekirse ayrı araştırma | Kapsam genişlemesi olmadan uygulanmaz |
 
-**Ana araştırma sorusu:** Kullanıcı tetiklemeli, plan-first ve approval-gated bir ajan döngüsü; doğrudan LLM çıktısına
-kıyasla çok dosyalı kod değişikliklerinde görev başarısını, güvenlik ihlali riskini, rollback davranışını ve kullanıcı
-güvenini ölçülebilir biçimde iyileştirir mi?
+**Ana soru teklifi:** Gereksinim ve kanıtlarla ilişkilendirilmiş kod değişikliği akışı, sabit görev/model koşullarında
+görev doğruluğunu, hatalı değişikliklerin uygulanmasını ve insan inceleme maliyetini nasıl etkiler?
+
+Bu soru tüm VDD metodolojisinin üstünlüğünü iddia etmez. Güven/öğrenme alt sorusu ancak onaylı insan çalışmasıyla
+eklenir; teknik benchmark tek başına bu sonucu vermez. Eski “VDD kesin destekleyicidir / kesin ana odaktır” alternatifleri
+danışman karar kaydı gelene kadar kesinleşmiş akademik sonuç olarak kullanılmaz.
 
 ### 0.3 Hedef Kullanıcı Kararı
 
@@ -46,7 +48,7 @@ görmek ister. Profesyonel power-user, tam ürün pazarı ve jüri demosu bu kap
 | Editör zemini | Electron + Monaco, klasör açma, dosya ağacı, dosya aç/kaydet, en fazla 5 sekme | VS Code extension uyumluluğu, debug adapter, gelişmiş tema sistemi | Editör akademik katkı değil, ölçüm zemini. |
 | Bağlam motoru | Aktif dosya, import/export ilişkileri, top-5 retrieval, `.agentignore`, gizli dosya filtreleri | Tüm repo'yu modele göndermek, gelişmiş ranking araştırması | Token maliyeti ve bağlam gürültüsü sınırlandırılır. |
 | Ajan döngüsü | Kullanıcı tetiklemeli single-agent ReAct: gözlemle, planla, diff göster, onay al, uygula | Multi-agent koordinasyon, otonom görev başlatma | Araştırma değişkeni approval gate olarak dar tutulur. |
-| Diff ve onay | Side-by-side/unified diff, seçmeli onay, atomik yazma, son 10 değişiklik için rollback | Onaysız dosya yazma, otomatik patch uygulama | Kullanıcı kararı ve geri alma davranışı ölçülür. |
+| Diff ve onay | Side-by-side/unified diff, dependency-aware seçmeli onay, recoverable transaction, son 10 değişiklik için rollback | Onaysız dosya yazma, otomatik patch uygulama | Kullanıcı kararı ve geri alma davranışı ölçülür. |
 | Güvenlik | Workspace boundary, path normalization, protected files, secret-in-diff, apply-öncesi reactive safety warnings, audit log | Terminal/shell execution, process sandbox, background security scanning | Shell injection ve alert fatigue riski MVP dışında tutulur. |
 | Model entegrasyonu | 1 bulut + 1 yerel sağlayıcı, manuel model seçimi, provider abstraction | 3+ sağlayıcı, otomatik model router, maliyet optimizasyon motoru | Karşılaştırma için yeterli çeşitlilik, düşük entegrasyon yükü. |
 | Değerlendirme | 20 benchmark görevi, A/B/C ablation, ürün/güvenlik/tez metrikleri | Büyük ölçekli sanayi benchmark'ı, zorunlu geniş kullanıcı çalışması | Tek kişilik bitirme projesi için savunulabilir örneklem. |
@@ -254,7 +256,7 @@ Kapsamın tek karar tablosu için bkz. §0.4. Aşağıdaki maddeler bu tablonun 
 - Sohbet paneli: kullanıcı doğal dil ile istek yazar
 - Ajan yanıtı: yalnızca metin (açıklama modu) veya değişiklik planı
 - Değişiklik planı onayı: kullanıcı "Uygula" veya "İptal"
-- Plan uygulama: atomik dosya yazma işlemi
+- Plan uygulama: kesin patch'e bağlı onay, journal ve kesinti kurtarmalı dosya değiştirme
 
 #### Diff Önizleme ve Güvenlik
 
@@ -333,8 +335,7 @@ Bu liste §0.4'teki tek kapsam tablosuyla tutarlıdır; çelişki durumunda §0.
 
 Bu bölüm, belgeyi finalize etmeden önce danışmandan net karar almak için hazırlanmıştır.
 
-1. Ana araştırma odağını "approval-gated AI coding" olarak, VDD'yi destekleyici kanıt çerçevesi olarak konumlandırmamız
-   akademik açıdan doğru mu?
+1. Dar VDD çerçevesi ve ölçülebilir approval bileşeni, ana araştırma sorusu için uygun akademik konumlandırma mı?
 2. Hedef kullanıcıyı junior developer / üst sınıf bilgisayar mühendisliği öğrencisi profiline indirmek tez değerlendirmesi
    için uygun mu?
 3. MVP kapsam tablosundaki dışarıda bırakılanlar (terminal, multi-agent, proaktif/background analiz, VS Code extension)

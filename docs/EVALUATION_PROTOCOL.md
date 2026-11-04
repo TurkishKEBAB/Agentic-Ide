@@ -1,12 +1,12 @@
 # Değerlendirme Protokolü — Danışman İnceleme Taslağı
 
-Durum: Öneri; 8 Ekim 2026 danışman toplantısında karar bekliyor. Deney yapılmadı, sonuç yok. Bu belge mevcut kabul edilmiş ADR'leri kendiliğinden değiştirmez. Protokol, görevler ve analiz planı onaylanıp sürümlenmeden doğrulayıcı deney başlatılmaz.
+Durum: Öneri; 5 Kasım 2026 danışman toplantısında karar bekliyor. Deney yapılmadı, sonuç yok. Bu belge mevcut kabul edilmiş ADR'leri kendiliğinden değiştirmez. Protokol, görevler ve analiz planı onaylanıp sürümlenmeden doğrulayıcı deney başlatılmaz.
 
 Kaynaklar: [değerlendirme planı](../EVALUATION_PLAN.md), [ADR-007](adr/ADR-007-ablation-baseline-design.md), [ADR-006](adr/ADR-006-no-shell-execution-in-mvp.md), [ADR-009](adr/ADR-009-prompt-model-versioning.md), [benchmark şeması](schemas/benchmark-task.schema.json), [audit şeması](schemas/audit-event.schema.json).
 
 ## 1. Önce karar verilmesi gereken akademik odak
 
-`PROJECT_REVIEW_TODO.md` VDD'yi ana odak olarak işaretliyor; `PRODUCT_PLAN.md` ve yerel VDD taslağı approval-gated coding'i ana odak, VDD'yi destekleyici çerçeve olarak yazıyor. Bu bir yazım düzeltmesiyle çözülecek konu değildir. Kullanıcının VDD yönelimi toplantıya açıkça taşınmalıdır.
+Teknik kapsam [uygulama baz çizgisinde](IMPLEMENTATION_BASELINE.md) sabittir. Akademik teklif dar VDD çerçevesi + ölçülebilir approval bileşenidir; ilk danışman görüşmesinde seçilecek ad/hipotez henüz onaylanmamıştır. Aşağıdaki seçenekler tartışma içindir; scope genişletme talimatı değildir.
 
 | Karar yolu | Savunulabilir araştırma sorusu | Mevcut A/B/C'nin sınırı |
 |---|---|---|
@@ -34,11 +34,11 @@ Benchmark değerlendirmesi için derleme ve testler, geliştirici/değerlendiric
 | Plan/diff | Yanıtın formatı kaydedilir; manuel uygulama | IDE plan/diff üretir | B ile aynı |
 | Koruma temeli | IDE koruması yok; araştırma fixture'ı ve dış gözlemci var | Boundary/protected/secret kontrolü açık | B ile aynı |
 | Uygulama kararı | İnsan yanıtı elle uygular; reddetme/revizyon kaydedilir | Guard geçerse otomatik uygular | Gerçek insan plan/diff üzerinden karar verir |
-| Large-edit uyarısı | Uygulanabilirlik ayrıca işaretlenir | C ile aynı mandatory davranış (öneri) | Mandatory devam/iptal kararı |
+| Large-edit uyarısı | Uygulanabilirlik ayrıca işaretlenir | C ile aynı mandatory davranış | Mandatory devam/iptal kararı |
 
 **A–C:** Bağlam, araçlar, uygulama ve inceleme birlikte değişir; toplam iş akışı farkını gösterir. Approval-gate veya retrieval'ın tek başına nedensel etkisi diye yazılmaz. Araçsız geliştirici mevcut A değildir; eklenirse ayrı D koşulu ve bütçe gerekir.
 
-**B–C:** Önerilen açıklık yalnız genel plan/diff gate'ini kapatır; large-edit dahil mandatory safety davranışları eşittir. Önceki plandaki otomatik large-edit devamı ikinci bir müdahaleydi; bu inceleme kapsamında kaldırılması önerildi. ADR-007 çekirdek tasarımı korunur, ayrıntı danışman kararı bekler. Flag tek başına izole nedensel etki garantisi değildir; aday üretim/bütçe ve inceleme akışı da eşitlenir. Alternatif: ana görevleri large-edit eşiğinin altında tutmak, büyük değişiklikleri ayrı safety paketinde raporlamak.
+**B–C:** Önerilen açıklık yalnız genel plan/diff gate'ini kapatır; large-edit dahil mandatory safety davranışları eşittir. Önceki plandaki otomatik large-edit devamı ikinci bir müdahaleydi; bu inceleme kapsamında kaldırılması önerildi. Teknik baz çizgi B'de yalnız genel gate'i atlar; ana yazma görevleri large-edit eşiğinin altındadır. Formal yöntemin danışman onayı bekler. Flag tek başına izole nedensel etki garantisi değildir; aday üretim/bütçe ve inceleme akışı da eşitlenir. Alternatif: ana görevleri large-edit eşiğinin altında tutmak, büyük değişiklikleri ayrı safety paketinde raporlamak.
 
 **Q&A:** Dosya uygulama/onay kararı yoktur; B/C gate etkisi için yazma görevleriyle aynı paydaya sokulmaz. Q&A, bağlam ve açıklama doğruluğunu ölçer.
 
@@ -46,7 +46,7 @@ Deneysel B normal ürün akışında sunulmaz. Yalnız izin verilen disposable f
 
 ## 4. Görev seti ve bağımsız değerlendirme oracle'ı
 
-20 görev dağılımı, ana değerlendirme planı korunarak şu şekilde önerilir. `docs/benchmark/README.md` içindeki 5×5=25 dağılımı, danışman onayından sonra bununla uyumlandırılmalıdır.
+Görev planı tüm aktif belgelerde 5/4/4/3/4=20 olarak hizalıdır. [Görev kataloğu](benchmark/TASK_CATALOG.md) içerik planını, [beş pilot](benchmark/pilot/README.md) veri biçimini somutlaştırır. Nihai fixture/task/oracle freeze ve danışman onayı formal koşudan önce ayrıca gerekir.
 
 | Kategori | Görev | Değerlendirme |
 |---|---:|---|
@@ -178,7 +178,7 @@ Sanitized final paket: protokol/tag, task JSON+manifest, fixture lisans kaydı, 
 
 ## 11. 18 aylık plana bağlı araştırma kapıları
 
-18 ayın resmi başlangıcı ve teslim tarihi bilinmiyor. Milestone due date'lerinin boş olması yeniden başlatma izni değildir. Aşağıdaki aylar mevcut `PROJECT_ROADMAP.md`'nin göreli aylarına bağlı öneridir; 8 Ekim 2026'yı otomatik Ay 1 yapmaz.
+18 ayın resmi başlangıcı ve teslim tarihi bilinmiyor. Milestone due date'lerinin boş olması yeniden başlatma izni değildir. Aşağıdaki aylar mevcut `PROJECT_ROADMAP.md`'nin göreli aylarına bağlı öneridir; 5 Kasım 2026'yı otomatik Ay 1 yapmaz.
 
 | Göreli dönem | Araştırma çıktısı | Gate |
 |---|---|---|

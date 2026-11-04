@@ -1,0 +1,30 @@
+{
+  "schemaVersion": 2,
+  "evidenceId": "evidence-example",
+  "runId": "run-example",
+  "patchFingerprint": "63bd122f6d02f747340456b248dd6ad49e0190ed5305ddd61623997193cd08c7",
+  "treeFingerprint": "5c4e5381562992105cbd178ac698c782560a95e1c352a66d7f9e15d355d9dfaa",
+  "recordedAt": "2026-11-04T12:00:00Z",
+  "requirementIds": [
+    "req-agent-plan-first"
+  ],
+  "criterionIds": [
+    "criterion-1"
+  ],
+  "kind": "test",
+  "producer": {
+    "kind": "external-harness",
+    "id": "synthetic-runner",
+    "version": "example@1"
+  },
+  "verdict": "not-run",
+  "artifactRef": "synthetic-not-executed",
+  "versions": {
+    "implementationPrompt": "example@1",
+    "verificationPolicy": "example@1",
+    "retrievalPolicy": "example@1",
+    "safetyPolicy": "example@1",
+    "taskVersion": "example@1",
+    "requirementsVersion": "example@1"
+  }
+}

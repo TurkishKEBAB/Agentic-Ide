@@ -1,5 +1,12 @@
 # GitHub Requirements Project Seed
 
+4 November 2026: [implementation baseline](../docs/IMPLEMENTATION_BASELINE.md) and
+[current Project operations](../docs/GITHUB_PROJECT_OPERATIONS.md) supersede historical setup notes below.
+Stable issue numbers, explicit workflow/readiness, workstream, delivery slice, owner role and completion evidence
+are canonical. Views use supported GraphQL updates; existing grouping is preserved. Ordinary sync preserves live
+Status/Readiness; a deliberate reset uses `-SyncWorkflowStatus`. Done planning is distinct from Pending Advisor
+decisions and unfinished application behavior.
+
 This folder contains the seed data and automation for the `Agentic IDE - Thesis Backlog` GitHub Project.
 
 ## Files

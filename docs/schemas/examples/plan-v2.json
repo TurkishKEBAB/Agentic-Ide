@@ -1,0 +1,51 @@
+{
+  "schemaVersion": 2,
+  "planId": "plan-example",
+  "planRevision": 1,
+  "runId": "run-example",
+  "workspaceId": "workspace-example",
+  "createdAt": "2026-11-04T12:00:00Z",
+  "condition": "C",
+  "model": {
+    "provider": "synthetic",
+    "id": "fixture-model",
+    "version": "example@1",
+    "temperature": 0
+  },
+  "versions": {
+    "implementationPrompt": "example@1",
+    "verificationPolicy": "example@1",
+    "retrievalPolicy": "example@1",
+    "safetyPolicy": "example@1",
+    "taskVersion": "example@1",
+    "requirementsVersion": "example@1"
+  },
+  "goal": "Synthetic contract example: update a constant.",
+  "requirementIds": [
+    "req-agent-plan-first"
+  ],
+  "steps": [
+    {
+      "stepId": "s1",
+      "summary": "Change total constant.",
+      "dependsOn": []
+    }
+  ],
+  "affectedFiles": [
+    {
+      "path": "src/total.ts",
+      "operation": "modify",
+      "reason": "Synthetic acceptance criterion."
+    }
+  ],
+  "contextSources": [
+    {
+      "path": "src/total.ts",
+      "contentHash": "0739219ff1302eacd47db855b5c2e4a0db33ec756c3945074284df2d0b89361f",
+      "reason": "Current constant."
+    }
+  ],
+  "riskLevel": "low",
+  "requiresApproval": true,
+  "verificationRequired": true
+}
