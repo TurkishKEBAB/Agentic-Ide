@@ -70,12 +70,14 @@ Sunumda performans, güvenlik üstünlüğü, kullanıcı güveni veya öğrenme
 
 | Kategori | Görev sayısı |
 |---|---:|
-| Bug fix | 5 |
+| Güvenli tek dosya değişikliği | 5 |
 | Çok dosyalı refactor | 4 |
-| Test yazma | 4 |
-| Codebase Q&A | 3 |
-| Güvenli tek dosya değişikliği | 4 |
+| Bug fix | 4 |
+| Test yazma | 3 |
+| Codebase Q&A | 4 |
 | Toplam | **20** |
+
+Dağılım, [görev kataloğu](docs/benchmark/TASK_CATALOG.md) ve [değerlendirme planıyla](EVALUATION_PLAN.md) aynıdır.
 
 20 görev bir kapsam önerisidir; yeterli istatistiksel güç sağlandığı iddia edilmez. Görev sayısı, tekrar sayısı ve run sayısı ayrı kaydedilir: **20 × 3 koşul × danışmanla belirlenecek tekrar sayısı**. Adversarial policy fixture'ları ayrı güvenlik paketi olabilir; primary görev paydasına sessizce eklenmez.
 
