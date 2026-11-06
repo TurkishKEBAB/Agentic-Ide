@@ -322,7 +322,7 @@ describe('#49 openWorkspaceRoot on a real filesystem', () => {
   );
 
   it('#49 rejects a relative path even when it would resolve to a real directory', async () => {
-    const relative = path.relative(process.cwd(), fx.ws);
+    const relative = relativeExistingDirectory();
     expect(path.isAbsolute(relative)).toBe(false);
     expect(fs.existsSync(relative)).toBe(true);
     expectCode(await openWorkspaceRoot(relative), 'ROOT_UNSUPPORTED');
@@ -1533,6 +1533,17 @@ describe('#49 readVerifiedTextFile', () => {
 // Privacy
 // =============================================================================================
 
+/**
+ * A genuinely relative path to an existing directory. On Windows a temp directory on another
+ * drive than the working directory (e.g. GitHub runners: repo on D:, temp on C:) cannot be
+ * expressed relatively, so `path.relative` returns an absolute path; fall back to the
+ * repository's own `tests` directory, which is relative to the Vitest root.
+ */
+function relativeExistingDirectory(): string {
+  const candidate = path.relative(process.cwd(), fx.ws);
+  return path.isAbsolute(candidate) ? 'tests' : candidate;
+}
+
 describe('#49 policy errors never reveal local paths', () => {
   it('#49 failures across all APIs carry no temp-directory path in code or message', async (ctx: TestContext) => {
     linkDir(ctx, fx.outside, inWs('out'));
@@ -1545,7 +1556,7 @@ describe('#49 policy errors never reveal local paths', () => {
       await openWorkspaceRoot(path.join(fx.base, 'missing')),
       await openWorkspaceRoot(inWs('src', 'a.ts')),
       await openWorkspaceRoot(`${fx.ws}\0`),
-      await openWorkspaceRoot(path.relative(process.cwd(), fx.ws)),
+      await openWorkspaceRoot(relativeExistingDirectory()),
       await resolveWorkspacePath(root, 'out/secret.txt', 'read'),
       await resolveWorkspacePath(root, 'out/secret.txt', 'write'),
       await resolveWorkspacePath(root, 'hard.ts', 'read'),
