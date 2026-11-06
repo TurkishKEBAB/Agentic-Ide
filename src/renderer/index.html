@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="tr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="Content-Security-Policy" content="__AGENTIC_IDE_CSP__" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Agentic IDE</title>
+  </head>
+  <body>
+    <div class="app">
+      <header class="toolbar">
+        <strong class="brand">Agentic IDE</strong>
+        <span class="badge" data-testid="read-only-badge">Salt okunur (S1)</span>
+      </header>
+      <main class="layout">
+        <nav id="file-tree" class="file-tree" aria-label="Dosyalar" data-testid="file-tree"></nav>
+        <section class="editor-pane" aria-label="Editör">
+          <div id="file-path" class="file-path" data-testid="file-path"></div>
+          <div id="editor" class="editor" data-testid="editor"></div>
+        </section>
+      </main>
+      <footer class="status-bar">
+        <output id="status" class="status" data-testid="status"></output>
+      </footer>
+    </div>
+    <script type="module" src="./src/main.ts"></script>
+  </body>
+</html>
