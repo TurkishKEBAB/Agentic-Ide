@@ -13,6 +13,7 @@
     "vitest.security.config.ts",
     "vitest.shared.ts",
     "playwright.config.ts",
-    "eslint.config.mjs"
+    "eslint.config.mjs",
+    "src/renderer/src/env.d.ts"
   ]
 }

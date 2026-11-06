@@ -1,10 +1,14 @@
 import path from 'node:path';
 
-import { app, BrowserWindow, net, protocol, session } from 'electron';
+import type { BrowserWindow } from 'electron';
+import { app, dialog, ipcMain, net, protocol, session } from 'electron';
 
 import { buildContentSecurityPolicy } from '../shared/csp';
 import { APP_PROTOCOL_PRIVILEGES, registerAppProtocol } from './app-protocol';
 import { APP_SCHEME } from './app-protocol-constants';
+import { registerWorkspaceIpc } from './ipc/register-workspace-ipc';
+import { isAuthorizedSender } from './ipc/sender-guard';
+import { WorkspaceBroker } from './ipc/workspace-broker';
 import { isTrustedRendererUrl, resolveRendererSource } from './renderer-source';
 import { hardenSession, hardenWebContents } from './security';
 import { createMainWindow } from './window';
@@ -17,6 +21,18 @@ const rendererSource = resolveRendererSource({
   devServerUrl: process.env.ELECTRON_RENDERER_URL,
 });
 
+let mainWindow: BrowserWindow | null = null;
+
+/** Native folder picker owned by the main process; the renderer never sends a root path. */
+async function pickWorkspaceFolder(): Promise<string | null> {
+  const options = { title: 'Çalışma klasörünü seç', properties: ['openDirectory' as const] };
+  const result =
+    mainWindow === null
+      ? await dialog.showOpenDialog(options)
+      : await dialog.showOpenDialog(mainWindow, options);
+  return result.canceled ? null : (result.filePaths[0] ?? null);
+}
+
 function bootstrap(): void {
   hardenSession(session.defaultSession);
   registerAppProtocol(protocol, net, {
@@ -26,10 +42,20 @@ function bootstrap(): void {
       delivery: 'header',
     }),
   });
-  createMainWindow({
+  registerWorkspaceIpc(ipcMain, new WorkspaceBroker(pickWorkspaceFolder), (event) =>
+    isAuthorizedSender(event, {
+      source: rendererSource,
+      appWebContentsId: () =>
+        mainWindow === null || mainWindow.isDestroyed() ? null : mainWindow.webContents.id,
+    }),
+  );
+  mainWindow = createMainWindow({
     preloadPath: path.join(__dirname, '../preload/index.js'),
     source: rendererSource,
     allowDevTools: !app.isPackaged,
+  });
+  mainWindow.on('closed', () => {
+    mainWindow = null;
   });
 }
 
@@ -38,12 +64,11 @@ if (app.requestSingleInstanceLock()) {
     hardenWebContents(contents, (url) => isTrustedRendererUrl(url, rendererSource));
   });
   app.on('second-instance', () => {
-    const [existing] = BrowserWindow.getAllWindows();
-    if (existing !== undefined) {
-      if (existing.isMinimized()) {
-        existing.restore();
+    if (mainWindow !== null) {
+      if (mainWindow.isMinimized()) {
+        mainWindow.restore();
       }
-      existing.focus();
+      mainWindow.focus();
     }
   });
   app.on('window-all-closed', () => {
