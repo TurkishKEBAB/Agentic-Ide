@@ -185,3 +185,28 @@ test('#33 broker rejects calls from an iframe even on the app origin', async () 
   });
   expect(framed).toBe(false);
 });
+
+test('#33 switching workspaces clears the previous tree and file', async () => {
+  const { app, window: page } = launched;
+  await page.getByTestId('open-folder').click();
+  await page.getByTestId('file-tree').locator('button[data-path="src/hello.ts"]').click();
+  await expect(page.getByTestId('file-path')).toHaveText('src/hello.ts');
+
+  const second = path.join(fixture.base, 'second-workspace');
+  fs.mkdirSync(second);
+  fs.writeFileSync(path.join(second, 'only.txt'), 'ikinci\n');
+  await app.evaluate(({ dialog }, workspace) => {
+    dialog.showOpenDialog = () => Promise.resolve({ canceled: false, filePaths: [workspace] });
+  }, second);
+
+  await page.getByTestId('open-folder').click();
+  await expect(page.getByTestId('workspace-name')).toHaveText('second-workspace');
+  await expect(page.getByTestId('file-path')).toHaveText('');
+  const tree = page.getByTestId('file-tree');
+  await expect(tree.locator('button[data-path="only.txt"]')).toBeVisible();
+  await expect(tree.locator('button[data-path="src/hello.ts"]')).toHaveCount(0);
+  await expect(page.locator('.view-lines')).not.toContainText('Merhaba');
+  // The old workspace is no longer reachable through the API either.
+  const stale = await page.evaluate(() => window.agentIde.readFile('src/hello.ts'));
+  expect(stale).toMatchObject({ ok: false, error: { code: 'NOT_FOUND' } });
+});

@@ -13,6 +13,8 @@ export interface WorkspaceViewElements {
 /** Wires the S1 read-only workflow: choose folder → list files → display one file. */
 export class WorkspaceView {
   #activeButton: HTMLButtonElement | null = null;
+  /** Incremented per file request and per workspace change; stale responses are dropped. */
+  #requestGeneration = 0;
 
   constructor(
     private readonly elements: WorkspaceViewElements,
@@ -25,22 +27,33 @@ export class WorkspaceView {
     elements.openButton.disabled = false;
   }
 
+  /** Asks the main process for a folder; on success resets the view and lists the new tree. */
   async chooseWorkspace(): Promise<void> {
-    const result = await window.agentIde.chooseWorkspace();
-    if (!result.ok) {
-      this.showError(result.error);
-      return;
+    this.elements.openButton.disabled = true;
+    try {
+      const result = await window.agentIde.chooseWorkspace();
+      if (!result.ok) {
+        this.showError(result.error);
+        return;
+      }
+      if (result.value === null) {
+        this.setStatus('Klasör seçimi iptal edildi.');
+        return;
+      }
+      this.resetWorkspaceView(result.value.name);
+      await this.refreshTree();
+    } finally {
+      this.elements.openButton.disabled = false;
     }
-    if (result.value === null) {
-      this.setStatus('Klasör seçimi iptal edildi.');
-      return;
-    }
-    this.elements.workspaceName.textContent = result.value.name;
-    await this.refreshTree();
   }
 
+  /** Re-lists the open workspace into the file tree. */
   async refreshTree(): Promise<void> {
+    const generation = this.#requestGeneration;
     const listing = await window.agentIde.listFiles();
+    if (generation !== this.#requestGeneration) {
+      return;
+    }
     if (!listing.ok) {
       this.showError(listing.error);
       return;
@@ -50,22 +63,40 @@ export class WorkspaceView {
     this.setStatus(`${listing.value.entries.length} öğe listelendi${suffix}. Salt okunur.`);
   }
 
+  /** Shows one file read-only; only the most recent request may update the editor. */
   async openFile(relativePath: string, button: HTMLButtonElement): Promise<void> {
+    this.#requestGeneration += 1;
+    const generation = this.#requestGeneration;
     const file = await window.agentIde.readFile(relativePath);
+    if (generation !== this.#requestGeneration) {
+      return;
+    }
     if (!file.ok) {
       this.showError(file.error);
       return;
     }
-    const previous = this.editor.getModel();
-    this.editor.setModel(
-      monaco.editor.createModel(file.value.content, languageForPath(file.value.path)),
-    );
-    previous?.dispose();
+    this.replaceModel(file.value.content, languageForPath(file.value.path));
     this.#activeButton?.removeAttribute('aria-current');
     button.setAttribute('aria-current', 'true');
     this.#activeButton = button;
     this.elements.filePath.textContent = file.value.path;
     this.setStatus(`${file.value.path} — ${file.value.sizeBytes} bayt, salt okunur.`);
+  }
+
+  /** Drops everything shown from the previous workspace (tree, file, pending requests). */
+  private resetWorkspaceView(name: string): void {
+    this.#requestGeneration += 1;
+    this.#activeButton = null;
+    this.elements.workspaceName.textContent = name;
+    this.elements.tree.replaceChildren();
+    this.elements.filePath.textContent = '';
+    this.replaceModel('', 'plaintext');
+  }
+
+  private replaceModel(content: string, language: string): void {
+    const previous = this.editor.getModel();
+    this.editor.setModel(monaco.editor.createModel(content, language));
+    previous?.dispose();
   }
 
   private renderTree(entries: readonly FileEntry[]): void {
