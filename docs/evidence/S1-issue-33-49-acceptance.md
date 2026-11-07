@@ -30,7 +30,7 @@ This is runtime test evidence for the S1 slice in
 
 | Criterion | Evidence | Result |
 | --- | --- | --- |
-| Clean checkout with Node 24, `npm ci` and locked manifest launches Electron/Monaco on the demo OS | Fresh `git clone` of `c077590` → `npm ci` (213 packages) → `npm run build` → Playwright Electron suite: 8/8 passed on Windows 10; GitHub `windows-latest` job (checkout → `npm ci` → `test:security` → build → Electron E2E) passed in [run 42171880737](https://github.com/TurkishKEBAB/Agentic-Ide/actions/runs/42171880737) at `46218e8` | Met |
+| Clean checkout with Node 24, `npm ci` and locked manifest launches Electron/Monaco on the demo OS | Fresh `git clone` of `c077590` → `npm ci` (213 packages) → `npm run build` → Playwright Electron suite: 8/8 passed on Windows 10; GitHub `windows-latest` job (checkout → `npm ci` → `test:security` → build → Electron E2E) passed in [run 42171880737](https://github.com/TurkishKEBAB/Agentic-Ide/actions/runs/42171880737) at `46218e8`; the launcher `start-app.cmd` ([scripts/start-app.ps1](../../scripts/start-app.ps1)) opened the window on Windows 10 in production and `-Dev` mode from a host that sets `ELECTRON_RUN_AS_NODE=1` | Met |
 | `nodeIntegration=false`, `contextIsolation=true`, narrow validated preload API, no generic fs/process access | `tests/security/electron-hardening.test.ts` (web preferences, CSP, navigation, permissions); E2E: no `require`/`process`/`module`/`Buffer`/`ipcRenderer` in the page, Chromium sandbox reported by `app.getAppMetrics()`, `window.agentIde` is frozen with exactly `chooseWorkspace`, `listFiles`, `readFile`; `tests/security/ipc-broker.test.ts` (sender must be the app window's main frame on `app://renderer`, exact argument shape) | Met |
 | format/lint/typecheck/test/security/build scripts exist and pass CI; no missing script skipped | All six scripts exist. `format:check`, `typecheck`, `test`, `test:security`, `build` pass on Windows and Linux. `lint` fails on one error inside `eslint.config.mjs` (preload import regex escape), which a local config-protection hook prevented the implementation session from editing | **Not met yet**: pending the `eslint.config.mjs` fix; CI not yet run |
 | Smoke evidence of workspace selection and read-only display of one local UTF-8 file; agent write unavailable | `tests/e2e/workspace.e2e.ts`: folder chosen through the main-process dialog, tree listed, Turkish UTF-8 file shown, typing does not change the buffer or the file on disk, screenshot `issue-33-workspace-read-only.png` written to the Playwright output; the API has no write capability | Met |
@@ -47,8 +47,8 @@ This is runtime test evidence for the S1 slice in
 
 | Suite | Windows 10 | WSL Ubuntu |
 | --- | --- | --- |
-| `npm test` (all unit/security/editor, with coverage) | 827 passed, 12 skipped | 819 passed, 20 skipped |
-| `npm run test:security` | 812 passed, 12 skipped | 804 passed, 20 skipped |
+| `npm test` (all unit/security/editor, with coverage) | 831 passed, 12 skipped | 819 passed, 20 skipped (at `c077590`, before the 4 tree-order tests) |
+| `npm run test:security` | 812 passed, 12 skipped | 804 passed, 20 skipped (at `c077590`) |
 | `npm run test:e2e` (Electron, Playwright) | 8 passed | not run (no display; Windows is the demo OS) |
 | Line coverage of `src/main` + `src/shared` (excluding Electron bootstrap) | 96.8% | threshold met |
 
@@ -57,8 +57,19 @@ GitHub CI at `46218e8` ([Application CI run 42171880737](https://github.com/Turk
 `npm run lint` (the known `eslint.config.mjs` error); governance, documentation, secret scan and
 dependency review passed. The first run (`e31bb12`) exposed two test-precondition defects that only
 appear when the repository and the temp directory are on different Windows drives; fixed in
-`46218e8`. `CodeQL Analysis` and `Supply Chain Checks` did not run because GitHub had disabled both
-workflows for inactivity (last scheduled runs 28 September 2026); `npm audit` was clean locally.
+`46218e8`. GitHub had disabled `CodeQL Analysis` and `Supply Chain Checks` for inactivity (last
+scheduled runs 28 September 2026); both were re-enabled on 7 November 2026 and dispatched on this
+branch at `dc18bb2`:
+
+- [CodeQL run 42341247455](https://github.com/TurkishKEBAB/Agentic-Ide/actions/runs/42341247455)
+  (Actions and JavaScript/TypeScript, `security-extended` + `security-and-quality`) passed with four
+  open warnings. Three `js/xss-through-dom` warnings are in `advisor-meeting-board.html`, a planning
+  page that was already on `main` and is not part of S1; JavaScript analysis had never run before
+  because the repository had no `package.json`. One `js/file-system-race` warning was in this branch's
+  property test (stat, then read the same fixture) and was fixed by reading first.
+- [Supply Chain run 42341250081](https://github.com/TurkishKEBAB/Agentic-Ide/actions/runs/42341250081):
+  `npm audit --audit-level=high` and the CycloneDX SBOM passed. OpenSSF Scorecard (non-blocking,
+  skipped on pull requests) refuses non-default branches and will run on `main`.
 
 Skips are capability-gated and never silent passes: Windows file symlinks need Developer Mode
 (this machine lacks it), POSIX-only cases (FIFO, socket, `/dev`) skip on Windows, and Windows-only
@@ -84,9 +95,15 @@ switch were fixed. A planned multi-agent Electron/CI review could not run becaus
 limit; that review was performed by the implementation session instead and is therefore not
 independent.
 
+Running the built app on this repository as the workspace showed the file tree in the broker's
+breadth-first order, so files appeared detached from their folders. The broker keeps breadth-first
+listing (its entry budget then drops the deepest levels first); the renderer now displays each
+directory's subtree under it, directories first (`treeOrder`, pinned by unit tests and the E2E smoke).
+
 ## Reproduce
 
 ```powershell
+.\start-app.cmd    # launches the app (checks Node, installs if needed, builds)
 npm ci
 npm run format:check; npm run lint; npm run typecheck
 npm test; npm run test:security
@@ -100,6 +117,6 @@ extension hosts) turns Electron into plain Node; the E2E helper removes that var
 
 - Fix the `eslint.config.mjs` preload import regex, then rerun `npm run lint` and record the green
   `App quality gate` run here.
-- Re-enable the `CodeQL Analysis` and `Supply Chain Checks` workflows (disabled for inactivity) and
-  record their first runs on this PR.
+- Triage the three pre-existing `js/xss-through-dom` code-scanning warnings in
+  `advisor-meeting-board.html` (outside S1).
 - S3 must call `revalidateResolvedPath` at apply and resolve with intent `write`.
