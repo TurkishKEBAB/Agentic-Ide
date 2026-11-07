@@ -6,7 +6,20 @@ Agentic IDE is a graduation thesis prototype for a safety-oriented AI coding edi
 
 ## Current Status
 
-This repository is currently in the thesis planning and requirements phase. The main artifacts are research notes, architecture decisions, safety design, evaluation planning, and GitHub Project seed data. Implementation work will start from the Electron + Monaco + TypeScript stack described in the project documents.
+Implementation has started. The first slice (S1) is a hardened Electron + Monaco + TypeScript shell that opens a workspace folder and displays one UTF-8 file read-only, behind the main-process workspace boundary ([#33](https://github.com/TurkishKEBAB/Agentic-Ide/issues/33), [#49](https://github.com/TurkishKEBAB/Agentic-Ide/issues/49); [acceptance evidence](docs/evidence/S1-issue-33-49-acceptance.md)). There is no agent, model provider or write capability yet. The research notes, architecture decisions, safety design and evaluation planning below remain the source of scope.
+
+## Running the App
+
+Requirements: Windows 10/11 (the demo OS) and Node.js 24 ([.nvmrc](.nvmrc)).
+
+```powershell
+.\start-app.cmd                                                        # or double-click it in Explorer
+powershell -ExecutionPolicy Bypass -File .\scripts\start-app.ps1 -Dev  # Vite dev server with hot reload
+```
+
+[scripts/start-app.ps1](scripts/start-app.ps1) checks the Node.js version, runs `npm ci` when dependencies are missing or older than `package-lock.json` (`-Reinstall` forces it), clears `ELECTRON_RUN_AS_NODE` for the run (some IDE terminals set it, which stops Electron from opening a window), then builds and opens the app. Close the window to exit. On Linux or macOS run `npm ci` and `npm start`.
+
+In the app, **Klasör Aç** chooses the workspace; clicking a file in the tree shows it read-only. Quality gates: `npm run format:check`, `npm run lint`, `npm run typecheck`, `npm test`, `npm run test:security`, `npm run build`, `npm run test:e2e`.
 
 ## Core Documents
 
