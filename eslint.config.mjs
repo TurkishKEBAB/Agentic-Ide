@@ -75,7 +75,7 @@ export default defineConfig(
         {
           patterns: [
             {
-              regex: '^(?!electron$|\.{1,2}/|@shared/).*',
+              regex: '^(?!electron$|\\.{1,2}/).*',
               message: 'Sandboxed preload may only import electron and shared contracts.',
             },
           ],

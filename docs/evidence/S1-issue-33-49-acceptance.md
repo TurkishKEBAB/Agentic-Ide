@@ -32,7 +32,7 @@ This is runtime test evidence for the S1 slice in
 | --- | --- | --- |
 | Clean checkout with Node 24, `npm ci` and locked manifest launches Electron/Monaco on the demo OS | Fresh `git clone` of `c077590` → `npm ci` (213 packages) → `npm run build` → Playwright Electron suite: 8/8 passed on Windows 10; GitHub `windows-latest` job (checkout → `npm ci` → `test:security` → build → Electron E2E) passed in [run 42171880737](https://github.com/TurkishKEBAB/Agentic-Ide/actions/runs/42171880737) at `46218e8`; the launcher `start-app.cmd` ([scripts/start-app.ps1](../../scripts/start-app.ps1)) opened the window on Windows 10 in production and `-Dev` mode from a host that sets `ELECTRON_RUN_AS_NODE=1` | Met |
 | `nodeIntegration=false`, `contextIsolation=true`, narrow validated preload API, no generic fs/process access | `tests/security/electron-hardening.test.ts` (web preferences, CSP, navigation, permissions); E2E: no `require`/`process`/`module`/`Buffer`/`ipcRenderer` in the page, Chromium sandbox reported by `app.getAppMetrics()`, `window.agentIde` is frozen with exactly `chooseWorkspace`, `listFiles`, `readFile`; `tests/security/ipc-broker.test.ts` (sender must be the app window's main frame on `app://renderer`, exact argument shape) | Met |
-| format/lint/typecheck/test/security/build scripts exist and pass CI; no missing script skipped | All six scripts exist. `format:check`, `typecheck`, `test`, `test:security`, `build` pass on Windows and Linux. `lint` fails on one error inside `eslint.config.mjs` (preload import regex escape), which a local config-protection hook prevented the implementation session from editing | **Not met yet**: pending the `eslint.config.mjs` fix; CI not yet run |
+| format/lint/typecheck/test/security/build scripts exist and pass CI; no missing script skipped | All six scripts exist and pass locally on Windows; `format:check`, `typecheck`, `test`, `test:security` and `build` also pass on Linux. The preload import rule in `eslint.config.mjs` had a useless `\.` escape, so it matched any one- or two-character prefix and let imports such as `fs/promises` through. The corrected rule rejects `fs/promises`, `node:fs` and `electron/main` and allows only `electron` and relative imports (checked with a temporary probe file). The required `App quality gate` (Ubuntu) runs all six scripts on every push; earlier runs failed only on this lint error | Met once `App quality gate` is green on the final PR head |
 | Smoke evidence of workspace selection and read-only display of one local UTF-8 file; agent write unavailable | `tests/e2e/workspace.e2e.ts`: folder chosen through the main-process dialog, tree listed, Turkish UTF-8 file shown, typing does not change the buffer or the file on disk, screenshot `issue-33-workspace-read-only.png` written to the Playwright output; the API has no write capability | Met |
 
 ## #49 acceptance criteria
@@ -115,8 +115,6 @@ extension hosts) turns Electron into plain Node; the E2E helper removes that var
 
 ## Open items
 
-- Fix the `eslint.config.mjs` preload import regex, then rerun `npm run lint` and record the green
-  `App quality gate` run here.
 - Triage the three pre-existing `js/xss-through-dom` code-scanning warnings in
   `advisor-meeting-board.html` (outside S1).
 - S3 must call `revalidateResolvedPath` at apply and resolve with intent `write`.
