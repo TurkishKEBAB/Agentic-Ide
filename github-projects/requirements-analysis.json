@@ -2551,7 +2551,7 @@
       ],
       "kind": "issue",
       "title": "REQ: Electron + Monaco tabanli editor kabugu kurulmalı",
-      "status": "Planned",
+      "status": "Done",
       "area": "Editor",
       "requirementType": "Functional",
       "phase": "Faz 2",
@@ -2579,15 +2579,21 @@
         "docs/IMPLEMENTATION_BASELINE.md"
       ],
       "githubIssueNumber": 33,
-      "workflowStatus": "Ready",
+      "workflowStatus": "Done",
       "workstream": "Implementation",
       "ownerRole": "Student",
       "decisionStatus": "Not Required",
       "deliverySlice": "S1",
       "testTarget": "tests/editor/issue-33 acceptance, negative and regression cases",
-      "thesisEvidence": "Planned: issue-specific acceptance report, artifact/run IDs and versioned evidence; no runtime result yet.",
+      "thesisEvidence": "Runtime acceptance report docs/evidence/S1-issue-33-49-acceptance.md (PR #123, Windows 10 and GitHub CI)",
       "risk": "Bitirilebilirlik ve ajan entegrasyonu esnekligi icin secilen mimari budur.",
-      "readiness": "Ready"
+      "completionEvidence": [
+        "docs/evidence/S1-issue-33-49-acceptance.md",
+        "https://github.com/TurkishKEBAB/Agentic-Ide/pull/123",
+        "tests/e2e/shell.e2e.ts",
+        "tests/security/electron-hardening.test.ts"
+      ],
+      "readiness": "Validated"
     },
     {
       "key": "req-editor-file-management",
@@ -2598,7 +2604,7 @@
       ],
       "kind": "issue",
       "title": "REQ: Proje klasoru acma, dosya agaci, dosya ac-kaydet ve 5 sekme desteklensin",
-      "status": "Planned",
+      "status": "Done",
       "area": "Editor",
       "requirementType": "Functional",
       "phase": "Faz 2",
@@ -2624,15 +2630,21 @@
         "docs/IMPLEMENTATION_BASELINE.md"
       ],
       "githubIssueNumber": 44,
-      "workflowStatus": "Backlog",
+      "workflowStatus": "Done",
       "workstream": "Implementation",
       "ownerRole": "Student",
       "decisionStatus": "Not Required",
       "deliverySlice": "S2",
       "testTarget": "tests/editor/issue-44 acceptance, negative and regression cases",
-      "thesisEvidence": "Planned: issue-specific acceptance report, artifact/run IDs and versioned evidence; no runtime result yet.",
+      "thesisEvidence": "Runtime acceptance report docs/evidence/S2-issue-44-acceptance.md (PR #124, Windows 10 and GitHub CI)",
       "risk": "Ajan deneyimi icin gereken asgari editor kullanilabilirligi budur.",
-      "readiness": "Blocked"
+      "completionEvidence": [
+        "docs/evidence/S2-issue-44-acceptance.md",
+        "https://github.com/TurkishKEBAB/Agentic-Ide/pull/124",
+        "tests/e2e/workspace.e2e.ts",
+        "tests/security/ipc-broker.test.ts"
+      ],
+      "readiness": "Validated"
     },
     {
       "key": "req-editor-status-bar",
@@ -3157,7 +3169,7 @@
       ],
       "kind": "issue",
       "title": "REQ: Workspace boundary + path normalization yalnizca proje dizini icinde calismali",
-      "status": "Planned",
+      "status": "Done",
       "area": "Safety",
       "requirementType": "Non-Functional",
       "phase": "Faz 2",
@@ -3183,15 +3195,21 @@
         "docs/IMPLEMENTATION_BASELINE.md"
       ],
       "githubIssueNumber": 49,
-      "workflowStatus": "Ready",
+      "workflowStatus": "Done",
       "workstream": "Implementation",
       "ownerRole": "Student",
       "decisionStatus": "Not Required",
       "deliverySlice": "S1",
       "testTarget": "tests/safety/issue-49 acceptance, negative and regression cases",
-      "thesisEvidence": "Planned: issue-specific acceptance report, artifact/run IDs and versioned evidence; no runtime result yet.",
+      "thesisEvidence": "Runtime acceptance report docs/evidence/S1-issue-33-49-acceptance.md (PR #123, Windows 10, WSL Ubuntu and GitHub CI)",
       "risk": "Guvenlik modeli once neyin izinli oldugunu tanimlamalidir.",
-      "readiness": "Ready"
+      "completionEvidence": [
+        "docs/evidence/S1-issue-33-49-acceptance.md",
+        "https://github.com/TurkishKEBAB/Agentic-Ide/pull/123",
+        "src/main/workspace/README.md",
+        "tests/safety/issue-49"
+      ],
+      "readiness": "Validated"
     },
     {
       "key": "req-safety-protected-files",

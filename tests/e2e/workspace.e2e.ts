@@ -133,7 +133,7 @@ test('the workspace tree opens UTF-8 files in the shared Monaco editor', async (
   ).toEqual([]);
 });
 
-test('drafts stay in the workset until explicitly saved with Ctrl+S', async () => {
+test('#44 drafts stay in the workset until explicitly saved with Ctrl+S', async () => {
   const { window: page } = launched;
   await chooseWorkspace(page);
   await openWithKeyboard(page, HELLO_PATH);
@@ -156,7 +156,7 @@ test('drafts stay in the workset until explicitly saved with Ctrl+S', async () =
   await expect(page.getByText('Kaydedilmedi', { exact: true })).toHaveCount(0);
 });
 
-test('an external edit preserves the draft and disk until reload is confirmed', async () => {
+test('#44 an external edit preserves the draft and disk until reload is confirmed', async () => {
   const { window: page } = launched;
   await chooseWorkspace(page);
   await openWithKeyboard(page, HELLO_PATH);
@@ -300,7 +300,7 @@ test('the broker rejects a real IPC call from another window on the same origin'
   expect(fs.readFileSync(path.join(fixture.workspace, 'README.md'), 'utf8')).toBe('# Demo\n');
 });
 
-test('switching workspaces requires explicit discard of local drafts', async () => {
+test('#44 switching workspaces requires explicit discard of local drafts', async () => {
   const { window: page } = launched;
   await chooseWorkspace(page);
   await openWithKeyboard(page, HELLO_PATH);
@@ -327,7 +327,7 @@ test('switching workspaces requires explicit discard of local drafts', async () 
   expect(stale).toMatchObject({ ok: false, error: { code: 'NOT_FOUND' } });
 });
 
-test('practice and local drafts remain separate even for the same path', async () => {
+test('#44 practice and local drafts remain separate even for the same path', async () => {
   const { window: page } = launched;
   await chooseWorkspace(page);
   await openWithKeyboard(page, SESSION_PATH);
@@ -359,4 +359,70 @@ test('practice and local drafts remain separate even for the same path', async (
   await expect(lines).not.toContainText('İlk görev notu');
   await page.keyboard.press('ControlOrMeta+s');
   await expect.poll(() => fs.readFileSync(file, 'utf8')).toBe(localDraft);
+});
+
+test('#44 a sixth file asks which open file to close and never drops a draft silently', async () => {
+  const { window: page } = launched;
+  const notes = ['notes/a.md', 'notes/b.md', 'notes/c.md', 'notes/d.md'];
+  fs.mkdirSync(path.join(fixture.workspace, 'notes'));
+  for (const note of notes) fs.writeFileSync(path.join(fixture.workspace, note), `# ${note}\n`);
+  await chooseWorkspace(page);
+
+  const hello = path.join(fixture.workspace, HELLO_PATH);
+  const draft = '// Altıncı dosyadan önce kaydedilmemiş taslak\n';
+  await openWithKeyboard(page, HELLO_PATH);
+  await replaceEditorText(page, draft);
+  for (const open of ['README.md', SESSION_PATH, 'notes/a.md', 'notes/b.md']) {
+    await openWithKeyboard(page, open);
+  }
+  const workset = page.locator('#workset');
+  await expect(workset.locator('.workset-label')).toHaveText('Çalışma seti 5/5');
+
+  const askToOpen = async (relativePath: string): Promise<void> => {
+    await page.keyboard.press('ControlOrMeta+p');
+    await page.getByLabel('Dosya adı veya yolu', { exact: true }).fill(relativePath);
+    await pickerFile(page, relativePath).click();
+    await expect(
+      page.getByRole('heading', { name: 'Çalışma seti dolu', exact: true }),
+    ).toBeVisible();
+  };
+  const closeChoice = (relativePath: string) =>
+    page.locator(`dialog[open] button[data-act="replace-file"][data-value="${relativePath}"]`);
+
+  // The sixth file never evicts a file on its own; the user picks one, and drafts are marked.
+  await askToOpen('notes/c.md');
+  await expect(page.locator('dialog[open] button[data-act="replace-file"]')).toHaveCount(5);
+  await expect(closeChoice(HELLO_PATH)).toContainText('Kaydedilmedi');
+  await expect(page.getByTestId('file-path')).toHaveText('notes/b.md');
+
+  // Choosing the draft asks again; cancelling keeps the draft, the workset and the disk.
+  await closeChoice(HELLO_PATH).click();
+  await expect(
+    page.getByRole('heading', { name: 'Kaydedilmemiş dosya', exact: true }),
+  ).toBeVisible();
+  await page.getByRole('button', { name: 'Vazgeç', exact: true }).click();
+  await expect(workset.locator('.workset-label')).toHaveText('Çalışma seti 5/5');
+  await expect(
+    workset.locator(`button[data-act="open-file"][data-value="${HELLO_PATH}"]`),
+  ).toHaveCount(1);
+  expect(fs.readFileSync(hello, 'utf8')).toBe(HELLO_TS);
+
+  // A clean file closes directly and the requested file opens in its place.
+  await askToOpen('notes/c.md');
+  await closeChoice('README.md').click();
+  await expect(page.getByTestId('file-path')).toHaveText('notes/c.md');
+  await expect(workset.locator('button[data-act="open-file"][data-value="README.md"]')).toHaveCount(
+    0,
+  );
+  await expect(workset.locator('.workset-label')).toHaveText('Çalışma seti 5/5');
+
+  // "Save and close" writes the draft first and only then frees its slot.
+  await askToOpen('notes/d.md');
+  await closeChoice(HELLO_PATH).click();
+  await page.getByRole('button', { name: 'Kaydet ve kapat', exact: true }).click();
+  await expect(page.getByTestId('file-path')).toHaveText('notes/d.md');
+  expect(fs.readFileSync(hello, 'utf8')).toBe(draft);
+  await expect(
+    workset.locator(`button[data-act="open-file"][data-value="${HELLO_PATH}"]`),
+  ).toHaveCount(0);
 });

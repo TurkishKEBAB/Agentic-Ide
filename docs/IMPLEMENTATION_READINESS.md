@@ -8,12 +8,15 @@ No advisor meeting has occurred; first meeting is 5 November. Academic approval 
 - Repo ADR-001–009, typed lifecycle contracts, privacy/accessibility/threat baselines and active G0 CI exist.
 - A single slice has explicit scope, acceptance cases, source, risk, owner, test and evidence target.
 - The slice's real upstream dependencies are completed. Merely listing an unresolved blocker does not satisfy DoR.
-- #33 safe Electron/Monaco shell and #49 pure workspace policy are the first ready implementation items.
+- #33 safe Electron/Monaco shell and #49 pure workspace policy were the first ready implementation items. Both are
+  Done with runtime evidence in [S1 acceptance evidence](evidence/S1-issue-33-49-acceptance.md) (7 November 2026).
 - No model execution, agent write or human study is part of S1. Formal benchmark approval does not block this read-only foundation.
 
 ## Later gates
 
 S2 adds typed IPC/credentials/read-only providers and context only after security boundaries exist.
+Its manual file flow (#44: open, reload, save, five-file working set) is Done with runtime evidence in
+[S2 #44 acceptance evidence](evidence/S2-issue-44-acceptance.md); providers, credentials and context are still open.
 S3 actual write requires current v2 plan/patch/approval, mandatory policy, audit, durable journal and fault/recovery tests.
 S4 adds dependency-aware partial approval and multi-file transactions after single-file recovery evidence.
 S5 formal research requires real #20/#54/#66/#25 decisions, #113 participant decision, independent oracle and immutable
