@@ -16,7 +16,8 @@
     "format:check": "prettier --check .",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit -p tsconfig.node.json && tsc --noEmit -p tsconfig.web.json && tsc --noEmit -p tsconfig.test.json",
-    "test": "vitest run --coverage",
+    "test": "vitest run --coverage && npm run test:prototype",
+    "test:prototype": "node --disable-warning=ExperimentalWarning --experimental-strip-types --test \"design-prototype/tests/*.test.ts\"",
     "test:security": "vitest run --config vitest.security.config.ts",
     "test:e2e": "playwright test",
     "build": "electron-vite build"

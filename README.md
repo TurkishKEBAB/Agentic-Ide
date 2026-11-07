@@ -6,7 +6,9 @@ Agentic IDE is a graduation thesis prototype for a safety-oriented AI coding edi
 
 ## Current Status
 
-This design branch extends the hardened Electron + Monaco + TypeScript shell from S1 ([#33](https://github.com/TurkishKEBAB/Agentic-Ide/issues/33), [#49](https://github.com/TurkishKEBAB/Agentic-Ide/issues/49)). The desktop editor opens and saves existing UTF-8 files through the main-process workspace boundary. The first-task tutorial runs the plan, approval and rollback flow on a separate synthetic TypeScript project. A browser preview runs the same tutorial and editor UI.
+S1 ([#33](https://github.com/TurkishKEBAB/Agentic-Ide/issues/33), [#49](https://github.com/TurkishKEBAB/Agentic-Ide/issues/49); [acceptance evidence](docs/evidence/S1-issue-33-49-acceptance.md)) delivered the hardened Electron + Monaco + TypeScript shell behind the main-process workspace boundary. The desktop editor now also opens and manually saves existing UTF-8 files through that boundary ([#44](https://github.com/TurkishKEBAB/Agentic-Ide/issues/44)): saves are atomic, detect external changes and obey the protected-file rules.
+
+The **İlk Göreve başla** tutorial shows the planned plan → diff → approval → rollback flow with a **simulated** agent on a synthetic in-memory project (`auth-lab`). There is no real agent or model provider yet, and nothing in the tutorial touches files on disk. The UI lives in [design-prototype/](design-prototype/README.md), which also runs as a browser preview. The research notes, architecture decisions, safety design and evaluation planning below remain the source of scope.
 
 ## Running the App
 
@@ -21,7 +23,7 @@ powershell -ExecutionPolicy Bypass -File .\scripts\start-app.ps1 -Dev  # Vite de
 
 Choose **Klasör aç** to open a local workspace or **İlk Göreve başla** to learn in `auth-lab`. Use `Ctrl+P` to find a file and `Ctrl+S` to save. Local saves use a disk revision to detect conflicts and keep the draft open if the file has changed. The separate [browser preview instructions](design-prototype/README.md) cover the tutorial and its two extra exercises.
 
-Quality gates are `npm run format:check`, `npm run lint`, `npm run typecheck`, `npm test`, `npm run test:security`, `npm run build`, and `npm run test:e2e`.
+Quality gates are `npm run format:check`, `npm run lint`, `npm run typecheck`, `npm test` (Vitest with coverage, then the tutorial's Node tests), `npm run test:security`, `npm run build`, and `npm run test:e2e`.
 
 ## Core Documents
 

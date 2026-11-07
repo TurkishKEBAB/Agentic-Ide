@@ -370,10 +370,12 @@ function render(): void {
 
 function agentStatus(): string {
   if (workspaceMode === 'local') return 'Yerel düzenleme';
+  // There is no real agent yet; only the practice project runs the simulated one.
+  if (!state.open) return 'Çalışma alanı seçilmedi';
   if (snapshot) return 'Geçmiş görüntüleniyor';
   if (state.approval) return 'Uygulama bekliyor';
   if (state.planStale) return 'Plan güncelliğini yitirdi';
-  return state.plan && !state.completed ? 'İnceleme bekliyor' : 'Ajan hazır';
+  return state.plan && !state.completed ? 'İnceleme bekliyor' : 'Deneme ajanı hazır';
 }
 
 function renderAgentStatus(): void {
