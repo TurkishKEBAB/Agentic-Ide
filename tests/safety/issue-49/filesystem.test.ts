@@ -1371,15 +1371,17 @@ describe('#49 property: accepted results are always canonical and inside the roo
         expect(path.isAbsolute(relative)).toBe(false);
         expect(fs.realpathSync.native(value.canonicalPath)).toBe(value.canonicalPath);
         expect(value.relativePath).toBe(relative.split(path.sep).join('/'));
+        // Read before lstat: nothing moves here, and a stat-then-read sequence is a TOCTOU pattern.
+        const content = intent === 'list' ? null : fs.readFileSync(value.canonicalPath, 'utf8');
         const stats = fs.lstatSync(value.canonicalPath, { bigint: true });
         expect(value.identity).toEqual({ dev: stats.dev, ino: stats.ino });
         expect(value.intent).toBe(intent);
-        if (intent === 'list') {
+        if (content === null) {
           expect(value.kind).toBe('directory');
         } else {
           expect(value.kind).toBe('file');
           expect(stats.nlink).toBe(1n);
-          expect(fs.readFileSync(value.canonicalPath, 'utf8')).not.toMatch(FORBIDDEN_CONTENT);
+          expect(content).not.toMatch(FORBIDDEN_CONTENT);
         }
         if (intent === 'write') {
           expect(value.followedLink).toBe(false);
