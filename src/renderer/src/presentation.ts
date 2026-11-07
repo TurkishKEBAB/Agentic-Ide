@@ -1,4 +1,4 @@
-import type { IpcErrorCode } from '../../shared/ipc-contract';
+import type { FileEntry, IpcErrorCode } from '../../shared/ipc-contract';
 
 const LANGUAGE_BY_EXTENSION: Readonly<Record<string, string>> = {
   ts: 'typescript',
@@ -67,4 +67,43 @@ export function messageForError(code: IpcErrorCode): string {
 /** Indentation depth of a workspace-relative path in the file tree. */
 export function depthOf(relativePath: string): number {
   return relativePath.split('/').length - 1;
+}
+
+interface TreePosition {
+  readonly entry: FileEntry;
+  readonly segments: readonly string[];
+}
+
+/**
+ * Display order for the file tree. The broker lists breadth-first, so its entry budget drops the
+ * deepest levels first; the tree instead shows each directory's subtree directly below it, with
+ * directories before files at every level and each group in name order.
+ */
+export function treeOrder(entries: readonly FileEntry[]): FileEntry[] {
+  return entries
+    .map((entry): TreePosition => ({ entry, segments: entry.path.split('/') }))
+    .sort(compareTreePositions)
+    .map(({ entry }) => entry);
+}
+
+function compareTreePositions(left: TreePosition, right: TreePosition): number {
+  const shared = Math.min(left.segments.length, right.segments.length);
+  for (let index = 0; index < shared; index += 1) {
+    const leftName = left.segments[index] ?? '';
+    const rightName = right.segments[index] ?? '';
+    if (leftName !== rightName) {
+      const leftIsDirectory = isDirectoryAt(left, index);
+      if (leftIsDirectory !== isDirectoryAt(right, index)) {
+        return leftIsDirectory ? -1 : 1;
+      }
+      return leftName < rightName ? -1 : 1;
+    }
+  }
+  // One path is an ancestor of the other: the ancestor comes first.
+  return left.segments.length - right.segments.length;
+}
+
+/** Segment `index` names a directory when deeper segments follow it or the entry is one. */
+function isDirectoryAt(position: TreePosition, index: number): boolean {
+  return index < position.segments.length - 1 || position.entry.kind === 'directory';
 }

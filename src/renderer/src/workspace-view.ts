@@ -1,6 +1,6 @@
 import type { FileEntry, IpcError } from '../../shared/ipc-contract';
 import { monaco } from './monaco-setup';
-import { depthOf, languageForPath, messageForError } from './presentation';
+import { depthOf, languageForPath, messageForError, treeOrder } from './presentation';
 
 export interface WorkspaceViewElements {
   readonly openButton: HTMLButtonElement;
@@ -101,7 +101,7 @@ export class WorkspaceView {
 
   private renderTree(entries: readonly FileEntry[]): void {
     const list = document.createElement('ul');
-    for (const entry of entries) {
+    for (const entry of treeOrder(entries)) {
       const item = document.createElement('li');
       item.style.paddingLeft = `${depthOf(entry.path) * 12}px`;
       const name = entry.path.slice(entry.path.lastIndexOf('/') + 1);

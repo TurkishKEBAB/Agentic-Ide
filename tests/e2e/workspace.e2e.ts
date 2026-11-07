@@ -77,6 +77,8 @@ test('#33 smoke: choose workspace and display one UTF-8 file read-only', async (
   const tree = page.getByTestId('file-tree');
   await expect(tree.locator('button[data-path="src/hello.ts"]')).toBeVisible();
   await expect(tree.locator('button[data-path="README.md"]')).toBeVisible();
+  // Directory subtrees are shown under their directory, before the root's own files.
+  await expect(tree.locator('button').first()).toHaveAttribute('data-path', 'src/hello.ts');
   // VCS/dependency folders and links are not offered.
   await expect(tree.locator('[data-path^=".git"]')).toHaveCount(0);
   await expect(tree.locator('[data-path^="node_modules"]')).toHaveCount(0);

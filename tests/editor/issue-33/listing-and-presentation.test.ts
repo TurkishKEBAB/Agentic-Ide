@@ -6,8 +6,13 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
 import { listWorkspace } from '../../../src/main/workspace/list-workspace';
 import { openWorkspaceRoot, type WorkspaceRoot } from '../../../src/main/workspace/workspace-root';
-import { depthOf, languageForPath, messageForError } from '../../../src/renderer/src/presentation';
-import type { IpcErrorCode } from '../../../src/shared/ipc-contract';
+import {
+  depthOf,
+  languageForPath,
+  messageForError,
+  treeOrder,
+} from '../../../src/renderer/src/presentation';
+import type { FileEntry, IpcErrorCode } from '../../../src/shared/ipc-contract';
 
 let base: string;
 let root: WorkspaceRoot;
@@ -138,5 +143,73 @@ describe('#33 presentation helpers', () => {
   it('computes tree depth from relative paths', () => {
     expect(depthOf('a.ts')).toBe(0);
     expect(depthOf('src/deep/x.ts')).toBe(2);
+  });
+});
+
+describe('#33 file tree display order', () => {
+  const file = (path: string): FileEntry => ({ path, kind: 'file' });
+  const dir = (path: string): FileEntry => ({ path, kind: 'directory' });
+
+  it('regression: shows each directory subtree under its directory, not in breadth-first order', async () => {
+    const listing = await listWorkspace(root);
+    if (!listing.ok) {
+      throw new Error(listing.error.code);
+    }
+    expect(treeOrder(listing.value.entries).map((entry) => entry.path)).toEqual([
+      'src',
+      'src/deep',
+      'src/deep/deeper',
+      'src/deep/deeper/x.ts',
+      'src/index.ts',
+      '.gitignore',
+      'a.ts',
+      'b.ts',
+    ]);
+  });
+
+  it('puts directories before files at every level, each group in name order', () => {
+    const entries = [
+      file('z.ts'),
+      dir('b'),
+      file('a.ts'),
+      dir('a'),
+      file('b/z.ts'),
+      dir('b/c'),
+      file('b/a.ts'),
+      file('a/x.ts'),
+      file('b/c/y.ts'),
+    ];
+    expect(treeOrder(entries).map((entry) => entry.path)).toEqual([
+      'a',
+      'a/x.ts',
+      'b',
+      'b/c',
+      'b/c/y.ts',
+      'b/a.ts',
+      'b/z.ts',
+      'a.ts',
+      'z.ts',
+    ]);
+  });
+
+  it('keeps a directory and a file whose names share a prefix apart', () => {
+    const entries = [file('src.ts'), file('src/a.ts'), dir('src'), dir('src-old')];
+    expect(treeOrder(entries).map((entry) => entry.path)).toEqual([
+      'src',
+      'src/a.ts',
+      'src-old',
+      'src.ts',
+    ]);
+  });
+
+  it('returns a new array with the same entries and leaves the input untouched', () => {
+    const entries = [file('b.ts'), dir('a'), file('a/x.ts')];
+    const snapshot = [...entries];
+    const ordered = treeOrder(entries);
+    expect(ordered).not.toBe(entries);
+    expect(entries).toEqual(snapshot);
+    expect([...ordered].sort((l, r) => l.path.localeCompare(r.path))).toEqual(
+      [...entries].sort((l, r) => l.path.localeCompare(r.path)),
+    );
   });
 });
