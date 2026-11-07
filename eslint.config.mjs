@@ -7,13 +7,15 @@ import { defineConfig } from 'eslint/config';
 
 const NODE_BUILTINS_MESSAGE =
   'The renderer is untrusted: it must not import Node built-ins or Electron. Use the typed preload API.';
+const PROTOTYPE_TYPESCRIPT = ['design-prototype/**/*.ts'];
+const PROTOTYPE_TOOLS = ['design-prototype/tests/**/*.ts', 'design-prototype/vite.config.ts'];
 
 export default defineConfig(
   {
     ignores: [
-      'node_modules/**',
-      'out/**',
-      'dist/**',
+      '**/node_modules/**',
+      '**/out/**',
+      '**/dist/**',
       'build/**',
       'coverage/**',
       'playwright-report/**',
@@ -27,8 +29,16 @@ export default defineConfig(
     ],
   },
   js.configs.recommended,
-  ...tseslint.configs.strictTypeChecked,
-  ...tseslint.configs.stylisticTypeChecked,
+  {
+    files: ['**/*.{js,mjs,cjs,ts,mts,cts}'],
+    ignores: PROTOTYPE_TYPESCRIPT,
+    extends: [...tseslint.configs.strictTypeChecked, ...tseslint.configs.stylisticTypeChecked],
+  },
+  {
+    // The separately runnable design prototype predates the desktop style rules.
+    files: PROTOTYPE_TYPESCRIPT,
+    extends: tseslint.configs.recommendedTypeChecked,
+  },
   {
     languageOptions: {
       parserOptions: {
@@ -84,7 +94,7 @@ export default defineConfig(
     },
   },
   {
-    files: ['src/renderer/**/*.ts'],
+    files: ['src/renderer/**/*.ts', 'design-prototype/src/**/*.ts'],
     languageOptions: { globals: { ...globals.browser } },
     rules: {
       'no-restricted-imports': [
@@ -103,11 +113,26 @@ export default defineConfig(
     },
   },
   {
-    files: ['tests/**/*.ts', '*.config.ts', 'vitest.shared.ts'],
+    files: [
+      'tests/**/*.ts',
+      'design-prototype/tests/**/*.ts',
+      '**/*.config.ts',
+      'vitest.shared.ts',
+    ],
     languageOptions: { globals: { ...globals.node } },
     rules: {
       '@typescript-eslint/explicit-module-boundary-types': 'off',
     },
+  },
+  {
+    files: PROTOTYPE_TYPESCRIPT,
+    rules: { '@typescript-eslint/explicit-module-boundary-types': 'off' },
+  },
+  {
+    // The standalone package runs these tests with Node's test runner and builds its own Vite config.
+    files: PROTOTYPE_TOOLS,
+    extends: [tseslint.configs.disableTypeChecked],
+    rules: { '@typescript-eslint/restrict-template-expressions': 'off' },
   },
   {
     files: ['**/*.mjs'],

@@ -4,7 +4,7 @@ import { IPC_CHANNELS, type IpcChannel, type IpcResult } from '../../shared/ipc-
 import type { WorkspaceBroker } from './workspace-broker';
 
 type IpcMainLike = Pick<IpcMain, 'handle' | 'removeHandler'>;
-type BrokerLike = Pick<WorkspaceBroker, 'chooseWorkspace' | 'listFiles' | 'readFile'>;
+type BrokerLike = Pick<WorkspaceBroker, 'chooseWorkspace' | 'listFiles' | 'readFile' | 'saveFile'>;
 
 const UNAUTHORIZED: IpcResult<never> = {
   ok: false,
@@ -20,7 +20,7 @@ const INTERNAL: IpcResult<never> = {
 };
 
 /**
- * Registers the three S1 capabilities. Each call is checked in order: sender (frame,
+ * Registers the named workspace capabilities. Each call is checked in order: sender (frame,
  * window and origin), exact argument count/type, then the broker's workspace policy.
  * Unexpected exceptions become a generic INTERNAL result so no stack or path leaks.
  * Returns an unregister function.
@@ -54,6 +54,14 @@ export function registerWorkspaceIpc(
   );
   handle(IPC_CHANNELS.readFile, (args) =>
     args.length === 1 && typeof args[0] === 'string' ? broker.readFile(args[0]) : INVALID_REQUEST,
+  );
+  handle(IPC_CHANNELS.saveFile, (args) =>
+    args.length === 3 &&
+    typeof args[0] === 'string' &&
+    typeof args[1] === 'string' &&
+    typeof args[2] === 'string'
+      ? broker.saveFile(args[0], args[1], args[2])
+      : INVALID_REQUEST,
   );
 
   return () => {

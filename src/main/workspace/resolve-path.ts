@@ -13,8 +13,8 @@ import {
 } from './workspace-root';
 
 /**
- * What the caller is about to do. `write` never follows links; S1 itself has no write
- * operation, but S3 apply must resolve with `write` and call `revalidateResolvedPath`.
+ * What the caller is about to do. `write` never follows links and must be revalidated
+ * immediately before a file is replaced.
  */
 export type AccessIntent = 'read' | 'list' | 'write';
 
@@ -30,6 +30,8 @@ export interface ResolvedWorkspacePath {
   readonly kind: 'file' | 'directory';
   readonly identity: FileIdentity;
   readonly sizeBytes: bigint;
+  readonly modifiedAtNs: bigint;
+  readonly changedAtNs: bigint;
   /** A symbolic link or junction inside the workspace was followed (read/list only). */
   readonly followedLink: boolean;
 }
@@ -92,6 +94,8 @@ export async function resolveWorkspacePath(
     kind: kind.value,
     identity: { dev: stats.dev, ino: stats.ino },
     sizeBytes: stats.size,
+    modifiedAtNs: stats.mtimeNs,
+    changedAtNs: stats.ctimeNs,
     followedLink: walk.value.followedLink,
   });
 }
@@ -130,7 +134,7 @@ async function resolveCanonical(
 }
 
 /**
- * Second check immediately before use (e.g. S3 apply): the same request must still resolve
+ * Second check immediately before use: the same request must still resolve
  * to the same canonical path, kind and filesystem identity.
  */
 export async function revalidateResolvedPath(

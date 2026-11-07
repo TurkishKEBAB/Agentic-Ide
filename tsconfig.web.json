@@ -2,8 +2,9 @@
   "$schema": "https://json.schemastore.org/tsconfig",
   "extends": "./tsconfig.base.json",
   "compilerOptions": {
+    "allowImportingTsExtensions": true,
     "lib": ["ES2023", "DOM", "DOM.Iterable"],
     "types": ["vite/client"]
   },
-  "include": ["src/renderer/src/**/*.ts", "src/shared/**/*.ts"]
+  "include": ["src/renderer/src/**/*.ts", "src/shared/**/*.ts", "design-prototype/src/**/*.ts"]
 }

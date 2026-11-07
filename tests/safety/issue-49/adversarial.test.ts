@@ -23,6 +23,7 @@ import path from 'node:path';
 import fc from 'fast-check';
 import { afterEach, describe, expect, it, vi, type TestContext } from 'vitest';
 
+import { WorkspaceBroker } from '../../../src/main/ipc/workspace-broker';
 import { isWithinRoot } from '../../../src/main/workspace/containment';
 import type { PolicyResult, WorkspacePolicyCode } from '../../../src/main/workspace/policy-result';
 import { parseWorkspaceRelativePath } from '../../../src/main/workspace/relative-path';
@@ -880,11 +881,22 @@ describe('#49 adversarial: links planted in the workspace', () => {
       );
     });
 
-    it('#49 a Unix domain socket is UNSUPPORTED_FILE_TYPE', async () => {
+    it('#49 a Unix domain socket is UNSUPPORTED_FILE_TYPE', async (ctx) => {
       const fx = await makeFixture();
       const socketPath = path.join(fx.ws, 's.sock');
       const server = net.createServer();
-      await new Promise<void>((resolve) => server.listen(socketPath, resolve));
+      try {
+        await new Promise<void>((resolve, reject) => {
+          server.once('error', reject);
+          server.listen(socketPath, resolve);
+        });
+      } catch (error) {
+        const code = errnoCode(error);
+        if (code === 'EPERM' || code === 'EACCES' || code === 'ENOSYS' || code === 'ENOTSUP') {
+          ctx.skip('Unix domain socket creation is unavailable');
+        }
+        throw error;
+      }
       try {
         expect(readOutcome(await readVerifiedTextFile(fx.root, 's.sock'))).toBe(
           'UNSUPPORTED_FILE_TYPE',
@@ -1397,6 +1409,83 @@ describe('#49 adversarial: fault injection never turns into a throw or an allow'
 // ---------------------------------------------------------------------------------------------
 
 describe('#49 adversarial: TOCTOU windows', () => {
+  it('manual save rejects an ancestor redirected outside the workspace before opening the target', async (ctx) => {
+    requireDirLinks(ctx);
+    const fx = await makeFixture();
+    const broker = new WorkspaceBroker(() => Promise.resolve(fx.ws));
+    await broker.chooseWorkspace();
+    const opened = await broker.readFile('sub/secret.txt');
+    if (!opened.ok) throw new Error(`Fixture read failed: ${opened.error.code}`);
+    const target = path.join(fx.ws, 'sub', 'secret.txt');
+    let swapped = false;
+    fsHooks.beforeOpen = (candidate) => {
+      if (candidate === target && !swapped) {
+        swapDirForLink(path.dirname(target), fx.outside);
+        swapped = true;
+      }
+    };
+    await expect(
+      broker.saveFile(opened.value.path, 'user edit', opened.value.revision),
+    ).resolves.toMatchObject({ error: { code: 'TARGET_CHANGED' } });
+    expect(swapped).toBe(true);
+    expect(fs.readdirSync(fx.outside)).toEqual(['secret.txt']);
+    expect(fs.readFileSync(path.join(fx.outside, 'secret.txt'), 'utf8')).toBe(SECRET);
+    expect(fs.readFileSync(path.join(fx.ws, 'sub-orig', 'secret.txt'), 'utf8')).toBe(INSIDE);
+  });
+
+  it('manual save leaves an external edit made while staging intact', async () => {
+    const fx = await makeFixture();
+    const broker = new WorkspaceBroker(() => Promise.resolve(fx.ws));
+    await broker.chooseWorkspace();
+    const opened = await broker.readFile('sub/secret.txt');
+    if (!opened.ok) throw new Error(`Fixture read failed: ${opened.error.code}`);
+    const target = path.join(fx.ws, 'sub', 'secret.txt');
+    const external = INSIDE.replace('inside', 'edited');
+    let edited = false;
+    fsHooks.beforeOpen = (candidate) => {
+      if (path.dirname(candidate) === path.dirname(target) && candidate !== target && !edited) {
+        fs.writeFileSync(target, external);
+        edited = true;
+      }
+    };
+    await expect(
+      broker.saveFile(opened.value.path, 'user edit', opened.value.revision),
+    ).resolves.toMatchObject({
+      error: { code: 'TARGET_CHANGED' },
+    });
+    expect(edited).toBe(true);
+    expect(fs.readFileSync(target, 'utf8')).toBe(external);
+    expect(fs.readdirSync(path.dirname(target))).toEqual(['secret.txt']);
+  });
+
+  it('manual save never overwrites or unlinks a preexisting temporary entry', async () => {
+    const fx = await makeFixture();
+    const broker = new WorkspaceBroker(() => Promise.resolve(fx.ws));
+    await broker.chooseWorkspace();
+    const opened = await broker.readFile('sub/secret.txt');
+    if (!opened.ok) throw new Error(`Fixture read failed: ${opened.error.code}`);
+    const target = path.join(fx.ws, 'sub', 'secret.txt');
+    let existing = '';
+    fsHooks.beforeOpen = (candidate) => {
+      if (
+        path.dirname(candidate) === path.dirname(target) &&
+        candidate !== target &&
+        existing === ''
+      ) {
+        fs.writeFileSync(candidate, 'preexisting');
+        existing = candidate;
+      }
+    };
+    await expect(
+      broker.saveFile(opened.value.path, 'user edit', opened.value.revision),
+    ).resolves.toMatchObject({
+      ok: false,
+    });
+    expect(existing).not.toBe('');
+    expect(fs.readFileSync(existing, 'utf8')).toBe('preexisting');
+    expect(fs.readFileSync(target, 'utf8')).toBe(INSIDE);
+  });
+
   it('#49 parent swapped for an outside link between the walk and realpath is OUTSIDE_WORKSPACE', async (ctx) => {
     requireDirLinks(ctx);
     const fx = await makeFixture();

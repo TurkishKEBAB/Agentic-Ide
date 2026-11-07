@@ -1,30 +1,15 @@
 <!doctype html>
-<html lang="tr">
+<html lang="tr" data-theme="dark">
   <head>
     <meta charset="UTF-8" />
     <meta http-equiv="Content-Security-Policy" content="__AGENTIC_IDE_CSP__" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Agentic IDE</title>
+    <meta name="theme-color" content="#101117" />
+    <title>Agentic IDE · Niyet Sayfası</title>
+    <link rel="icon" type="image/svg+xml" href="./mark.svg" />
   </head>
   <body>
-    <div class="app">
-      <header class="toolbar">
-        <strong class="brand">Agentic IDE</strong>
-        <button id="open-folder" type="button" data-testid="open-folder" disabled>Klasör Aç</button>
-        <span id="workspace-name" data-testid="workspace-name"></span>
-        <span class="badge" data-testid="read-only-badge">Salt okunur (S1)</span>
-      </header>
-      <main class="layout">
-        <nav id="file-tree" class="file-tree" aria-label="Dosyalar" data-testid="file-tree"></nav>
-        <section class="editor-pane" aria-label="Editör">
-          <div id="file-path" class="file-path" data-testid="file-path"></div>
-          <div id="editor" class="editor" data-testid="editor"></div>
-        </section>
-      </main>
-      <footer class="status-bar">
-        <output id="status" class="status" data-testid="status"></output>
-      </footer>
-    </div>
+    <div id="app"></div>
     <script type="module" src="./src/main.ts"></script>
   </body>
 </html>
