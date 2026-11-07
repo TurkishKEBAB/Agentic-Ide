@@ -14,6 +14,16 @@ import { IPC_CHANNELS, type FileContent } from '../../src/shared/ipc-contract';
 const BUNDLED = resolveRendererSource({ isPackaged: true, devServerUrl: undefined });
 const POLICY: SenderPolicy = { source: BUNDLED, appWebContentsId: () => 7 };
 
+/** Stats through an open handle, so the fixture is not checked by path and then used. */
+function statThroughHandle(file: string): fs.Stats {
+  const handle = fs.openSync(file, 'r');
+  try {
+    return fs.fstatSync(handle);
+  } finally {
+    fs.closeSync(handle);
+  }
+}
+
 function invokeEvent(options: {
   readonly senderId?: number;
   readonly url?: string;
@@ -266,7 +276,7 @@ describe('#33/#49 workspace broker', () => {
     const target = path.join(workspace, 'src', 'a.ts');
     fs.writeFileSync(target, '\uFEFFconst değer = 1;\r\n');
     if (process.platform !== 'win32') fs.chmodSync(target, 0o750);
-    const originalMode = fs.statSync(target).mode;
+    const originalMode = statThroughHandle(target).mode;
     const broker = await openBroker();
     const original = await readFile(broker);
     expect(original.content).toBe('const değer = 1;\r\n');
@@ -283,7 +293,7 @@ describe('#33/#49 workspace broker', () => {
       value: { sizeBytes: 3, content: '' },
     });
     expect(fs.readFileSync(target)).toEqual(Buffer.from('\uFEFF'));
-    expect(fs.statSync(target).mode).toBe(originalMode);
+    expect(statThroughHandle(target).mode).toBe(originalMode);
     expect(fs.readdirSync(path.dirname(target))).toEqual(['a.ts']);
   });
 
@@ -291,7 +301,7 @@ describe('#33/#49 workspace broker', () => {
     const broker = await openBroker();
     const { path: relative, revision } = await readFile(broker);
     const target = path.join(workspace, relative);
-    const { atime, mtime } = fs.statSync(target);
+    const { atime, mtime } = statThroughHandle(target);
     fs.writeFileSync(target, 'export const a = 2;\n');
     fs.utimesSync(target, atime, mtime);
     await expect(broker.saveFile(relative, 'user edit', revision)).resolves.toMatchObject({
