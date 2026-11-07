@@ -1,0 +1,29 @@
+# Prettier formats the application, test and tooling sources only.
+# Planning documents, diagrams and benchmark fixtures keep their reviewed formatting
+# (fixtures are frozen evaluation inputs and must not be rewritten).
+node_modules/
+out/
+dist/
+build/
+release/
+coverage/
+playwright-report/
+test-results/
+package-lock.json
+
+*.md
+*.html
+!src/renderer/index.html
+docs/
+diagrams/
+github-projects/
+working-notes/
+scripts/
+.github/
+.vscode/
+.obsidian/
+.idea/
+
+# Existing governance configs keep their reviewed formatting.
+.commitlintrc.json
+.markdownlint.json

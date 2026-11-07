@@ -84,3 +84,57 @@ jobs:
               throw "Required npm script '$script' is missing; the application quality gate cannot pass."
             }
           }
+
+  windows-safety-and-smoke:
+    name: Windows safety tests and Electron smoke
+    # The demo OS is Windows: junctions, 8.3 names and NTFS semantics are only exercised here.
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+
+      - name: Detect application scaffold
+        id: app
+        shell: bash
+        run: |
+          if [[ -f package.json ]]; then
+            echo "exists=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "exists=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Setup Node
+        if: steps.app.outputs.exists == 'true'
+        uses: actions/setup-node@v6
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+
+      - name: Install dependencies
+        if: steps.app.outputs.exists == 'true'
+        run: npm ci
+
+      - name: Security property tests (workspace boundary, IPC, Electron hardening)
+        if: steps.app.outputs.exists == 'true'
+        run: npm run test:security
+
+      - name: Build
+        if: steps.app.outputs.exists == 'true'
+        run: npm run build
+
+      - name: Electron smoke and E2E
+        if: steps.app.outputs.exists == 'true'
+        run: npm run test:e2e
+
+      - name: Upload Playwright evidence
+        if: always() && steps.app.outputs.exists == 'true'
+        uses: actions/upload-artifact@v7
+        with:
+          name: electron-e2e-evidence-windows
+          path: |
+            playwright-report
+            test-results
+          if-no-files-found: warn
