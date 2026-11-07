@@ -32,7 +32,10 @@ export async function launchApp(): Promise<LaunchedApp> {
   const window = await app.firstWindow();
   const consoleErrors: string[] = [];
   window.on('console', (message) => {
-    if (message.type() === 'error') {
+    if (
+      message.type() === 'error' ||
+      (message.type() === 'warning' && /worker/i.test(message.text()))
+    ) {
       consoleErrors.push(message.text());
     }
   });
@@ -40,4 +43,18 @@ export async function launchApp(): Promise<LaunchedApp> {
     consoleErrors.push(error.message);
   });
   return { app, window, consoleErrors };
+}
+
+/** Test teardown deliberately discards buffers without opening a native confirmation. */
+export async function closeApp(app: ElectronApplication): Promise<void> {
+  try {
+    await app.evaluate(({ app: electronApp, BrowserWindow }) => {
+      electronApp.removeAllListeners('window-all-closed');
+      for (const window of BrowserWindow.getAllWindows()) {
+        window.destroy();
+      }
+    });
+  } finally {
+    await app.close();
+  }
 }

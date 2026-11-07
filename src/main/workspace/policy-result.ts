@@ -27,13 +27,17 @@ export type WorkspacePolicyCode =
   /** The OS canonical path differs from the request without a detected link (8.3 alias, case, reparse point). */
   | 'NON_CANONICAL_PATH'
   | 'NOT_FOUND'
-  /** File identity changed between validation and use (time-of-check/time-of-use). */
+  /** File bytes or identity changed since it was opened or during validation. */
   | 'TARGET_CHANGED'
+  | 'PROTECTED_PATH'
+  /** The write policy could not be safely loaded. */
+  | 'PROTECTION_UNAVAILABLE'
+  | 'READ_ONLY'
   /** The workspace root is unusable (filesystem root, UNC/device path, not a directory). */
   | 'ROOT_UNSUPPORTED'
   /** The workspace root was replaced or moved after it was opened. */
   | 'ROOT_CHANGED'
-  /** S1 displays plain-text files up to a fixed size only. */
+  /** Plain-text files are read and saved up to a fixed size only. */
   | 'FILE_TOO_LARGE'
   /** Content is not strict UTF-8 text (binary, NUL bytes or invalid sequences). */
   | 'UNSUPPORTED_ENCODING'
@@ -61,11 +65,14 @@ const MESSAGES: Readonly<Record<WorkspacePolicyCode, string>> = {
   UNSUPPORTED_FILE_TYPE: 'This kind of file system entry is not supported for the operation.',
   NON_CANONICAL_PATH: 'The path does not match its canonical file system name.',
   NOT_FOUND: 'The path does not exist.',
-  TARGET_CHANGED: 'The file changed while it was being validated.',
+  TARGET_CHANGED: 'The file changed since it was opened or during validation.',
+  PROTECTED_PATH: 'The workspace policy prevents saving this file.',
+  PROTECTION_UNAVAILABLE: 'The workspace write policy could not be read safely.',
+  READ_ONLY: 'The file cannot be saved because it is read-only.',
   ROOT_UNSUPPORTED: 'This folder cannot be used as a workspace.',
   ROOT_CHANGED: 'The workspace folder changed after it was opened.',
-  FILE_TOO_LARGE: 'The file is too large to display.',
-  UNSUPPORTED_ENCODING: 'Only UTF-8 text files can be displayed.',
+  FILE_TOO_LARGE: 'The file exceeds the UTF-8 text size limit.',
+  UNSUPPORTED_ENCODING: 'This operation requires valid UTF-8 text without NUL characters.',
   IO_ERROR: 'The file system operation failed.',
 };
 

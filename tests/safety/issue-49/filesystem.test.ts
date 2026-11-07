@@ -598,6 +598,8 @@ describe('#49 resolveWorkspacePath accepts canonical in-root paths', () => {
       kind: 'file',
       identity: { dev: stats.dev, ino: stats.ino },
       sizeBytes: stats.size,
+      modifiedAtNs: stats.mtimeNs,
+      changedAtNs: stats.ctimeNs,
       followedLink: false,
     });
     expect(typeof value.sizeBytes).toBe('bigint');
@@ -1050,15 +1052,18 @@ describe('#49 entry kinds and missing paths', () => {
     },
   );
 
-  it.runIf(!IS_WINDOWS)('#49 a Unix domain socket is UNSUPPORTED_FILE_TYPE', async () => {
+  it.runIf(!IS_WINDOWS)('#49 a Unix domain socket is UNSUPPORTED_FILE_TYPE', async (ctx) => {
     const socketPath = inWs('agent.sock');
     const server = net.createServer();
-    await new Promise<void>((resolve, reject) => {
-      server.once('error', reject);
-      server.listen(socketPath, () => {
-        resolve();
+    try {
+      await new Promise<void>((resolve, reject) => {
+        server.once('error', reject);
+        server.listen(socketPath, resolve);
       });
-    });
+    } catch (error) {
+      if (isPrivilegeError(error)) ctx.skip('Unix domain socket creation is unavailable');
+      throw error;
+    }
     try {
       for (const intent of INTENTS) {
         expectCode(await resolveWorkspacePath(root, 'agent.sock', intent), 'UNSUPPORTED_FILE_TYPE');

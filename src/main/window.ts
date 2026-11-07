@@ -1,4 +1,4 @@
-import { BrowserWindow } from 'electron';
+import { BrowserWindow, dialog } from 'electron';
 
 import type { RendererSource } from './renderer-source';
 import { buildMainWindowOptions } from './window-options';
@@ -14,6 +14,17 @@ export function createMainWindow(input: {
   );
   window.once('ready-to-show', () => {
     window.show();
+  });
+  window.webContents.on('will-prevent-unload', (event) => {
+    const choice = dialog.showMessageBoxSync(window, {
+      type: 'warning',
+      title: 'Kaydedilmemiş dosyalar',
+      message: 'Yerel çalışma alanında kaydedilmemiş düzenlemeler var.',
+      buttons: ['Editöre dön', 'Düzenlemeleri bırak'],
+      defaultId: 0,
+      cancelId: 0,
+    });
+    if (choice === 1) event.preventDefault();
   });
   void window.loadURL(input.source.url);
   return window;

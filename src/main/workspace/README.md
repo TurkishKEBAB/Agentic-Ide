@@ -7,7 +7,7 @@ out of scope ([THREAT_MODEL](../../../docs/THREAT_MODEL.md)); hardlink/reparse c
 
 All functions run in the privileged main-process broker. Renderer-side checks are never
 trusted; every file operation calls `resolveWorkspacePath` (or a function built on it) first,
-and a later use (S3 apply) calls `revalidateResolvedPath` again.
+and a manual save calls `revalidateResolvedPath` before replacing the file.
 
 ## Modules
 
@@ -19,6 +19,8 @@ and a later use (S3 apply) calls `revalidateResolvedPath` again.
 | `workspace-root.ts` | `openWorkspaceRoot(selected)`, `verifyWorkspaceRoot(root)`, `sameIdentity`. |
 | `resolve-path.ts` | `resolveWorkspacePath(root, input, intent)`, `revalidateResolvedPath(root, resolved)`. |
 | `verified-read.ts` | `readVerifiedTextFile(root, input, maxBytes?)`: validated, identity-checked UTF-8 read. |
+| `verified-save.ts` | Revision checking, bounded UTF-8 encoding, and same-directory staging for manual saves. |
+| `write-protection.ts` | Immutable protected paths and additional exclusions from the root `.agentignore`. |
 
 ## Lexical rules (`parseWorkspaceRelativePath`)
 
@@ -69,7 +71,8 @@ Any other intent value → `INVALID_INPUT` before any filesystem access.
 8. The canonical relative path must round-trip through the lexical rules unchanged → else
    `NON_CANONICAL_PATH` (e.g. a Linux name containing `\`, reachable only through a followed link).
 9. Result carries the canonical relative path (`/` separators), canonical absolute path (main
-   process only), kind, `(dev, ino)` identity, size and whether an in-root link was followed.
+   process only), kind, `(dev, ino)` identity, size, modification and change times, and whether
+   an in-root link was followed.
 
 `revalidateResolvedPath` re-runs the whole resolution for the same relative path and intent and
 returns `TARGET_CHANGED` if the canonical path, kind or identity differs.
@@ -92,9 +95,41 @@ connection is attempted, and again after it. A missing path → `NOT_FOUND`; a l
 `read`; size above `maxBytes` → `FILE_TOO_LARGE` (never truncated). The file is opened read-only
 (`O_NOFOLLOW | O_NONBLOCK` on POSIX, so a FIFO swapped in cannot block). The handle's `fstat` must be
 a regular file with `nlink === 1` and the validated `(dev, ino)` → else `TARGET_CHANGED`. At most one
-byte beyond the `fstat` size is read; a different byte count (the file grew or shrank) →
-`TARGET_CHANGED`. Content must be strict UTF-8 without NUL bytes → else `UNSUPPORTED_ENCODING`.
+byte beyond the `fstat` size is read; a different byte count or a change in the handle's
+size, timestamps or link count during the read → `TARGET_CHANGED` (growth beyond the byte
+limit returns `FILE_TOO_LARGE`). Content must be strict UTF-8 without NUL bytes → else `UNSUPPORTED_ENCODING`.
 A leading UTF-8 BOM is stripped by the decoder.
+
+## Manual save (`saveVerifiedTextFile`)
+
+The renderer sends a workspace-relative path, edited text, and the opaque revision from
+`readFile`. The revision binds the canonical path, file identity and original bytes to one
+opening of the workspace. Saves use `write` resolution and only replace existing, regular,
+single-link UTF-8 files. The broker accepts one save at a time and does not switch workspaces
+while a save is running. In-root links can be displayed but cannot provide a save revision.
+
+The original file is opened with write access and without truncating it. Its contents must
+match the supplied revision. The replacement must fit within 1 MiB after UTF-8 encoding,
+including any original BOM. Unpaired surrogates and NULs are rejected. A file whose original
+line endings are all CRLF keeps CRLF; otherwise the editor's text is saved as supplied.
+
+The broker exclusively creates a temporary file in the target's directory, verifies its
+location and identity, writes and flushes the replacement there, and rechecks protection,
+both paths and the target's bytes before renaming the staged file over the target. A changed
+revision returns `TARGET_CHANGED`. No-op saves leave the existing file in place. On POSIX,
+replacement preserves the original owner, group and ordinary permission bits; files with no
+write bits or special mode bits are read-only. If metadata cannot be set or the rename fails,
+the original file remains in place and the broker attempts to remove its verified temporary file.
+
+Built-in write protections apply to canonical path components, case insensitively. They
+include `.git`, `.ssh`, `.env` and `.env.*`, key and secret extensions, SSH key names, `.npmrc`,
+`credentials.json`, `.aws/credentials`, `secrets`, `private`, `keys` and `.agentignore` itself.
+The root `.agentignore` adds exclusions with case-insensitive `*` and `?` within segments,
+`**` across segments, a leading `/` to anchor a basename at the root, and a trailing `/` for
+directories. A basename pattern without a leading slash matches at any depth. Blank lines,
+comments beginning with `#` and negations beginning with `!` do not add rules. An unreadable,
+linked, oversized or unsupported policy fails closed. The policy is limited to 16 KiB of UTF-8
+and 128 rules of at most 256 characters. Backslash escapes and bracket expressions are unsupported.
 
 ## Listing (`listWorkspace`)
 
@@ -105,7 +140,8 @@ lexical rules reject are never listed, so every listed path is a valid read requ
 ## Limits (stated, not hidden)
 
 - Policy errors carry generic messages and never include absolute paths.
-- Protected-file rules (`.env`, keys, `.agentignore`) are a separate layer (write boundary).
+- The write protections do not hide files from the local editor. Agent context and indexing
+  must apply their own protected-file checks if introduced.
 - Hardlinked files are rejected rather than analysed; reparse points that Node does not report as
   links (e.g. volume-GUID junctions) are caught only through the canonical-path checks (steps 4–5).
 - Network shares (UNC, mapped drives that canonicalize to UNC) are unsupported workspace roots.
@@ -113,7 +149,11 @@ lexical rules reject are never listed, so every listed path is a valid read requ
   are accepted; creating them needs administrator/root rights. Weak file identities (ReFS 128-bit
   IDs truncated to 64 bits, FAT/exFAT, network filesystems reporting `ino` 0) weaken the
   `(dev, ino)` checks.
-- A concurrent malicious local process is out of scope. The broker narrows check/use windows
-  (steps 3–6, post-open identity, size match) but does not claim OS-level isolation.
+- A concurrent malicious local process is out of scope. Node's portable rename cannot
+  atomically assert that the validated directory entries and original bytes are unchanged.
+  The final checks narrow the interval before rename; they do not provide OS-level isolation.
+- Atomic replacement does not preserve platform-specific metadata such as ACLs, extended
+  attributes or alternate streams. The broker flushes the staged bytes, but does not offer
+  crash recovery or guarantee durability across power loss. A crash may leave a staging file.
 - Fullwidth look-alikes (`．．／`) are literal names here. ADR-006 forbids passing paths to child
   processes in the MVP; any future ANSI-API consumer must re-validate.

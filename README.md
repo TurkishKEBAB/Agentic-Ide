@@ -6,7 +6,9 @@ Agentic IDE is a graduation thesis prototype for a safety-oriented AI coding edi
 
 ## Current Status
 
-Implementation has started. The first slice (S1) is a hardened Electron + Monaco + TypeScript shell that opens a workspace folder and displays one UTF-8 file read-only, behind the main-process workspace boundary ([#33](https://github.com/TurkishKEBAB/Agentic-Ide/issues/33), [#49](https://github.com/TurkishKEBAB/Agentic-Ide/issues/49); [acceptance evidence](docs/evidence/S1-issue-33-49-acceptance.md)). There is no agent, model provider or write capability yet. The research notes, architecture decisions, safety design and evaluation planning below remain the source of scope.
+S1 ([#33](https://github.com/TurkishKEBAB/Agentic-Ide/issues/33), [#49](https://github.com/TurkishKEBAB/Agentic-Ide/issues/49); [acceptance evidence](docs/evidence/S1-issue-33-49-acceptance.md)) delivered the hardened Electron + Monaco + TypeScript shell behind the main-process workspace boundary. The desktop editor now also opens and manually saves existing UTF-8 files through that boundary ([#44](https://github.com/TurkishKEBAB/Agentic-Ide/issues/44)): saves are atomic, detect external changes and obey the protected-file rules.
+
+The **İlk Göreve başla** tutorial shows the planned plan → diff → approval → rollback flow with a **simulated** agent on a synthetic in-memory project (`auth-lab`). There is no real agent or model provider yet, and nothing in the tutorial touches files on disk. The UI lives in [design-prototype/](design-prototype/README.md), which also runs as a browser preview. The research notes, architecture decisions, safety design and evaluation planning below remain the source of scope.
 
 ## Running the App
 
@@ -19,7 +21,9 @@ powershell -ExecutionPolicy Bypass -File .\scripts\start-app.ps1 -Dev  # Vite de
 
 [scripts/start-app.ps1](scripts/start-app.ps1) checks the Node.js version, runs `npm ci` when dependencies are missing or older than `package-lock.json` (`-Reinstall` forces it), clears `ELECTRON_RUN_AS_NODE` for the run (some IDE terminals set it, which stops Electron from opening a window), then builds and opens the app. Close the window to exit. On Linux or macOS run `npm ci` and `npm start`.
 
-In the app, **Klasör Aç** chooses the workspace; clicking a file in the tree shows it read-only. Quality gates: `npm run format:check`, `npm run lint`, `npm run typecheck`, `npm test`, `npm run test:security`, `npm run build`, `npm run test:e2e`.
+Choose **Klasör aç** to open a local workspace or **İlk Göreve başla** to learn in `auth-lab`. Use `Ctrl+P` to find a file and `Ctrl+S` to save. Local saves use a disk revision to detect conflicts and keep the draft open if the file has changed. The separate [browser preview instructions](design-prototype/README.md) cover the tutorial and its two extra exercises.
+
+Quality gates are `npm run format:check`, `npm run lint`, `npm run typecheck`, `npm test` (Vitest with coverage, then the tutorial's Node tests), `npm run test:security`, `npm run build`, and `npm run test:e2e`.
 
 ## Core Documents
 

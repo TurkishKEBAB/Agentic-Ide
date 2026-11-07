@@ -1,6 +1,6 @@
 import { expect, test } from '@playwright/test';
 
-import { launchApp, type LaunchedApp } from './electron-app';
+import { closeApp, launchApp, type LaunchedApp } from './electron-app';
 
 let launched: LaunchedApp;
 
@@ -9,21 +9,24 @@ test.beforeEach(async () => {
 });
 
 test.afterEach(async () => {
-  await launched.app.close();
+  if (typeof launched !== 'undefined') await closeApp(launched.app);
 });
 
-test('#33 shell loads Monaco from the app:// origin', async () => {
+test('the desktop entry loads the shared welcome screen from the app:// origin', async () => {
   const { window, consoleErrors } = launched;
-  await expect(window.locator('.monaco-editor')).toBeVisible();
+  await expect(window.getByTestId('open-folder')).toBeVisible();
+  await expect(window.getByRole('button', { name: 'İlk Göreve başla', exact: true })).toBeVisible();
+  await expect(window.locator('.brand img')).toHaveJSProperty('complete', true);
+  expect(
+    await window.locator('.brand img').evaluate((img: HTMLImageElement) => img.naturalWidth),
+  ).toBeGreaterThan(0);
   expect(await window.evaluate(() => location.href)).toBe('app://renderer/index.html');
-  // Monaco tokenised the welcome buffer: comment tokens get a non-default `mtkN` class.
-  await expect(window.locator('.view-lines span[class*="mtk"]:not(.mtk1)').first()).toBeVisible();
   expect(
     consoleErrors.filter((text) => /Content Security Policy|Worker|Refused/i.test(text)),
   ).toEqual([]);
 });
 
-test('#33 renderer has no Node, Electron or process access', async () => {
+test('the renderer has no Node, Electron or process access', async () => {
   const { app, window } = launched;
   const exposed = await window.evaluate(() => ({
     require: Reflect.has(globalThis, 'require'),
@@ -53,9 +56,9 @@ test('#33 renderer has no Node, Electron or process access', async () => {
   }
 });
 
-test('#33 renderer cannot navigate away or open new windows', async () => {
+test('the renderer cannot navigate away or open new windows', async () => {
   const { app, window: page } = launched;
-  await expect(page.locator('.monaco-editor')).toBeVisible();
+  await expect(page.getByTestId('open-folder')).toBeVisible();
   await page.evaluate(() => {
     window.open('https://example.com', '_blank');
     location.href = 'https://example.com/';
@@ -65,13 +68,31 @@ test('#33 renderer cannot navigate away or open new windows', async () => {
   expect(await page.evaluate(() => location.href)).toBe('app://renderer/index.html');
 });
 
-test('#33 editor buffer is read-only', async () => {
-  const { window } = launched;
-  const lines = window.locator('.view-lines');
-  await expect(lines).toBeVisible();
-  const before = await lines.innerText();
-  await window.locator('.monaco-editor').click();
-  await window.keyboard.type('agent write attempt');
-  await window.keyboard.press('Enter');
-  expect(await lines.innerText()).toBe(before);
+test('an embedded app-origin frame cannot reach preload', async () => {
+  const { window: page } = launched;
+  await expect(page.getByTestId('open-folder')).toBeVisible();
+  // The production CSP blocks app-origin frames; the sender guard also rejects child frames.
+  const exposed = await page.evaluate(async () => {
+    const frame = document.createElement('iframe');
+    const loaded = new Promise<void>((resolve) => {
+      frame.addEventListener(
+        'load',
+        () => {
+          resolve();
+        },
+        { once: true },
+      );
+    });
+    frame.src = 'app://renderer/index.html';
+    document.body.append(frame);
+    try {
+      await loaded;
+      return frame.contentWindow !== null && 'agentIde' in frame.contentWindow;
+    } catch {
+      return false;
+    } finally {
+      frame.remove();
+    }
+  });
+  expect(exposed).toBe(false);
 });

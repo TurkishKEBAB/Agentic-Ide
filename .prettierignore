@@ -11,6 +11,9 @@ playwright-report/
 test-results/
 package-lock.json
 
+# The separately runnable design prototype keeps its original formatting.
+design-prototype/
+
 *.md
 *.html
 !src/renderer/index.html
