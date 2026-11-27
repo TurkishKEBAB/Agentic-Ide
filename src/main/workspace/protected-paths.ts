@@ -33,8 +33,9 @@ export async function checkWorkspaceProtection(
   canonicalRelativePath: string,
   privateRoots: readonly string[] = [],
 ): Promise<PolicyResult<true>> {
-  const parts = canonicalRelativePath.toLowerCase().split('/');
-  if (isBuiltInProtected(parts)) return policyFail('PROTECTED_PATH');
+  if (isBuiltInProtected(path.join(root.canonicalPath, canonicalRelativePath))) {
+    return policyFail('PROTECTED_PATH');
+  }
 
   const excludes = await loadWorkspaceProtection(root, privateRoots);
   if (!excludes.ok) return excludes;
@@ -48,7 +49,7 @@ export async function loadWorkspaceProtection(
   root: WorkspaceRoot,
   privateRoots: readonly string[],
 ): Promise<PolicyResult<PathExclusion>> {
-  if (root.canonicalPath.toLowerCase().split(path.sep).some(isPrivateNamespace)) {
+  if (isBuiltInProtected(root.canonicalPath)) {
     return policyOk(() => true);
   }
   const rules = await readIgnoreRules(root);
@@ -57,13 +58,12 @@ export async function loadWorkspaceProtection(
   if (!canonical.ok) return canonical;
 
   return policyOk((relativePath, kind) => {
-    if (canonical.value.length > 0) {
-      const candidate = path.join(root.canonicalPath, relativePath);
-      if (canonical.value.some((privateRoot) => isWithinRoot(privateRoot, candidate))) return true;
-    }
+    const candidate = path.join(root.canonicalPath, relativePath);
+    if (canonical.value.some((privateRoot) => isWithinRoot(privateRoot, candidate))) return true;
+    if (isBuiltInProtected(candidate)) return true;
     if (relativePath === '') return false;
     const parts = relativePath.toLowerCase().split('/');
-    return isBuiltInProtected(parts) || rules.value.some((rule) => matchesRule(parts, kind, rule));
+    return rules.value.some((rule) => matchesRule(parts, kind, rule));
   });
 }
 
@@ -101,7 +101,16 @@ async function canonicalPrivateRoots(
   return policyOk([...paths]);
 }
 
-function isBuiltInProtected(parts: readonly string[]): boolean {
+function isBuiltInProtected(canonicalPath: string): boolean {
+  const parts = canonicalPath.toLowerCase().split(path.sep);
+  // macOS puts its system temp and var directories under /private after realpath.
+  if (
+    process.platform === 'darwin' &&
+    parts[1] === 'private' &&
+    (parts[2] === 'tmp' || parts[2] === 'var')
+  ) {
+    parts.splice(1, 1);
+  }
   return parts.some(
     (part, index) =>
       isPrivateNamespace(part) ||

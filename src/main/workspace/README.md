@@ -122,11 +122,13 @@ replacement preserves the original owner, group and ordinary permission bits; fi
 write bits or special mode bits are read-only. If metadata cannot be set or the rename fails,
 the original file remains in place and the broker attempts to remove its verified temporary file.
 
-Built-in protections apply to canonical path components, case insensitively. They
-include `.git`, `.ssh`, `.env` and `.env.*`, key and secret extensions, SSH key names, `.npmrc`,
+Built-in protections apply case insensitively to canonical path components through the selected
+root and its descendants. They include `.git`, `.ssh`, `.env` and `.env.*`, key and secret
+extensions, SSH key names, `.npmrc`,
 `credentials.json`, `.aws/credentials`, `secrets`, `private`, `keys`, `.agentignore` itself,
 `.agentide`, `.agentbackup` and the temporary manual-save namespace. The main process supplies the
 Electron application and session data directories and the app's home directory store as private roots.
+On macOS, the canonical system prefix `/private` is normalized for `/tmp` and `/var`.
 The root `.agentignore` adds exclusions with case-insensitive `*` and `?` within segments,
 `**` across segments, a leading `/` to anchor a basename at the root, and a trailing `/` for
 directories. A basename pattern without a leading slash matches at any depth. Blank lines,

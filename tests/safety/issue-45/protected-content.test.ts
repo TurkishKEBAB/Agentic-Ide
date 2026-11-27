@@ -204,6 +204,46 @@ describe('#45 protected agent content', () => {
     await expect(broker.readAgentFile('before.txt')).resolves.toMatchObject(denied);
   });
 
+  it.each(['private', 'secrets/nested', 'KEYS'])(
+    'enforces the built-in rules when %s is the workspace root',
+    async (relativeRoot) => {
+      await addFile(`${relativeRoot}/fixture.txt`);
+      const broker = await openBroker(path.join(workspace, relativeRoot));
+      const denied = { ok: false, error: { code: 'PROTECTED_PATH' } };
+      await expect(broker.listAgentFiles()).resolves.toMatchObject(denied);
+      await expect(broker.readAgentFile('fixture.txt')).resolves.toMatchObject(denied);
+      const opened = await broker.readFile('fixture.txt');
+      expect(opened).toMatchObject({ ok: true, value: { readOnly: true } });
+      if (!opened.ok) throw new Error(opened.error.code);
+      await expect(
+        broker.saveFile('fixture.txt', PUBLIC_CONTENT, opened.value.revision),
+      ).resolves.toMatchObject(denied);
+    },
+  );
+
+  it('uses adjacent canonical components when .aws is the workspace root', async () => {
+    await addFile('.aws/credentials');
+    await addFile('.aws/source.txt', PUBLIC_CONTENT);
+    const broker = await openBroker(path.join(workspace, '.aws'));
+
+    await expect(broker.listAgentFiles()).resolves.toMatchObject({
+      ok: true,
+      value: { entries: [{ kind: 'file', path: 'source.txt' }] },
+    });
+    await expect(broker.readAgentFile('credentials')).resolves.toMatchObject({
+      ok: false,
+      error: { code: 'PROTECTED_PATH' },
+    });
+    await expect(broker.readFile('credentials')).resolves.toMatchObject({
+      ok: true,
+      value: { readOnly: true },
+    });
+    await expect(broker.readAgentFile('source.txt')).resolves.toMatchObject({
+      ok: true,
+      value: { content: PUBLIC_CONTENT },
+    });
+  });
+
   it('refuses to traverse a linked directory for discovery or explicit reads', async () => {
     await addFile('private/fixture.txt');
     await symlink(path.join(workspace, 'private'), path.join(workspace, 'alias'), 'junction');
