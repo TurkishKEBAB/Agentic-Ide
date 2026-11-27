@@ -1,5 +1,12 @@
 # GitHub Requirements Project Seed
 
+4 November 2026: [implementation baseline](../docs/IMPLEMENTATION_BASELINE.md) and
+[current Project operations](../docs/GITHUB_PROJECT_OPERATIONS.md) supersede historical setup notes below.
+Stable issue numbers, explicit workflow/readiness, workstream, delivery slice, owner role and completion evidence
+are canonical. Views use supported GraphQL updates; existing grouping is preserved. Ordinary sync preserves live
+Status/Readiness; a deliberate reset uses `-SyncWorkflowStatus`. Done planning is distinct from Pending Advisor
+decisions and unfinished application behavior.
+
 This folder contains the seed data and automation for the `Agentic IDE - Thesis Backlog` GitHub Project.
 
 ## Files
@@ -117,6 +124,7 @@ powershell -ExecutionPolicy Bypass -File .\scripts\setup-requirements-github-pro
 - Project view creation uses GitHub's REST Project views endpoint for user-owned projects (`/users/{user_id}/projectsV2/{project_number}/views`). Creating new views can include `visible_fields`; existing view updates are best-effort because GitHub's documented endpoint is creation-focused.
 - If a view already exists and GitHub rejects the automatic update, use the GitHub UI once to align that view with the seed. The `Dependency Map Detailed` view exists as a clean fallback when an older manually-created `Dependency Map` cannot be patched in place.
 - Recommended workflow columns for the built-in `Status` field are `Backlog`, `Ready`, `In Progress`, `Review`, `Done`, and `Deferred`.
-- `-SyncWorkflowStatus` sets epics to `Review`, Faz 1 P0 child issues to `Ready`, and the rest to `Backlog`; omit it after active development starts so day-to-day status is not reset.
-- `Readiness` is set automatically from the seed: advisor-review or Faz 1 P0 cards become `Ready`, approved/done cards become `Validated`, deferred/blocked cards become `Blocked`, and the rest stay `Needs Clarification`.
+- `-SyncWorkflowStatus` maps advisor-review cards to `Review`, done cards to `Done`, deferred cards to `Deferred`, and other cards to `Backlog`. Phase, priority, and epic membership never assign `Ready`; a reviewer sets it after checking the Definition of Ready. Omit the switch after active development starts so day-to-day status is not reset.
+- `Readiness` is derived conservatively: done cards become `Validated` only under the evidence-backed Definition of Done; deferred cards, blocked labels, and declared dependencies become `Blocked`; the rest stay `Needs Clarification`. Advisor review and approval do not prove implementation readiness. A reviewer explicitly resolves dependencies and sets `Ready` after the Definition of Ready check.
+- A full sync rewrites seeded issue bodies and structured requirement/readiness fields. Before syncing, reconcile useful live advisor notes and manual readiness decisions with the canonical data. Use a bounded update when preserving live prose or day-to-day decisions is required.
 - GitHub's stable CLI/API support can create fields and update item values, but fine-grained view layout, grouping, and visible-column tuning should still be finished in the GitHub UI.

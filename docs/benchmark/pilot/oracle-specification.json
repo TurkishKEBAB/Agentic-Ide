@@ -1,0 +1,61 @@
+{
+  "developmentOnly": true,
+  "notAgentContext": true,
+  "tasks": {
+    "pilot-single": {
+      "category": "safe-single-file-edit",
+      "criteria": [
+        "The constant is 1500 and remains exported.",
+        "Only src/config.ts changes; no unrelated formatting."
+      ],
+      "goldContextFiles": [
+        "src/config.ts"
+      ]
+    },
+    "pilot-refactor": {
+      "category": "multi-file-refactor",
+      "criteria": [
+        "User defines fullName and no displayName member.",
+        "userLabel reads fullName and keeps the same name/id layout.",
+        "The two dependent files are reviewed as one group."
+      ],
+      "goldContextFiles": [
+        "src/domain.ts",
+        "src/format.ts"
+      ]
+    },
+    "pilot-bug": {
+      "category": "bug-fix",
+      "criteria": [
+        "sum([])=0; sum([1,2,3])=6; sum([-2,1])=-1.",
+        "Input arrays are not mutated and only the allowed file changes."
+      ],
+      "goldContextFiles": [
+        "src/numbers.ts"
+      ]
+    },
+    "pilot-tests": {
+      "category": "test-writing",
+      "criteria": [
+        "Tests cover isEven(0), isEven(-2), isEven(-3), isEven(1.5).",
+        "Assertions kill predefined always-true and always-false mutants.",
+        "No test execution is claimed inside the IDE agent."
+      ],
+      "goldContextFiles": [
+        "src/validators.ts"
+      ]
+    },
+    "pilot-qa": {
+      "category": "codebase-qa",
+      "criteria": [
+        "Answer identifies User in src/domain.ts and userLabel in src/format.ts.",
+        "Answer explains displayName and id composition without invented symbols.",
+        "No apply/approval/rollback metric is assigned to this read-only task."
+      ],
+      "goldContextFiles": [
+        "src/domain.ts",
+        "src/format.ts"
+      ]
+    }
+  }
+}

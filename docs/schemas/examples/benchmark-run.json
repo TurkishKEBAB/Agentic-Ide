@@ -1,0 +1,48 @@
+{
+  "schemaVersion": 1,
+  "runId": "synthetic-not-executed",
+  "taskId": "pilot-single",
+  "taskCategory": "safe-single-file-edit",
+  "condition": "C",
+  "status": "not-run",
+  "fixtureCommit": "0000000000000000000000000000000000000000",
+  "protocolVersion": "draft-example",
+  "versions": {
+    "implementationPrompt": "example@1",
+    "verificationPolicy": "example@1",
+    "retrievalPolicy": "example@1",
+    "safetyPolicy": "example@1",
+    "taskVersion": "example@1",
+    "requirementsVersion": "example@1"
+  },
+  "model": {
+    "provider": "synthetic",
+    "id": "fixture-model",
+    "version": "example@1",
+    "temperature": 0
+  },
+  "operatorPseudonym": "not-recruited",
+  "repeatIndex": 1,
+  "randomizationSeed": 1,
+  "budget": {
+    "maxIterations": 2,
+    "maxInputTokens": 8000,
+    "maxWallClockSeconds": 1200
+  },
+  "candidateFingerprint": null,
+  "finalFingerprint": null,
+  "score": null,
+  "humanDecision": "not-run",
+  "metrics": {
+    "totalMs": null,
+    "reviewMs": null,
+    "ttftMs": null,
+    "inputTokens": null,
+    "outputTokens": null,
+    "estimatedCost": null,
+    "appliedPolicyViolations": null
+  },
+  "criterionResults": [],
+  "deviations": [],
+  "failureReason": null
+}

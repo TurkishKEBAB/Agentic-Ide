@@ -9,6 +9,7 @@ actor "Sistem Dosya Seçici" as FilePicker
 actor "Dosya Sistemi" as FileSystem
 actor "Tercih Deposu\n(preferences.json)" as PreferenceStore
 actor "Konfigürasyon Deposu\n(~/.agentide/config.json)" as ConfigStore
+actor "OS Credential / Şifreli Secret Store\n(önerilen; mekanizma spike'ta seçilir)" as SecretStore
 actor "Yerel Model Sağlayıcı\n(Ollama)" as LocalModel
 actor "Bulut Model Sağlayıcı\n(Claude API)" as CloudModel
 actor "Bağlam ve İndeks Servisi" as ContextService
@@ -23,7 +24,8 @@ rectangle "Agentic IDE - İlk Kurulum ve Tercihler" {
   usecase "Varsayılan model\nprofilini seç" as UC_SelectModelProfile
   usecase "Yerel model bağlantısını\ntest et" as UC_TestLocalModel
   usecase "Bulut API anahtarını gir" as UC_EnterCloudKey
-  usecase "API anahtarını güvenli\nkonfigürasyona yaz" as UC_StoreCloudKey
+  usecase "Broker ile API anahtarını\nsecret store'a kaydet" as UC_StoreCloudKey
+  usecase "Yalnızca secret referansını\nkonfigürasyona yaz" as UC_StoreKeyReference
   usecase "Gizlilik tercihini seç" as UC_SelectPrivacyMode
   usecase "Tercihleri kaydet" as UC_SavePreferences
   usecase "Son projeleri göster" as UC_ShowRecentProjects
@@ -46,6 +48,7 @@ UC_StartOnboarding .> UC_SelectPrivacyMode : <<include>>
 UC_TestLocalModel .> UC_SelectModelProfile : <<extend>>
 UC_EnterCloudKey .> UC_SelectModelProfile : <<extend>>
 UC_EnterCloudKey .> UC_StoreCloudKey : <<include>>
+UC_StoreCloudKey .> UC_StoreKeyReference : <<include>>
 UC_SelectPrivacyMode .> UC_SavePreferences : <<include>>
 UC_SelectModelProfile .> UC_SavePreferences : <<include>>
 
@@ -58,7 +61,8 @@ LocalModel --> UC_TestLocalModel
 CloudModel --> UC_EnterCloudKey
 PreferenceStore --> UC_SavePreferences
 PreferenceStore --> UC_ShowRecentProjects
-ConfigStore --> UC_StoreCloudKey
+SecretStore --> UC_StoreCloudKey
+ConfigStore --> UC_StoreKeyReference
 
 note right of UC_SelectModelProfile
 MVP'de otomatik karmaşıklık tabanlı router yoktur.
@@ -72,9 +76,12 @@ bulut profili seçilirse API anahtarı girişi açılır.
 end note
 
 note bottom of UC_StoreCloudKey
-API anahtarı audit log'a, model context'ine veya
-embedding indeksine yazılmaz. MVP saklama yeri
-~/.agentide/config.json dosyasıdır.
+Önerilen sözleşme — ADR-010; uygulanmış davranış değildir.
+API anahtarı main-process broker üzerinden OS credential
+veya şifreli secret store'a kaydedilir; renderer'a geri verilmez.
+Config yalnızca apiKeyRef tutar. Audit/context/index/export
+ham anahtar içermez. Storage yoksa plaintext fallback yapılmaz.
+Gerçek platform mekanizması implementation spike'ta seçilir.
 end note
 
 note bottom of UC_SelectWorkspace
