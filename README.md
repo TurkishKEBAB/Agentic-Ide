@@ -23,6 +23,8 @@ powershell -ExecutionPolicy Bypass -File .\scripts\start-app.ps1 -Dev  # Vite de
 
 Choose **Klasör aç** to open a local workspace or **İlk Göreve başla** to learn in `auth-lab`. Use `Ctrl+P` to find a file and `Ctrl+S` to save. Local saves use a disk revision to detect conflicts and keep the draft open if the file has changed. The separate [browser preview instructions](design-prototype/README.md) cover the tutorial and its two extra exercises.
 
+On the desktop, **Model ve gizlilik** opens the local-first setup. Windows allows configuring an Anthropic key with explicit consent and OS-protected storage. **Son projeler** reopens previously selected folders. [Setup acceptance evidence](docs/evidence/S2-issue-52-onboarding.md)
+
 Quality gates are `npm run format:check`, `npm run lint`, `npm run typecheck`, `npm test` (Vitest with coverage, then the tutorial's Node tests), `npm run test:security`, `npm run build`, and `npm run test:e2e`.
 
 ## Core Documents

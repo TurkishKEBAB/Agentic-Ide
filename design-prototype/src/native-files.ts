@@ -111,11 +111,11 @@ export class NativeFiles {
   }
 
   /** Call after confirming any drafts that would be discarded on a successful choice. */
-  async choose(): Promise<NativeResult<NativeWorkspace | null>> {
+  async choose(open: () => Promise<NativeResult<NativeWorkspace | null>> = () => this.#api.chooseWorkspace()): Promise<NativeResult<NativeWorkspace | null>> {
     if (this.busy) return busy();
     this.#choosing = true;
     try {
-      const result = await request(() => this.#api.chooseWorkspace());
+      const result = await request(open);
       if (result.ok && result.value !== null) {
         this.#name = result.value.name;
         this.#entries = [];

@@ -3,6 +3,7 @@ import '@fontsource/jetbrains-mono/latin-400.css';
 import '@fontsource/jetbrains-mono/latin-ext-400.css';
 import './style.css';
 import './tutorial.css';
+import type { AgentIdeApi, SetupSummary } from '../../src/shared/ipc-contract';
 import { button, escapeHtml, fileName, icon, iconButton, select } from './markup.ts';
 import { defaultWorkset, paths, WORKSET_LIMIT, type Files } from './project.ts';
 import { commands, matchingFiles, mountCommand } from './command.ts';
@@ -16,7 +17,8 @@ import { riskView, visionDetail, visionOverview, visionPanel, type VisionCard } 
 import { intentView, planDetail, planPanel, proposalView, requestDetail, sourceDetail, sourcePanel, sourcePreview, workflowView } from './views.ts';
 import { pickerRows, type Entry } from './file-picker.ts';
 import { captureFocus } from './focus-return.ts';
-import { NativeFiles, type NativeWorkspaceApi } from './native-files.ts';
+import { NativeFiles } from './native-files.ts';
+import { recentWorkspaces, setupView } from './setup-view.ts';
 import { FirstTaskTutorial, laterPracticeComment, practiceComment, type TutorialEvent } from './tutorial.ts';
 import { tutorialCard } from './tutorial-view.ts';
 
@@ -95,7 +97,7 @@ const intro = select('#intro');
 const statusFile = select('#status-file');
 const statusAgent = select('#status-agent');
 const state = new WorkspaceState();
-const nativeApi = (window as Window & { agentIde?: NativeWorkspaceApi }).agentIde;
+const nativeApi = (window as Window & { agentIde?: AgentIdeApi }).agentIde;
 const native = nativeApi ? new NativeFiles(nativeApi) : null;
 const tutorial = new FirstTaskTutorial();
 const coachHost = document.createElement('div');
@@ -108,6 +110,9 @@ let practiceView = { activePath: '', workset: [] as string[], view: 'editor' as 
 let requestGeneration = 0;
 let pendingFile = '';
 let workspaceMessage = '';
+let nativeSetup: SetupSummary | null = null;
+let setupRead = 0;
+let setupBusy = false;
 let returnSheetFocus: (() => void) | null = null;
 let tutorialMessage = '';
 let exercise: { kind: 'expiry' | 'conflict'; stage: number } | null = null;
@@ -329,6 +334,8 @@ function showSheet(title: string, body: string, kind = '', restore?: () => void)
 
 dialog.addEventListener('close', () => {
   if (dialog.open) return;
+  const key = dialog.querySelector<HTMLInputElement>('#setup-key');
+  if (key) key.value = '';
   const restore = returnSheetFocus;
   returnSheetFocus = null;
   renderTutorial();
@@ -350,6 +357,7 @@ function render(): void {
   select('#workspace-mode').innerHTML = `<span class="dot"></span> ${workspaceMode === 'local' ? 'Masaüstü' : open ? 'Deneme' : native ? 'Masaüstü' : 'Önizleme'}`;
   select('#header-actions').innerHTML = `${workspaceMode === 'practice' && native?.name ? button('return-local', 'Yerel projeye dön', { glyph: 'folder', className: 'ghost' }) : ''}
     ${workspaceMode === 'practice' && open ? button('model', state.model === 'local' ? 'Yerel model' : 'Bulut modeli', { glyph: state.model === 'local' ? 'chip' : 'cloud', suffix: 'chevron', className: 'model-button ghost' }) : ''}
+    ${nativeApi ? button('setup', 'Model ve gizlilik', { glyph: 'shield', className: 'ghost setup-button' }) : ''}
     ${button('help', 'Yardım', { glyph: 'note', className: 'ghost help-button' })}
     ${iconButton('theme', light ? 'Koyu temaya geç' : 'Açık temaya geç', light ? 'moon' : 'sun')}`;
   const input = commandInput;
@@ -367,6 +375,7 @@ function render(): void {
           ${native ? '<button type="button" class="button ghost" data-act="workspace" data-testid="open-folder">' + icon('folder') + '<span>Klasör aç</span></button>'
             : button('open-workspace', 'Deneme projesini aç', { glyph: 'folder', className: 'ghost' })}
         </div>
+        ${nativeApi ? '<div id="welcome-setup"></div>' : ''}
         <p class="welcome-foot">${icon('shield')} Eğitim için ayrı örnek proje</p>
       </div>
       <div class="welcome-graphic" aria-hidden="true">
@@ -377,6 +386,7 @@ function render(): void {
         <div class="graphic-grid"></div>
       </div>
     </section>`;
+  renderWelcomeSetup();
   renderWorkView();
   renderDock();
 }
@@ -448,6 +458,7 @@ function showWorkspaceError(code: string, title: string): void {
   if (code === 'STALE') return;
   const messages: Record<string, string> = {
     BUSY: 'Açık dosya işleminin bitmesini bekle ve yeniden dene.',
+    WORKSPACE_OPEN_IN_PROGRESS: 'Bir klasör açılıyor. İşlem tamamlandığında tekrar dene.',
     SAVE_IN_PROGRESS: 'Bu dosya kaydediliyor. İşlem tamamlandığında tekrar dene.',
     PROTECTED_PATH: 'Bu dosya çalışma alanının koruma kuralları kapsamında.',
     PROTECTION_UNAVAILABLE: 'Koruma kuralları doğrulanamadı. Dosyayı yeniden yüklemeyi dene.',
@@ -461,19 +472,77 @@ function showWorkspaceError(code: string, title: string): void {
   showSheet(title, `<p>${escapeHtml(messages[code] ?? 'Çalışma alanı işlemi tamamlanamadı. Dosyayı veya klasörü yeniden açıp tekrar dene.')}</p>`, 'workspace-error');
 }
 
-async function chooseLocal(confirmed = false): Promise<void> {
+function renderWelcomeSetup(): void {
+  const welcomeSetup = intro.querySelector('#welcome-setup');
+  if (!welcomeSetup || !nativeSetup) return;
+  const local = nativeSetup.profile === 'local-only';
+  welcomeSetup.innerHTML = `<p class="welcome-profile">${icon(local ? 'chip' : 'cloud')}
+    <span>Model profili</span> <strong>${local ? 'Yalnızca yerel' : 'Manuel hibrit'}</strong></p>
+    ${recentWorkspaces(nativeSetup.recentWorkspaces.slice(0, 3))}`;
+}
+
+function renderSetupDialog(message = '', error = false): void {
+  const body = setupBusy || (!nativeSetup && !error)
+    ? '<p role="status">Model ve gizlilik ayarları yükleniyor…</p>'
+    : nativeSetup ? setupView(nativeSetup, message, error) : `<p role="alert">${escapeHtml(message)}</p>`;
+  showSheet('Model ve gizlilik', body, 'setup');
+}
+
+async function refreshSetup(): Promise<void> {
+  if (!nativeApi || setupBusy) return;
+  const pending = ++setupRead;
+  const result = await nativeApi.getSetup().catch(() => null);
+  if (setupRead !== pending) return;
+  if (result?.ok) {
+    nativeSetup = result.value;
+    renderWelcomeSetup();
+  }
+  if (dialog.open && sheetKind === 'setup') {
+    renderSetupDialog(result?.ok ? '' : 'Model ve gizlilik ayarları okunamadı.', !result?.ok);
+  }
+}
+
+async function changeSetup(operation: () => ReturnType<AgentIdeApi['getSetup']>, success: string): Promise<void> {
+  if (setupBusy) return;
+  setupBusy = true;
+  setupRead++;
+  renderSetupDialog();
+  const result = await operation().catch(() => null);
+  setupBusy = false;
+  const message = result?.ok ? success : result?.error.code === 'SECURE_STORAGE_UNAVAILABLE'
+    ? 'Güvenli depolama kullanılamıyor. Yerel profille devam edebilirsin.'
+    : 'Ayarlar kaydedilemedi. Tekrar dene.';
+  if (result?.ok) {
+    nativeSetup = result.value;
+    renderWelcomeSetup();
+  }
+  if (dialog.open && sheetKind === 'setup') renderSetupDialog(message, !result?.ok);
+  else announce(message);
+}
+
+async function chooseLocal(confirmed = false, recentId?: string): Promise<void> {
   if (!native) return chooseWorkspace();
   if (native.busy) return showWorkspaceError('BUSY', 'Çalışma alanı bekliyor');
   if (!confirmed && native.dirtyPaths().length) {
-    showSheet('Kaydedilmemiş dosyalar', `<p class="sheet-intro">Yeni bir klasör seçersen yerel taslaklar kapanır. İptal ederek düzenlemene dönebilirsin.</p><div class="sheet-actions">${button('close-sheet', 'Vazgeç', { className: 'ghost' })}${button('choose-local-confirm', 'Taslakları bırak ve klasör seç', { className: 'primary', glyph: 'folder' })}</div>`, 'workspace-confirm');
+    const confirmLabel = recentId ? 'Taslakları bırak ve projeyi aç' : 'Taslakları bırak ve klasör seç';
+    const confirm = button('choose-local-confirm', confirmLabel, {
+      className: 'primary', glyph: 'folder', ...(recentId ? { value: recentId } : {}),
+    });
+    showSheet('Kaydedilmemiş dosyalar', `<p class="sheet-intro">Başka bir klasör açarsan yerel taslaklar kapanır. İptal ederek düzenlemene dönebilirsin.</p><div class="sheet-actions">${button('close-sheet', 'Vazgeç', { className: 'ghost' })}${confirm}</div>`, 'workspace-confirm');
     return;
   }
   if (dialog.open) dialog.close();
-  const picking = native.choose();
+  const api = nativeApi;
+  const picking = native.choose(recentId && api ? () => api.openRecentWorkspace(recentId) : undefined);
   syncEditor();
   const result = await picking;
   if (!result.ok) {
     syncEditor();
+    if (recentId) {
+      showSheet('Klasör açılamadı', `<p>Son proje artık açılamıyor. Konumunu klasör seçicisinden seçebilirsin.</p>
+        <div class="sheet-actions">${button('workspace', 'Klasör seç', { glyph: 'folder', className: 'primary' })}</div>`, 'workspace-error');
+      return;
+    }
     return showWorkspaceError(result.error.code, 'Klasör açılamadı');
   }
   if (!result.value) {
@@ -494,6 +563,7 @@ async function chooseLocal(confirmed = false): Promise<void> {
   commandInput.value = '';
   commandControl.hide();
   render();
+  void refreshSetup();
   const listing = await native.list();
   if (workspaceMode !== 'local') return;
   if (!listing.ok) return showWorkspaceError(listing.error.code, 'Klasör listelenemedi');
@@ -1020,7 +1090,18 @@ app.addEventListener('click', event => {
   const value = target?.dataset.value ?? '';
   switch (action) {
     case 'workspace': void chooseLocal(); break;
-    case 'choose-local-confirm': void chooseLocal(true); break;
+    case 'choose-local-confirm': void chooseLocal(true, value || undefined); break;
+    case 'open-recent': if (value) void chooseLocal(false, value); break;
+    case 'setup':
+      renderSetupDialog();
+      if (!nativeSetup) void refreshSetup();
+      break;
+    case 'setup-local':
+      if (nativeApi) void changeSetup(() => nativeApi.selectLocalProfile(), 'Yalnızca yerel profil seçildi.');
+      break;
+    case 'setup-remove-key':
+      if (nativeApi) void changeSetup(() => nativeApi.removeCloudKey(), 'Bulut anahtarı kaldırıldı.');
+      break;
     case 'return-local': returnLocal(); break;
     case 'help': showHelp(); break;
     case 'key-help':
@@ -1263,6 +1344,17 @@ app.addEventListener('click', event => {
   }
 });
 
+dialog.addEventListener('submit', event => {
+  if (!(event.target instanceof HTMLFormElement) || event.target.id !== 'setup-cloud' || !nativeApi) return;
+  event.preventDefault();
+  const input = event.target.querySelector<HTMLInputElement>('#setup-key');
+  const consent = event.target.querySelector<HTMLInputElement>('#setup-consent')?.checked === true;
+  if (!input?.value || !consent) return;
+  const key = input.value;
+  input.value = '';
+  void changeSetup(() => nativeApi.configureCloud(key, consent), 'Manuel hibrit profil etkinleştirildi.');
+});
+
 app.addEventListener('input', event => {
   if (event.target instanceof HTMLInputElement && event.target.id === 'picker-search') refreshFilePicker();
 });
@@ -1318,3 +1410,4 @@ setInterval(updateApprovalClock, 1000);
 
 const requestedStep = Number(new URLSearchParams(location.search).get('adim'));
 loadDemo(Number.isInteger(requestedStep) && requestedStep >= 1 && requestedStep <= 8 ? requestedStep : 1, false);
+void refreshSetup();

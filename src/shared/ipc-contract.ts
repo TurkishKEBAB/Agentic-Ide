@@ -12,12 +12,21 @@ export const IPC_CHANNELS = {
 
 export type IpcChannel = (typeof IPC_CHANNELS)[keyof typeof IPC_CHANNELS];
 
+export const SETUP_CHANNELS = {
+  getSetup: 'agent-ide:setup/get',
+  configureCloud: 'agent-ide:setup/configure-cloud',
+  selectLocalProfile: 'agent-ide:setup/select-local',
+  removeCloudKey: 'agent-ide:setup/remove-cloud-key',
+  openRecentWorkspace: 'agent-ide:setup/open-recent-workspace',
+} as const;
+
 /** Broker-level failures plus the workspace policy codes from `src/main/workspace`. */
 export type IpcErrorCode =
   | 'NO_WORKSPACE'
   | 'INVALID_REQUEST'
   | 'UNAUTHORIZED_SENDER'
   | 'INTERNAL'
+  | 'SECURE_STORAGE_UNAVAILABLE'
   | 'INVALID_INPUT'
   | 'ABSOLUTE_PATH'
   | 'TRAVERSAL'
@@ -32,6 +41,7 @@ export type IpcErrorCode =
   | 'NOT_FOUND'
   | 'TARGET_CHANGED'
   | 'SAVE_IN_PROGRESS'
+  | 'WORKSPACE_OPEN_IN_PROGRESS'
   | 'PROTECTED_PATH'
   | 'PROTECTION_UNAVAILABLE'
   | 'READ_ONLY'
@@ -52,6 +62,18 @@ export type IpcResult<T> =
 export interface WorkspaceSummary {
   /** Folder name only; the absolute path stays in the main process. */
   readonly name: string;
+}
+
+export interface RecentWorkspace {
+  readonly id: string;
+  readonly name: string;
+}
+
+export interface SetupSummary {
+  readonly profile: 'local-only' | 'manual-hybrid';
+  readonly cloudAvailable: boolean;
+  readonly cloudConfigured: boolean;
+  readonly recentWorkspaces: readonly RecentWorkspace[];
 }
 
 export interface FileEntry {
@@ -77,6 +99,11 @@ export interface FileContent {
 
 /** The complete capability surface exposed on `window.agentIde`. */
 export interface AgentIdeApi {
+  getSetup(): Promise<IpcResult<SetupSummary>>;
+  configureCloud(key: string, consent: boolean): Promise<IpcResult<SetupSummary>>;
+  selectLocalProfile(): Promise<IpcResult<SetupSummary>>;
+  removeCloudKey(): Promise<IpcResult<SetupSummary>>;
+  openRecentWorkspace(id: string): Promise<IpcResult<WorkspaceSummary>>;
   /** Opens the native folder picker in the main process; `null` value when cancelled. */
   chooseWorkspace(): Promise<IpcResult<WorkspaceSummary | null>>;
   listFiles(): Promise<IpcResult<FileListing>>;

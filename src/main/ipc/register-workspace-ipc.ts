@@ -1,24 +1,13 @@
-import type { IpcMain, IpcMainInvokeEvent } from 'electron';
-
-import { IPC_CHANNELS, type IpcChannel, type IpcResult } from '../../shared/ipc-contract';
+import { IPC_CHANNELS } from '../../shared/ipc-contract';
+import {
+  guardedIpcHandler,
+  INVALID_REQUEST,
+  type AuthorizedSender,
+  type IpcMainLike,
+} from './register-guarded-ipc';
 import type { WorkspaceBroker } from './workspace-broker';
 
-type IpcMainLike = Pick<IpcMain, 'handle' | 'removeHandler'>;
 type BrokerLike = Pick<WorkspaceBroker, 'chooseWorkspace' | 'listFiles' | 'readFile' | 'saveFile'>;
-
-const UNAUTHORIZED: IpcResult<never> = {
-  ok: false,
-  error: { code: 'UNAUTHORIZED_SENDER', message: 'The caller is not allowed to use this API.' },
-};
-const INVALID_REQUEST: IpcResult<never> = {
-  ok: false,
-  error: { code: 'INVALID_REQUEST', message: 'The request is malformed.' },
-};
-const INTERNAL: IpcResult<never> = {
-  ok: false,
-  error: { code: 'INTERNAL', message: 'The operation failed unexpectedly.' },
-};
-
 /**
  * Registers the named workspace capabilities. Each call is checked in order: sender (frame,
  * window and origin), exact argument count/type, then the broker's workspace policy.
@@ -28,23 +17,9 @@ const INTERNAL: IpcResult<never> = {
 export function registerWorkspaceIpc(
   ipcMain: IpcMainLike,
   broker: BrokerLike,
-  isAuthorized: (event: IpcMainInvokeEvent) => boolean,
+  isAuthorized: AuthorizedSender,
 ): () => void {
-  const handle = (
-    channel: IpcChannel,
-    run: (args: readonly unknown[]) => Promise<IpcResult<unknown>> | IpcResult<never>,
-  ): void => {
-    ipcMain.handle(channel, async (event, ...args: unknown[]) => {
-      if (!isAuthorized(event)) {
-        return UNAUTHORIZED;
-      }
-      try {
-        return await run(args);
-      } catch {
-        return INTERNAL;
-      }
-    });
-  };
+  const handle = guardedIpcHandler(ipcMain, isAuthorized);
 
   handle(IPC_CHANNELS.chooseWorkspace, (args) =>
     args.length === 0 ? broker.chooseWorkspace() : INVALID_REQUEST,

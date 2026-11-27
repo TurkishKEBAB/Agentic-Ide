@@ -15,11 +15,17 @@ import {
   revisionForSnapshot,
   saveVerifiedTextFile,
 } from '../workspace/verified-save';
-import { openWorkspaceRoot, type WorkspaceRoot } from '../workspace/workspace-root';
+import { openWorkspaceRoot, sameIdentity, type WorkspaceRoot } from '../workspace/workspace-root';
 import { checkWriteProtection } from '../workspace/write-protection';
 
 /** Opens the native folder picker; resolves to an absolute path or `null` when cancelled. */
 export type FolderPicker = () => Promise<string | null>;
+type WorkspaceOpened = (root: WorkspaceRoot) => Promise<void>;
+
+interface WorkspaceOpenOptions {
+  readonly onOpened?: WorkspaceOpened | undefined;
+  readonly expectedRoot?: Pick<WorkspaceRoot, 'canonicalPath' | 'identity'>;
+}
 
 const NO_WORKSPACE: IpcError = { code: 'NO_WORKSPACE', message: 'No workspace folder is open.' };
 const INVALID_REQUEST: IpcError = {
@@ -29,6 +35,10 @@ const INVALID_REQUEST: IpcError = {
 const SAVE_IN_PROGRESS: IpcError = {
   code: 'SAVE_IN_PROGRESS',
   message: 'A file is already being saved.',
+};
+const WORKSPACE_OPEN_IN_PROGRESS: IpcError = {
+  code: 'WORKSPACE_OPEN_IN_PROGRESS',
+  message: 'A workspace is already being opened.',
 };
 
 interface OpenWorkspace {
@@ -43,6 +53,8 @@ interface OpenWorkspace {
 export class WorkspaceBroker {
   #workspace: OpenWorkspace | null = null;
   #saving = false;
+  #opening = false;
+  #picking = false;
 
   constructor(
     private readonly pickFolder: FolderPicker,
@@ -50,18 +62,46 @@ export class WorkspaceBroker {
   ) {}
 
   /** Lets the user pick a folder; an invalid choice keeps the previous workspace. */
-  async chooseWorkspace(): Promise<IpcResult<WorkspaceSummary | null>> {
-    const selected = await this.pickFolder();
+  async chooseWorkspace(onOpened?: WorkspaceOpened): Promise<IpcResult<WorkspaceSummary | null>> {
+    if (this.#picking || this.#opening) return { ok: false, error: WORKSPACE_OPEN_IN_PROGRESS };
+    this.#picking = true;
+    let selected: string | null;
+    try {
+      selected = await this.pickFolder();
+    } finally {
+      this.#picking = false;
+    }
     if (selected === null) {
       return { ok: true, value: null };
     }
-    const opened = await openWorkspaceRoot(selected);
-    if (!opened.ok) {
-      return failure(opened.error);
+    return this.openWorkspaceFolder(selected, { onOpened });
+  }
+
+  /** Accepts a trusted native picker or recent-workspace path from the main process. */
+  async openWorkspaceFolder(
+    folder: string,
+    { onOpened, expectedRoot }: WorkspaceOpenOptions = {},
+  ): Promise<IpcResult<WorkspaceSummary>> {
+    if (this.#opening || this.#picking) return { ok: false, error: WORKSPACE_OPEN_IN_PROGRESS };
+    this.#opening = true;
+    try {
+      const opened = await openWorkspaceRoot(folder);
+      if (!opened.ok) return failure(opened.error);
+      const root = opened.value;
+      if (
+        expectedRoot &&
+        (root.canonicalPath !== expectedRoot.canonicalPath ||
+          !sameIdentity(root.identity, expectedRoot.identity))
+      ) {
+        return policyFail('ROOT_CHANGED');
+      }
+      if (this.#saving) return { ok: false, error: SAVE_IN_PROGRESS };
+      this.#workspace = { root, revisionKey: randomBytes(32) };
+      await onOpened?.(root);
+      return { ok: true, value: { name: root.displayName } };
+    } finally {
+      this.#opening = false;
     }
-    if (this.#saving) return { ok: false, error: SAVE_IN_PROGRESS };
-    this.#workspace = { root: opened.value, revisionKey: randomBytes(32) };
-    return { ok: true, value: { name: opened.value.displayName } };
   }
 
   /** Lists files and directories under the open workspace. */
