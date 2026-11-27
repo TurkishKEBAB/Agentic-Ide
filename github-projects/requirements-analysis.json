@@ -2654,7 +2654,7 @@
       ],
       "kind": "issue",
       "title": "REQ: Durum cubugu aktif dosya ve ajan durumunu gostermeli",
-      "status": "Planned",
+      "status": "Done",
       "area": "Editor",
       "requirementType": "Functional",
       "phase": "Faz 2",
@@ -2679,15 +2679,15 @@
         "docs/IMPLEMENTATION_BASELINE.md"
       ],
       "githubIssueNumber": 32,
-      "workflowStatus": "Backlog",
+      "workflowStatus": "Done",
       "workstream": "Implementation",
       "ownerRole": "Student",
       "decisionStatus": "Not Required",
       "deliverySlice": "S2",
-      "testTarget": "tests/editor/issue-32 acceptance, negative and regression cases",
-      "thesisEvidence": "Planned: issue-specific acceptance report, artifact/run IDs and versioned evidence; no runtime result yet.",
+      "testTarget": "tests/e2e/workspace.e2e.ts (#32 acceptance and regression cases)",
+      "thesisEvidence": "Runtime acceptance report docs/evidence/S2-issue-32-acceptance.md (PR #126, Windows Electron CI)",
       "risk": "Kullanici hangi baglamda calistigini kaybetmemeli.",
-      "readiness": "Blocked"
+      "readiness": "Validated"
     },
     {
       "key": "req-editor-onboarding-configuration",
@@ -2701,7 +2701,7 @@
       ],
       "kind": "issue",
       "title": "REQ: Ilk acilis onboarding ve guvenli konfigurasyon akisi desteklenmeli",
-      "status": "Planned",
+      "status": "Done",
       "area": "UX",
       "requirementType": "Functional",
       "phase": "Faz 2",
@@ -2730,15 +2730,15 @@
         "docs/IMPLEMENTATION_BASELINE.md"
       ],
       "githubIssueNumber": 52,
-      "workflowStatus": "Backlog",
+      "workflowStatus": "Done",
       "workstream": "Implementation",
       "ownerRole": "Student",
       "decisionStatus": "Not Required",
       "deliverySlice": "S2",
-      "testTarget": "tests/ux/issue-52 acceptance, negative and regression cases",
-      "thesisEvidence": "Planned: issue-specific acceptance report, artifact/run IDs and versioned evidence; no runtime result yet.",
+      "testTarget": "tests/security/setup-broker.test.ts and tests/e2e/onboarding.e2e.ts",
+      "thesisEvidence": "Runtime acceptance report docs/evidence/S2-issue-52-onboarding.md (PR #128, Windows Electron DPAPI and setup IPC)",
       "risk": "Onboarding akisi olmadan workspace boundary, model secimi ve gizlilik varsayimlari kullanici tarafindan gorunur ve denetlenebilir olmaz.",
-      "readiness": "Blocked"
+      "readiness": "Validated"
     },
     {
       "key": "req-context-always-on",
@@ -2775,7 +2775,7 @@
         "docs/IMPLEMENTATION_BASELINE.md"
       ],
       "githubIssueNumber": 19,
-      "workflowStatus": "Backlog",
+      "workflowStatus": "Ready",
       "workstream": "Implementation",
       "ownerRole": "Student",
       "decisionStatus": "Not Required",
@@ -2783,7 +2783,7 @@
       "testTarget": "tests/retrieval/issue-19 acceptance, negative and regression cases",
       "thesisEvidence": "Planned: issue-specific acceptance report, artifact/run IDs and versioned evidence; no runtime result yet.",
       "risk": "Bu katman retrieval olmadan bile minimum anlamli calisma baglamini saglar.",
-      "readiness": "Blocked"
+      "readiness": "Ready"
     },
     {
       "key": "req-context-on-demand",
@@ -3220,7 +3220,7 @@
       ],
       "kind": "issue",
       "title": "REQ: Protected file kurallari gizli anahtar dosyalarinda indeksleme ve yazmayi engellemeli",
-      "status": "Planned",
+      "status": "Done",
       "area": "Safety",
       "requirementType": "Non-Functional",
       "phase": "Faz 2",
@@ -3246,15 +3246,15 @@
         "docs/IMPLEMENTATION_BASELINE.md"
       ],
       "githubIssueNumber": 45,
-      "workflowStatus": "Backlog",
+      "workflowStatus": "Done",
       "workstream": "Implementation",
       "ownerRole": "Student",
       "decisionStatus": "Not Required",
       "deliverySlice": "S1",
-      "testTarget": "tests/safety/issue-45 acceptance, negative and regression cases",
-      "thesisEvidence": "Planned: issue-specific acceptance report, artifact/run IDs and versioned evidence; no runtime result yet.",
+      "testTarget": "tests/safety/issue-45/protected-content.test.ts",
+      "thesisEvidence": "Runtime acceptance report docs/evidence/S1-issue-45-protected-content.md (PR #127, workspace policy and synthetic consumers)",
       "risk": "Hassas dosyalarda ajan davranisinin sinirlanmasi arastirma icin zorunlu bir guvenlik kosuludur.",
-      "readiness": "Blocked"
+      "readiness": "Validated"
     },
     {
       "key": "req-safety-audit-log",
@@ -3568,7 +3568,7 @@
         "docs/IMPLEMENTATION_BASELINE.md"
       ],
       "githubIssueNumber": 26,
-      "workflowStatus": "Backlog",
+      "workflowStatus": "Ready",
       "workstream": "Implementation",
       "ownerRole": "Student",
       "decisionStatus": "Not Required",
@@ -3576,7 +3576,7 @@
       "testTarget": "tests/model/issue-26 acceptance, negative and regression cases",
       "thesisEvidence": "Planned: issue-specific acceptance report, artifact/run IDs and versioned evidence; no runtime result yet.",
       "risk": "Arastirma, maliyet ve performans farklarini gormek icin en az iki calisma modu gerektirir.",
-      "readiness": "Blocked"
+      "readiness": "Ready"
     },
     {
       "key": "req-model-user-selection",
