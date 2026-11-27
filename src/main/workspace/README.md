@@ -153,7 +153,8 @@ only the relative path, text and size. Both operations reject linked entries and
 ## Limits (stated, not hidden)
 
 - Policy errors carry generic messages and never include absolute paths.
-- The local editor can show protected files as read-only. Agent context and indexing use the
+- The local editor can show protected workspace files as read-only. App-managed state stays in the
+  main process. Agent context and indexing use the
   agent source-access methods for derived content.
 - Hardlinked files are rejected rather than analysed; reparse points that Node does not report as
   links (e.g. volume-GUID junctions) are caught only through the canonical-path checks (steps 4–5).

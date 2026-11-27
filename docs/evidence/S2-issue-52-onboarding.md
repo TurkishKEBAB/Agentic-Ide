@@ -15,6 +15,7 @@ with Windows DPAPI. The Windows 10 demo is the supported cloud-credential setup 
 the local profile available. The settings and the encrypted credential record are separate sections of one
 atomically written file in Electron user data, so replacing or removing a credential updates its reference in
 the same commit. Recent workspace IDs and folder names are the only history fields returned to the renderer.
+The Electron test also verifies that the editor cannot open the app-managed setup file from an enclosing workspace.
 
 The tests perform no provider requests. Provider connectivity, model availability and runtime network policy are
 tracked in [#26](https://github.com/TurkishKEBAB/Agentic-Ide/issues/26). Audit and index clearing are tracked in
