@@ -224,3 +224,20 @@ test('#52 keeps local setup available when secure storage cannot start', async (
   await page.getByTestId('open-folder').click();
   await expect(page.getByTestId('workspace-name')).toHaveText(firstName);
 });
+
+test('#52 disables the cloud form if encryption fails during setup', async () => {
+  test.skip(process.platform !== 'win32', 'Cloud credential storage targets the Windows demo.');
+  const page = await launch();
+  await openSetup(page);
+  const keyInput = page.getByLabel('Anthropic API anahtarı', { exact: true });
+  await expect(keyInput).toBeVisible();
+  await currentApp().app.evaluate(({ safeStorage }) => {
+    safeStorage.encryptStringAsync = () => Promise.reject(new Error('Test storage failure'));
+  });
+  await keyInput.fill(syntheticKey);
+  await page.getByRole('checkbox', { name: /bağlamının Anthropic’e gönderilmesine izin/ }).check();
+  await page.getByRole('button', { name: 'Bulut profilini etkinleştir', exact: true }).click();
+  await expect(page.getByRole('alert')).toContainText('Güvenli depolama kullanılamıyor.');
+  await expect(keyInput).toHaveCount(0);
+  await expect(page.getByRole('dialog').getByText('Yalnızca yerel', { exact: true })).toBeVisible();
+});

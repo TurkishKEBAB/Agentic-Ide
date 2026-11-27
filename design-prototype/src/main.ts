@@ -509,11 +509,15 @@ async function changeSetup(operation: () => ReturnType<AgentIdeApi['getSetup']>,
   renderSetupDialog();
   const result = await operation().catch(() => null);
   setupBusy = false;
-  const message = result?.ok ? success : result?.error.code === 'SECURE_STORAGE_UNAVAILABLE'
+  const unavailable = result?.ok === false && result.error.code === 'SECURE_STORAGE_UNAVAILABLE';
+  const message = result?.ok ? success : unavailable
     ? 'Güvenli depolama kullanılamıyor. Yerel profille devam edebilirsin.'
     : 'Ayarlar kaydedilemedi. Tekrar dene.';
   if (result?.ok) {
     nativeSetup = result.value;
+    renderWelcomeSetup();
+  } else if (unavailable && nativeSetup) {
+    nativeSetup = { ...nativeSetup, profile: 'local-only', cloudAvailable: false };
     renderWelcomeSetup();
   }
   if (dialog.open && sheetKind === 'setup') renderSetupDialog(message, !result?.ok);
@@ -1094,7 +1098,7 @@ app.addEventListener('click', event => {
     case 'open-recent': if (value) void chooseLocal(false, value); break;
     case 'setup':
       renderSetupDialog();
-      if (!nativeSetup) void refreshSetup();
+      if (!nativeSetup?.cloudAvailable) void refreshSetup();
       break;
     case 'setup-local':
       if (nativeApi) void changeSetup(() => nativeApi.selectLocalProfile(), 'Yalnızca yerel profil seçildi.');
