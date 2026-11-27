@@ -1,225 +1,46 @@
-# TEKNOLOJİ YIĞINI VE AI MODEL STRATEJİSİ (TECH_STACK_AND_AI)
+# Teknoloji ve model sözleşmesi
 
-> **Belge amacı:** Projede kullanılacak teknolojileri, AI model seçimini ve soyutlama stratejisini belgeler.  
-> Mimari seçenekler için → `ARCHITECTURE_OPTIONS.md`
+4 Kasım 2026 teknik baz çizgisi: [IMPLEMENTATION_BASELINE](docs/IMPLEMENTATION_BASELINE.md).
+Bu belge seçilmiş mühendislik yönünü anlatır; uygulama, donanım uyumu veya model kalitesi ölçülmüş değildir.
 
----
+## Seçilmiş yığın
 
-## 1. Teknoloji Yığını
+| Bileşen | Seçim | Kilitleme/doğrulama |
+|---------|-------|---------------------|
+| Geliştirme runtime | Node 24, npm | .nvmrc; scaffold'ta engines/packageManager ve package-lock |
+| Masaüstü | Electron + Monaco + TypeScript | Desteklenen sürümler ve native ABI scaffold/demo OS testinde kilitlenir |
+| Build/UI | electron-vite, vanilla TS renderer | tsup/esbuild/React ayrı aktif alternatif değildir |
+| Veri | Yerel SQLite + ContextStore arkasında sqlite-vec | Extension yükleme/cihaz spike'ı; fallback lexical politika olarak sürümlenir |
+| Test | Vitest, security property testleri, Playwright Electron | CI required scripts; runtime delili olmadan passed sonucu yok |
+| Kod modeli | Anthropic + loopback Ollama adaptörleri | Immutable ID/digest, parametre ve fiyat manifesti formal freeze'de kaydedilir |
+| Embedding | Yerel Ollama embedding capability | Chat ve embedding için local-only ağ kontrolü aynı uygulanır |
 
-### 1.1 Geliştirme Dili ve Runtime
+Eski Electron 30+/model RAM/context-window tabloları aktif sürüm garantisi değildir ve kaldırılmıştır.
+Model etiketi/digest, quantization, cihaz RAM/GPU ve TTFT ölçülür; bir model ailesi adına dayanarak tool reliability
+veya performans seviyesi atanmaz. Güncel desteklenen release seçimi scaffold'ın uyumluluk işidir.
 
-| Teknoloji      | Versiyon | Rol                         | Neden?                                                                                      |
-|----------------|----------|-----------------------------|---------------------------------------------------------------------------------------------|
-| **TypeScript** | 5.4+     | Ana geliştirme dili         | Tip güvenliği, refactor kolaylığı, VS Code ekosistemi                                       |
-| **Node.js**    | 24 LTS   | Runtime + backend işlemleri | Desteklenen LTS hedefi; Node 22 LTS sadece Electron/native modül blokajında geçici fallback |
-| **Electron**   | 30+      | Masaüstü framework          | Cross-platform, Monaco desteği, olgun ekosistem                                             |
+## Model seçimi ve privacy
 
-### 1.2 UI ve Editör
+Yeni kurulum local-only'dır. manual-hybrid/cloud-only kullanıcı seçimi ve açık aktarım tercihidir.
+Sağlayıcı değişimi yeni run başlatır; yarım stream veya eski provider patch'i yeniden kullanılmaz. Otomatik router,
+buluta retry fallback veya bütçe bitince gizli model geçişi yoktur. Remote Ollama URL MVP'de reddedilir.
+Anahtarlar main broker'da OS-backed secret store'dan çözülür; config yalnız apiKeyRef tutar.
 
-| Teknoloji         | Rol         | Neden?                                                  |
-|-------------------|-------------|---------------------------------------------------------|
-| **Monaco Editor** | Kod editörü | VS Code editör bileşeni, zengin API, diff viewer        |
-| **HTML/CSS**      | UI katmanı  | Electron renderer, özel stiller                         |
-| **Vanilla JS/TS** | UI mantığı  | Framework karmaşıklığından kaçınma (React/Vue gereksiz) |
+## Provider ve tool arayüzü
 
-### 1.3 Veri ve İndeksleme
+`stream(messages, tools, budget, signal)` normalize chunk/finishReason/usage; `health(signal)` availability/capabilities
+üretir. Cancel/timeout/retry/budget ve invalid-tool-output davranışları bütün adaptörlerde aynı kontrat testlerinden geçer.
+Token count/pricing bilinmiyorsa maliyet unknown; bulut çağrısı fail-closed olur.
 
-| Teknoloji            | Rol              | Neden?                                        |
-|----------------------|------------------|-----------------------------------------------|
-| **SQLite**           | Yerel veritabanı | Sıfır dış bağımlılık, tek dosya, taşınabilir  |
-| **sqlite-vec**       | Vektör araması   | SQLite extension, embedding benzerlik sorgusu |
-| **nomic-embed-text** | Embedding modeli | Yerel, API maliyeti yok, yüksek kalite        |
+Model read_file/list_files/search_symbols/retrieve/propose_change önerilerini üretir. `write_file` eski adı gerçek
+fs write anlamına gelmez. Gerçek apply yalnız broker'ın valid approval/fixture capability kontrolünden geçer.
+Shell, generic IPC ve process çalıştırma tool'u yoktur. Structured output desteği olmayan model otomatik apply'e
+yükseltilmez; şema doğrulanamıyorsa explain-only sonucuyla durur.
 
-### 1.4 Build ve Geliştirme Araçları
+MCP, model sayısını artırma ve ikinci model verifier, mevcut araştırma değişkenlerini genişlettiği için future work'tür;
+standartların olgunluğu hakkında kaynaklandırılmamış iddia gerektirmez.
 
-| Araç                      | Rol                           |
-|---------------------------|-------------------------------|
-| **tsup** veya **esbuild** | TypeScript derleme + bundling |
-| **Vitest**                | Test framework                |
-| **ESLint**                | Kod kalitesi                  |
-| **Prettier**              | Kod formatlandırma            |
-| **GitHub Actions**        | CI pipeline                   |
-
----
-
-## 2. AI Model Stratejisi
-
-### 2.1 Model Seçim Yaklaşımı (MVP)
-
-> **Karar:** MVP'de model seçimi **kullanıcı tercihine bırakılır**. Otomatik karmaşıklık-tabanlı router MVP DIŞIDIR (
-> gelecek çalışma). Detay: `docs/adr/ADR-004-manual-model-selection.md`.
-
-Kullanıcı, görevin gereksinimine göre yerel veya bulut modeli kendisi seçer. Seçim arayüzü:
-
-- **Durum çubuğunda** aktif model adı gösterilir; tıklandığında provider listesi açılır (UC-05)
-- **Tercih ayarları** (`preferences.json`): varsayılan model + projeye özgü override
-- Otomatik anahtarlama veya görev karmaşıklığı analizi yapılmaz
-
-**Üç tercih profili (kullanıcı seçer):**
-
-- 🔒 **Yalnızca Yerel:** Tüm görevler Ollama'da çalışır
-- ⚖️ **Manuel Hibrit (varsayılan):** Kullanıcı her görevde seçer; sistem otomatik karar vermez
-- ☁️ **Yalnızca Bulut:** Tüm görevler Claude API'de çalışır
-
-**Otomatik router neden MVP dışı:**
-
-- Görev karmaşıklığı sınıflandırıcısı kendi başına bir araştırma sorusu gerektirir
-- Yanlış sınıflandırma kullanıcıyı şaşırtır ve güveni zedeler
-- Plan-approval döngüsünün etkinliği ölçülürken model seçimi sabit/şeffaf olmalıdır
-- Tezde "manuel seçim" varsayımı altında ölçülen sonuçlar daha temiz savunulur
-
-### 2.2 Desteklenen Modeller
-
-#### Bulut Modeller
-
-| Model                      | Sağlayıcı | Context Window | Güçlü Yanı                                  |
-|----------------------------|-----------|----------------|---------------------------------------------|
-| **Claude Sonnet 4**        | Anthropic | 200K token     | Kod üretimi, plan yapma, hız/kalite dengesi |
-| **Claude Opus 4**          | Anthropic | 200K token     | Derin akıl yürütme, karmaşık analiz         |
-| *(Gelecek) GPT-4.1*        | OpenAI    | 1M token       | Geniş context, çok dilli destek             |
-| *(Gelecek) Gemini 2.5 Pro* | Google    | 1M token       | Uzun bağlam, multimodal (gelecek)           |
-
-#### Yerel Modeller (Ollama)
-
-| Model                  | Parametre | RAM    | Güçlü Yanı                    |
-|------------------------|-----------|--------|-------------------------------|
-| **Qwen2.5-Coder 1.5B** | 1.5B      | 4 GB   | Çok hızlı, basit görevler     |
-| **Qwen2.5-Coder 7B**   | 7B        | 8 GB   | İyi code completion, açıklama |
-| **Llama 3.2 3B**       | 3B        | 6 GB   | Genel amaçlı, hızlı           |
-| **Llama 3.1 8B**       | 8B        | 16 GB  | Daha derin akıl yürütme       |
-| **DeepSeek-Coder-V2**  | 16B       | 16 GB+ | Güçlü kod üretimi             |
-| **CodeLlama 13B**      | 13B       | 16 GB  | Uzmanlaşmış kod modeli        |
-
-### 2.3 Model Seçim Kriterleri
-
-| Kriter                     | Bulut Tercih                        | Yerel Tercih                     |
-|----------------------------|-------------------------------------|----------------------------------|
-| Görev karmaşıklığı         | Çok dosyalı refactor, mimari analiz | Yorum ekleme, tek satır düzeltme |
-| Gizlilik gerekliliği       | Açık kaynak proje                   | Kurumsal / gizli proje           |
-| İnternet bağlantısı        | Mevcut                              | Yok veya sınırlı                 |
-| Maliyet hassasiyeti        | Düşük                               | Yüksek                           |
-| Yanıt kalitesi gereksinimi | Kritik (hata düzeltme)              | Rutin (formatlama)               |
-
----
-
-## 3. Model Soyutlama Katmanı
-
-### 3.1 Arayüz Tasarımı
-
-```typescript
-interface ModelProvider {
-  /** Model adı ve versiyonu */
-  readonly name: string;
-
-  /** Bir mesaj listesi alır, yanıt stream'i döner */
-  chat(messages: ChatMessage[], options?: ChatOptions): AsyncIterable<ChatChunk>;
-
-  /** Modelin desteklediği maksimum token sayısı */
-  readonly maxTokens: number;
-
-  /** Model erişilebilir mi? (bağlantı kontrolü) */
-  ping(): Promise<boolean>;
-}
-
-interface ChatMessage {
-  role: 'system' | 'user' | 'assistant' | 'tool';
-  content: string;
-  toolCalls?: ToolCall[];
-}
-
-interface ChatOptions {
-  temperature?: number;
-  maxOutputTokens?: number;
-  stopSequences?: string[];
-  tools?: ToolDefinition[];
-}
-```
-
-### 3.2 Yeni Sağlayıcı Ekleme
-
-Yeni bir model sağlayıcısı eklemek:
-
-1. `ModelProvider` interface'ini implemente et
-2. `providers/` klasöründe yeni dosya oluştur
-3. Model registry'ye kaydet
-4. Kullanıcı ayarlarına ekle
-
-**Hedef:** Her yeni sağlayıcı tek dosya değişikliği olsun.
-
----
-
-## 4. Tool Calling ve Function Calling
-
-### 4.1 Tool Sistemini Destekleyen Modeller
-
-| Model            | Tool Calling        | Güvenilirlik |
-|------------------|---------------------|--------------|
-| Claude Sonnet 4  | ✅ Native            | Yüksek       |
-| Claude Opus 4    | ✅ Native            | Çok yüksek   |
-| GPT-4.1          | ✅ Native            | Yüksek       |
-| Llama 3.1 8B     | ✅ Fonksiyon çağrısı | Orta         |
-| Qwen2.5-Coder 7B | ⚠ Sınırlı           | Düşük-Orta   |
-
-### 4.2 Tool Tanımları
-
-```typescript
-const tools: ToolDefinition[] = [
-  {
-    name: 'read_file',
-    description: 'Belirtilen dosyanın içeriğini okur',
-    parameters: {
-      path: {type: 'string', description: 'Okunacak dosyanın yolu'}
-    }
-  },
-  {
-    name: 'write_file',
-    description: 'Belirtilen dosyaya içerik yazar (onay gerektirir)',
-    parameters: {
-      path: {type: 'string', description: 'Yazılacak dosyanın yolu'},
-      content: {type: 'string', description: 'Yazılacak içerik'}
-    }
-  },
-  {
-    name: 'search_symbols',
-    description: 'Kod tabanında sembol ve metin araması yapar',
-    parameters: {
-      query: {type: 'string', description: 'Arama sorgusu'}
-    }
-  },
-  {
-    name: 'list_files',
-    description: 'Belirtilen dizindeki dosyaları listeler',
-    parameters: {
-      pattern: {type: 'string', description: 'Glob pattern (ör: src/**/*.ts)'}
-    }
-  }
-];
-```
-
----
-
-## 5. MCP (Model Context Protocol) — Gelecek Çalışma
-
-### 5.1 MCP Nedir?
-
-- Anthropic tarafından geliştirilen açık standart
-- AI modellerinin dış araçlar ve veri kaynaklarıyla etkileşim protokolü
-- GitHub Copilot ve diğer araçlar tarafından benimsenmeye başlandı (2025)
-
-### 5.2 Neden MVP'de Yok?
-
-- Standart henüz olgunlaşmamış (hızlı değişiyor)
-- Kendi tool sistemi yeterli ve daha basit
-- MCP eklemek ekstra karmaşıklık (sunucu/istemci mimarisi)
-
-### 5.3 Ne Zaman Eklenebilir?
-
-- Tez sonrası, standart stabil hale geldiğinde
-- Soyutlama katmanı MCP'yi de destekleyecek şekilde tasarlanmalı
-
----
-
-*Teknoloji yığını için → bu belge.*  
-*Mimari seçenekler için → `ARCHITECTURE_OPTIONS.md`*  
-*Maliyet analizi için → `COST_AND_PERFORMANCE.md`*
+İlgili ADR'ler: [001](docs/adr/ADR-001-electron-monaco-editor-shell.md),
+[002](docs/adr/ADR-002-node-runtime-target.md), [003](docs/adr/ADR-003-local-retrieval-storage.md),
+[004](docs/adr/ADR-004-manual-model-selection.md), [005](docs/adr/ADR-005-cloud-local-provider-boundary.md),
+[010](docs/adr/ADR-010-secret-storage-and-ipc-broker.md).

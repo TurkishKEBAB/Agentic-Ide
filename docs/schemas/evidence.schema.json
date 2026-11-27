@@ -1,0 +1,139 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/TurkishKEBAB/Agentic-Ide/schemas/evidence.schema.json",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "evidenceId",
+    "runId",
+    "patchFingerprint",
+    "treeFingerprint",
+    "recordedAt",
+    "requirementIds",
+    "criterionIds",
+    "kind",
+    "producer",
+    "verdict",
+    "artifactRef",
+    "versions"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "const": 2
+    },
+    "evidenceId": {
+      "$ref": "contract-types.schema.json#/$defs/id"
+    },
+    "runId": {
+      "$ref": "contract-types.schema.json#/$defs/id"
+    },
+    "patchFingerprint": {
+      "$ref": "contract-types.schema.json#/$defs/hash"
+    },
+    "treeFingerprint": {
+      "$ref": "contract-types.schema.json#/$defs/hash"
+    },
+    "recordedAt": {
+      "type": "string",
+      "minLength": 1,
+      "format": "date-time"
+    },
+    "requirementIds": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "minItems": 1,
+      "uniqueItems": true
+    },
+    "criterionIds": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "minItems": 1,
+      "uniqueItems": true
+    },
+    "kind": {
+      "type": "string",
+      "enum": [
+        "policy-check",
+        "test",
+        "typecheck",
+        "lint",
+        "manual-review"
+      ]
+    },
+    "producer": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "kind",
+        "id",
+        "version"
+      ],
+      "properties": {
+        "kind": {
+          "type": "string",
+          "enum": [
+            "broker",
+            "external-harness",
+            "human"
+          ]
+        },
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "version": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "verdict": {
+      "type": "string",
+      "enum": [
+        "passed",
+        "failed",
+        "not-run"
+      ]
+    },
+    "artifactRef": {
+      "type": "string",
+      "minLength": 1
+    },
+    "versions": {
+      "$ref": "contract-types.schema.json#/$defs/versions"
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "kind": {
+            "enum": [
+              "test",
+              "typecheck",
+              "lint"
+            ]
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "producer": {
+            "properties": {
+              "kind": {
+                "const": "external-harness"
+              }
+            }
+          }
+        }
+      }
+    }
+  ]
+}

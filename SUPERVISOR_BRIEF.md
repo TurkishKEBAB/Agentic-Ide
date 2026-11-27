@@ -1,109 +1,44 @@
-# PROJE ÖZETİ VE BELGE HARİTASI (SUPERVISOR_BRIEF)
+# İlk danışman görüşmesi: proje özeti
 
-> **Belge amacı:** Danışman incelemesi için hazırlanmış kısa giriş metni.  
-> Projenin neyi hedeflediğini, hangi kararların netleştiğini ve belgelerin nasıl okunması gerektiğini özetler.
+Görüşme: 5 Kasım 2026. Hazırlık: 4 Kasım 2026. Daha önce danışman görüşmesi yapılmadı; onay kaydı yok.
 
----
+## Araştırma teklifi
 
-## 1. Proje Özeti
+Agentic IDE, öğrenci/junior geliştiricinin AI kod değişikliğini gereksinim → plan → diff → insan kararı →
+kontrollü apply → doğrulama kanıtı → rollback hattında inceleyebildiği bir tez prototipidir.
+Dar VDD çerçevesi, izlenebilirlik dilini; approval-gate karşılaştırılabilir bileşeni ifade eder. Akademik ad ve
+ana hipotez danışman kararı bekler. Mevcut araçlarda benzer kontroller bulunduğu için özellik yokluğu/üstünlük iddiası kurulmaz.
 
-**Agentic IDE**, kod yazma ortamı ile yapay zeka destekli geliştirme akışını tek çatı altında birleştirmeyi hedefleyen
-bir lisans bitirme projesidir.
+**Ana soru teklifi:** Bu akış, sabit görev/model koşullarında doğruluğu, hatalı değişikliklerin uygulanmasını ve
+insan inceleme maliyetini nasıl etkiler? Kullanıcı güveni/öğrenmesi ayrı insan çalışması gerektirir.
 
-Projenin odak noktası: yalnızca yanıt veren bir sohbet aracı değil; **kullanıcının açık bağlamını anlayan, plan sunan,
-onay alan ve güvenli biçimde değişiklik uygulayan** bir ajan döngüsünü ölçülebilir şekilde değerlendirmek.
+## Sabit teknik plan
 
-Bu çalışma, tam özellikli bir IDE üretmeyi değil, aşağıdaki araştırma sorusunu savunulabilir bir prototip üzerinden
-yanıtlamayı hedefler:
+Electron + Monaco + TypeScript; Windows ilk demo; tek kullanıcı tetiklemeli ajan; manuel bir bulut/bir yerel
+sağlayıcı; protected workspace, exact-patch onayı, journal/recovery ve son 10 set rollback. Shell, multi-agent,
+arka plan AI başlatma, extension uyumluluğu ve öğrenci/profesyonel ayrı modları MVP dışıdır.
 
-> **"Kullanıcı tetiklemeli, plan-önce-onay-sonra çalışan güvenli bir ajan döngüsü; çok dosyalı değişikliklerde hata
-oranını, güvenlik ihlali riskini ve kullanıcı güvenini doğrudan LLM kullanımına kıyasla iyileştirir mi?"**
+Repo planlama dokümanları ve şemaları içerir; uygulama kodu ve ölçülmüş deney sonucu yoktur.
+[Teknik baz çizgi](docs/IMPLEMENTATION_BASELINE.md) S1 güvenli shell/saf policy dilimi için uygulanabilir devri tanımlar.
+Native modül/model sürümlerinin cihazda kilitlenmesi ve runtime testleri uygulama işidir.
 
----
+## Değerlendirme planı
 
-## 2. Neden Bu Proje?
+20 görev: 5 tek dosya, 4 refactor, 4 bugfix, 3 test, 4 Q&A. Beş ayrı geliştirme pilotu hazır; final görev/fixture
+freeze ve dış oracle incelemesi daha sonra. A/C toplam workflow'u, B/C aynı üretim/safety üzerinde genel insan
+gate'ini karşılaştırır. Q&A ve adversarial safety ayrı paydalardadır. Formal protokol veri öncesinde onaylanıp dondurulur.
+Sıfır gözlenen ihlal evrensel güvenlik garantisi; düşük rollback oranı tek başına güven kanıtı değildir.
 
-### Problem
+## Görüşmede alınacak beş karar
 
-- Geliştiriciler günde 1-2 saat bağlam kırılması nedeniyle verimlilik kaybeder
-- Mevcut AI araçları (Copilot, Cursor, Windsurf) hız optimize eder; güvenlik ve şeffaflık arka planda kalır
-- "Plan-first, approval-gated" döngüsü için ölçülebilir akademik çalışma yok
+1. Dar VDD ve ana araştırma sorusu yeterli mi? #20/#66.
+2. Single-agent/no-shell ve dar kapsam, verification sorumluluk ayrımıyla uygun mu?
+3. 20 görev, B/C yöntemi, bağımsız oracle ve dış puanlayıcı nasıl onaylanacak? #54/#25.
+4. İnsan katılımcı çalışması gerekli mi; değilse güven/öğrenme iddiası çıkarılacak mı? #113.
+5. Gerçek teslim/savunma tarihi, haftalık kapasite ve ilk iki haftanın kanıtı nedir? #71.
 
-### Fark
+18 ay eski göreli taslaktır; üniversite takvimi veya geçmişte başlamış süre olduğu varsayılmaz.
+İlk teslim önerisi güvenli shell + workspace policy testleri + beş pilotun schema kanıtıdır.
 
-- Copilot/Cursor/Windsurf → hız optimize eder
-- **Agentic IDE → güven optimize eder** (diff önizleme, onay, rollback, audit log)
-
----
-
-## 3. Netleşen Kararlar
-
-| Karar                                      | Durum               | Belge                         |
-|--------------------------------------------|---------------------|-------------------------------|
-| Proje süresi: 18 ay                        | ✅ Kesinleşti        | `PROJECT_ROADMAP`             |
-| Platform: Electron + Monaco                | ✅ Kesinleşti        | `ARCHITECTURE_OPTIONS`        |
-| Ajan: Single-agent (ReAct döngüsü)         | ✅ Kesinleşti        | `AGENT_ARCHITECTURE_ANALYSIS` |
-| Değişiklik onayı: Diff + onay zorunlu      | ✅ Kesinleşti        | `SYSTEM_PLAN`                 |
-| Model: 1 bulut (Claude) + 1 yerel (Ollama) | ✅ Kesinleşti        | `TECH_STACK_AND_AI`           |
-| Proaktif analiz: MVP dışı                  | ✅ Kesinleşti        | `PROACTIVE_BEHAVIOR_DESIGN`   |
-| Benchmark: 20 görev, üçlü karşılaştırma    | 🟡 Onay bekliyor    | `EVALUATION_PLAN`             |
-| Terminal entegrasyonu                      | 🟡 Karar bekleniyor | `PRODUCT_PLAN` §6             |
-
----
-
-## 4. Belge Okuma Sırası
-
-Danışman incelemesi için önerilen okuma sırası:
-
-### Öncelik 1 — Karar Belgeleri (toplam ~20 dakika okuma)
-
-1. **Bu belge** (SUPERVISOR_BRIEF) — genel bakış
-2. **PRODUCT_PLAN** — problem, araştırma sorusu, MVP kapsamı
-3. **SYSTEM_PLAN** — ajan mimarisi, güvenlik katmanları
-
-### Öncelik 2 — Detay Belgeleri (toplam ~30 dakika okuma)
-
-1. **EVALUATION_PLAN** — benchmark yapısı, metrikler
-2. **PROJECT_ROADMAP** — 18 aylık takvim
-3. **ARCHITECTURE_OPTIONS** — Electron vs. Tauri kararı
-4. **TECH_STACK_AND_AI** — model seçimi, soyutlama katmanı
-
-### Öncelik 3 — Destek Belgeleri (ihtiyaçta okunabilir)
-
-1. **AGENT_ARCHITECTURE_ANALYSIS** — single-agent gerekçesi
-2. **CRITICAL_ANALYSIS** — kapsam ve risk eleştirisi
-3. **THESIS_OUTLINE** — tez bölüm yapısı
-4. **Diğer belgeler** — güvenlik, gizlilik, test, maliyet
-
----
-
-## 5. Bu Aşamada Açık Olan Konular
-
-Aşağıdaki başlıklar danışman geri bildirimiyle netleştirilecektir:
-
-| # | Konu                     | Seçenekler                                                |
-|---|--------------------------|-----------------------------------------------------------|
-| 1 | Terminal entegrasyonu    | MVP'de mi, gelecek çalışmada mı?                          |
-| 2 | Kullanıcı çalışması      | 5-10 katılımcı zorunlu mu, opsiyonel mi?                  |
-| 3 | Benchmark görev tasarımı | Kim tasarlayacak? (danışman, sınıf arkadaşı, açık kaynak) |
-| 4 | Model version kilitleme  | API güncellemeleri karşısında strateji                    |
-| 5 | Etik kurul onayı         | Bulut modele kod gönderme için gerekli mi?                |
-
----
-
-## 6. Beklenen Sonuç
-
-18 ay sonunda hedeflenen çıktı:
-
-- **Çalışan prototip:** Güvenli, açıklanabilir, ölçülebilir bir ajan destekli editör
-- **Akademik katkı:** Plan-approval döngüsünün etkinliğine ilişkin nicel veriler
-- **Tez:** 66-81 sayfalık savunulmuş akademik belge
-- **Demo:** 5 dakikalık jüri önünde canlı demo
-
-Başarının ölçütü: yalnızca çalışan demo değil; **hangi koşullarda güvenilir çalıştığını ve hangi sınırları olduğunu
-sistematik biçimde gösterebilmek.**
-
----
-
-*Danışman brifingi için → bu belge.*  
-*Detaylı belge hariyası için → yukarıdaki §4 okuma sırası.*
+Okuma sırası: [toplantı gündemi](ADVISOR_MEETING_AGENDA.md), [uygulama baz çizgisi](docs/IMPLEMENTATION_BASELINE.md),
+[değerlendirme protokolü](docs/EVALUATION_PROTOCOL.md), [kaynak/iddia matrisi](docs/LITERATURE_AND_CLAIMS.md).
