@@ -2,7 +2,8 @@
 
 ## Status
 
-Accepted engineering baseline — 2026-11-04. Not an advisor approval; no runtime implementation/platform validation yet.
+Accepted engineering baseline — 2026-11-04. The desktop setup and Windows credential store were validated in
+[#52](https://github.com/TurkishKEBAB/Agentic-Ide/issues/52). [Acceptance evidence](../evidence/S2-issue-52-onboarding.md)
 
 ## Context
 
