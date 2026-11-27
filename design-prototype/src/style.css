@@ -69,6 +69,20 @@ h3 { font-size: 14px; }
 p { line-height: 1.55; }
 .dock { background: var(--inset); border-top: 1px solid var(--line); }
 .dock-inner { padding: 12px 0; }
+.workspace-status {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 4px 16px;
+  padding: 5px clamp(13px, 2.5vw, 32px);
+  border-top: 1px solid var(--line);
+  background: var(--surface);
+  font-size: 12px;
+  line-height: 1.5;
+}
+.workspace-status-file, .workspace-status-agent { display: flex; align-items: center; gap: 7px; }
+.workspace-status-label, .workspace-status svg { flex-shrink: 0; color: var(--muted); }
+.workspace-status-file bdi { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-family: var(--mono); }
 :focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
 
 [hidden] { display: none !important; }
@@ -104,7 +118,6 @@ svg { flex: 0 0 auto; }
 .header-workspace { margin-left: 4px; padding-left: 18px; border-left: 1px solid var(--line); }
 .workspace-button { background: transparent; border-color: transparent; color: var(--muted); }
 .header-actions { display: flex; align-items: center; gap: 9px; margin-left: auto; }
-.agent-state { display: flex; align-items: center; gap: 7px; color: var(--green); padding-inline: 6px; white-space: nowrap; font-size: 12px; font-weight: 560; }
 .command { min-width: 0; display: flex; gap: 10px; align-items: center; padding: 7px; background: var(--surface); border: 1px solid var(--strong-line); border-radius: 11px; }
 .command:focus-within { border-color: var(--accent); }
 .command-icon { display: grid; place-items: center; width: 35px; height: 34px; color: var(--accent); border-radius: 7px; background: var(--accent-bg); flex-shrink: 0; }
@@ -506,7 +519,7 @@ button.compact-notice:hover { border-color: var(--amber); }
 .sheet-head > div { min-width: 0; }
 @media (max-width: 460px) {
   .flow-bar .workset-label { flex-basis: auto; }
-  .topbar .agent-state { max-width: 43vw; white-space: normal; line-height: 1.2; }
+  .workspace-status { grid-template-columns: minmax(0, 1fr); }
 }
 .page { padding-top: 19px; padding-bottom: 16px; }
 .intent { margin-bottom: 13px; }
@@ -616,7 +629,6 @@ button.compact-notice:hover { border-color: var(--amber); }
   .brand { gap: 7px; font-size: 14px; }
   .brand img { width: 28px; height: 28px; }
   .topbar .button, .topbar .icon-button, .topbar .view-tabs button { min-height: 28px; padding-block: 3px; }
-  .topbar .agent-state { padding-inline: 3px; }
   .workspace-name { max-width: 90px; }
   .dock-inner { padding-block: 5px; }
   .command { padding: 4px; }

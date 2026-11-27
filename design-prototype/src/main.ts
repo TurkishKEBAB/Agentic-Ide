@@ -73,6 +73,18 @@ app.innerHTML = `
         <div id="demo"></div>
       </div>
     </div>
+    <div class="workspace-status" role="status" aria-label="Editör durumu" aria-atomic="true">
+      <div class="workspace-status-file">
+        ${icon('file', 14)}
+        <span class="workspace-status-label">Aktif dosya</span>
+        <bdi id="status-file"></bdi>
+      </div>
+      <div class="workspace-status-agent">
+        ${icon('chip', 14)}
+        <span class="workspace-status-label">Ajan</span>
+        <span id="status-agent"></span>
+      </div>
+    </div>
   </footer>
   <dialog id="sheet" aria-labelledby="sheet-title"></dialog>
   <div id="live" class="sr-only" role="status" aria-live="polite"></div>
@@ -80,6 +92,8 @@ app.innerHTML = `
 
 const dialog = select<HTMLDialogElement>('#sheet');
 const intro = select('#intro');
+const statusFile = select('#status-file');
+const statusAgent = select('#status-agent');
 const state = new WorkspaceState();
 const nativeApi = (window as Window & { agentIde?: NativeWorkspaceApi }).agentIde;
 const native = nativeApi ? new NativeFiles(nativeApi) : null;
@@ -181,7 +195,7 @@ function bootEditor(): Promise<void> {
       renderEditorHead();
       renderWorkset();
       renderPlanPanels();
-      renderAgentStatus();
+      renderWorkspaceStatus();
       renderTutorial();
     });
     codeEditor.theme(light);
@@ -248,6 +262,7 @@ function renderWorkView(): void {
   workView.dataset.view = snapshot ? 'intent' : view;
   select('#main').dataset.editor = String(open && view === 'editor' && !snapshot);
   intro.hidden = open;
+  renderWorkspaceStatus();
   if (!open) return;
   renderWorkspaceCrumb();
   renderViewTabs();
@@ -306,7 +321,7 @@ function showSheet(title: string, body: string, kind = '', restore?: () => void)
   if (!dialog.open) returnSheetFocus = restore ?? captureFocus(focusEditor);
   sheetKind = kind;
   dialog.className = kind ? `sheet-${kind}` : '';
-  dialog.innerHTML = `<header class="sheet-head"><div><h2 id="sheet-title">${escapeHtml(title)}</h2>${workspaceOpen() ? `<p class="sheet-context">${escapeHtml(activePath || 'Çalışma alanı')} · ${agentStatus()}</p>` : ''}</div>${iconButton('close-sheet', 'Pencereyi kapat', 'close')}</header><div class="sheet-body">${body}</div>`;
+  dialog.innerHTML = `<header class="sheet-head"><div><h2 id="sheet-title">${escapeHtml(title)}</h2>${workspaceOpen() ? `<p class="sheet-context">${escapeHtml(activePath || 'Çalışma alanı')} · Ajan ${agentStatus()}</p>` : ''}</div>${iconButton('close-sheet', 'Pencereyi kapat', 'close')}</header><div class="sheet-body">${body}</div>`;
   if (!dialog.open) dialog.showModal();
   else dialog.querySelector<HTMLElement>('[data-act="close-sheet"]')?.focus();
   renderTutorial();
@@ -333,12 +348,10 @@ function render(): void {
   renderWorkspaceCrumb();
   renderViewTabs();
   select('#workspace-mode').innerHTML = `<span class="dot"></span> ${workspaceMode === 'local' ? 'Masaüstü' : open ? 'Deneme' : native ? 'Masaüstü' : 'Önizleme'}`;
-  select('#header-actions').innerHTML = `<span class="agent-state" id="agent-status"></span>
-    ${workspaceMode === 'practice' && native?.name ? button('return-local', 'Yerel projeye dön', { glyph: 'folder', className: 'ghost' }) : ''}
+  select('#header-actions').innerHTML = `${workspaceMode === 'practice' && native?.name ? button('return-local', 'Yerel projeye dön', { glyph: 'folder', className: 'ghost' }) : ''}
     ${workspaceMode === 'practice' && open ? button('model', state.model === 'local' ? 'Yerel model' : 'Bulut modeli', { glyph: state.model === 'local' ? 'chip' : 'cloud', suffix: 'chevron', className: 'model-button ghost' }) : ''}
     ${button('help', 'Yardım', { glyph: 'note', className: 'ghost help-button' })}
     ${iconButton('theme', light ? 'Koyu temaya geç' : 'Açık temaya geç', light ? 'moon' : 'sun')}`;
-  renderAgentStatus();
   const input = commandInput;
   input.disabled = !open;
   input.placeholder = open ? (workspaceMode === 'local' ? '@dosya ara veya /komut çalıştır…' : 'Bir istek yaz, @dosya ara veya /komut çalıştır…') : 'Önce bir çalışma alanı aç…';
@@ -369,19 +382,22 @@ function render(): void {
 }
 
 function agentStatus(): string {
-  if (workspaceMode === 'local') return 'Yerel düzenleme';
-  // There is no real agent yet; only the practice project runs the simulated one.
+  if (workspaceMode === 'local') return 'Kullanılamıyor';
   if (!state.open) return 'Çalışma alanı seçilmedi';
-  if (snapshot) return 'Geçmiş görüntüleniyor';
-  if (state.approval) return 'Uygulama bekliyor';
-  if (state.planStale) return 'Plan güncelliğini yitirdi';
-  return state.plan && !state.completed ? 'İnceleme bekliyor' : 'Deneme ajanı hazır';
+  if (snapshot) return 'Deneme · Geçmiş görüntüleniyor';
+  if (state.approval) return 'Deneme · Uygulama bekliyor';
+  if (state.planStale) return 'Deneme · Plan güncelliğini yitirdi';
+  return state.plan && !state.completed ? 'Deneme · İnceleme bekliyor' : 'Deneme · Hazır';
 }
 
-function renderAgentStatus(): void {
-  select('#agent-status').innerHTML = `<span class="dot"></span> ${agentStatus()}`;
+function renderWorkspaceStatus(): void {
+  const path = activePath || 'Dosya seçilmedi';
+  const agent = agentStatus();
+  if (statusFile.textContent !== path) statusFile.textContent = path;
+  if (statusFile.title !== activePath) statusFile.title = activePath;
+  if (statusAgent.textContent !== agent) statusAgent.textContent = agent;
   const context = dialog.querySelector('.sheet-context');
-  if (context) context.textContent = `${activePath} · ${agentStatus()}`;
+  if (context) context.textContent = `${activePath || 'Çalışma alanı'} · Ajan ${agent}`;
 }
 
 function renderWorkspaceCrumb(): void {
@@ -818,7 +834,7 @@ function showReview(path?: string, focus?: string): void {
   if (demoStep !== 7) demoStep = 5;
   state.markReviewed(change.path);
   renderPlanPanels();
-  renderAgentStatus();
+  renderWorkspaceStatus();
   select('#workflow').innerHTML = workflowView(plan, state.approval ? 4 : 2);
   renderDock();
   showSheet('Diff incelemesi', reviewView(state, plan, change, reviewMode), 'review', restore);
@@ -994,7 +1010,6 @@ function setView(next: 'editor' | 'intent'): void {
   view = next;
   renderWorkView();
   renderDock();
-  renderAgentStatus();
   select('#main').scrollTop = 0;
   document.querySelector<HTMLElement>(`[data-act="view-${next}"]`)?.focus();
 }
