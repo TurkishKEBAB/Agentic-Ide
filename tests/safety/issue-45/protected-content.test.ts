@@ -106,13 +106,13 @@ describe('#45 protected agent content', () => {
     );
   });
 
-  it('keeps protected content readable by the local editor and rejects manual writes', async () => {
+  it('keeps protected workspace files read-only and denies access to app-managed state', async () => {
     await addFile('notes.txt');
     await addFile('secret.key');
     await addFile('app-storage/session/fixture.json');
     await addFile('.agentignore', 'notes.txt\n!secret.key\n');
     const broker = await openBroker();
-    for (const relative of ['notes.txt', 'secret.key', 'app-storage/session/fixture.json']) {
+    for (const relative of ['notes.txt', 'secret.key']) {
       const opened = await broker.readFile(relative);
       expect(opened).toMatchObject({
         ok: true,
@@ -130,6 +130,13 @@ describe('#45 protected agent content', () => {
         error: { code: 'PROTECTED_PATH' },
       });
     }
+    const appState = 'app-storage/session/fixture.json';
+    const denied = { ok: false, error: { code: 'PROTECTED_PATH' } };
+    await expect(broker.readFile(appState)).resolves.toMatchObject(denied);
+    await expect(broker.readAgentFile(appState)).resolves.toMatchObject(denied);
+    await expect(broker.saveFile(appState, PUBLIC_CONTENT, '0'.repeat(64))).resolves.toMatchObject(
+      denied,
+    );
   });
 
   it('rechecks changes to the ignore file even after prior discovery and reads', async () => {

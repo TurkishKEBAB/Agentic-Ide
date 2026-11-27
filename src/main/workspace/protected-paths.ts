@@ -27,6 +27,18 @@ type EntryKind = 'file' | 'directory';
 
 type PathExclusion = (relativePath: string, kind: EntryKind) => boolean;
 
+/** App-managed state stays in the main process even when its parent is opened in the editor. */
+export async function checkEditorDataAccess(
+  canonicalPath: string,
+  privateRoots: readonly string[],
+): Promise<PolicyResult<true>> {
+  const roots = await canonicalPrivateRoots(privateRoots);
+  if (!roots.ok) return roots;
+  return roots.value.some((root) => isWithinRoot(root, canonicalPath))
+    ? policyFail('PROTECTED_PATH')
+    : policyOk(true);
+}
+
 /** Checks a canonical file path against immutable defaults and the current root .agentignore. */
 export async function checkWorkspaceProtection(
   root: WorkspaceRoot,

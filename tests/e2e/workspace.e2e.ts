@@ -251,7 +251,17 @@ test('the frozen renderer API rejects path escapes and malformed capabilities', 
     frozen: Object.isFrozen(window.agentIde),
   }));
   expect(surface).toEqual({
-    keys: ['chooseWorkspace', 'listFiles', 'readFile', 'saveFile'],
+    keys: [
+      'chooseWorkspace',
+      'configureCloud',
+      'getSetup',
+      'listFiles',
+      'openRecentWorkspace',
+      'readFile',
+      'removeCloudKey',
+      'saveFile',
+      'selectLocalProfile',
+    ],
     frozen: true,
   });
 

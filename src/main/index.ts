@@ -1,14 +1,17 @@
 import { homedir } from 'node:os';
 import path from 'node:path';
 
-import type { BrowserWindow } from 'electron';
-import { app, dialog, ipcMain, net, protocol, session } from 'electron';
+import type { BrowserWindow, IpcMainInvokeEvent } from 'electron';
+import { app, dialog, ipcMain, net, protocol, safeStorage, session } from 'electron';
 
 import { buildContentSecurityPolicy } from '../shared/csp';
 import { APP_PROTOCOL_PRIVILEGES, registerAppProtocol } from './app-protocol';
 import { APP_SCHEME } from './app-protocol-constants';
+import { registerSetupIpc } from './ipc/register-setup-ipc';
 import { registerWorkspaceIpc } from './ipc/register-workspace-ipc';
 import { isAuthorizedSender } from './ipc/sender-guard';
+import { SetupBroker } from './ipc/setup-broker';
+import { SetupStore } from './ipc/setup-store';
 import { WorkspaceBroker } from './ipc/workspace-broker';
 import { isTrustedRendererUrl, resolveRendererSource } from './renderer-source';
 import { hardenSession, hardenWebContents } from './security';
@@ -51,13 +54,29 @@ function bootstrap(): void {
     ]),
   ];
   const workspace = new WorkspaceBroker(pickWorkspaceFolder, undefined, privateDataRoots);
-  registerWorkspaceIpc(ipcMain, workspace, (event) =>
+  const isAuthorized = (event: IpcMainInvokeEvent): boolean =>
     isAuthorizedSender(event, {
       source: rendererSource,
       appWebContentsId: () =>
         mainWindow === null || mainWindow.isDestroyed() ? null : mainWindow.webContents.id,
-    }),
+    });
+  const setup = new SetupBroker(
+    new SetupStore(path.join(app.getPath('userData'), 'onboarding.json')),
+    safeStorage,
+    workspace,
   );
+  registerWorkspaceIpc(
+    ipcMain,
+    {
+      chooseWorkspace: () => workspace.chooseWorkspace((root) => setup.rememberWorkspace(root)),
+      listFiles: () => workspace.listFiles(),
+      readFile: (relativePath) => workspace.readFile(relativePath),
+      saveFile: (relativePath, content, revision) =>
+        workspace.saveFile(relativePath, content, revision),
+    },
+    isAuthorized,
+  );
+  registerSetupIpc(ipcMain, setup, isAuthorized);
   mainWindow = createMainWindow({
     preloadPath: path.join(__dirname, '../preload/index.js'),
     source: rendererSource,
