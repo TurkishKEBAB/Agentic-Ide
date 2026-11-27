@@ -133,6 +133,58 @@ test('the workspace tree opens UTF-8 files in the shared Monaco editor', async (
   ).toEqual([]);
 });
 
+test('#32 status bar follows file selection, edits and closing at the minimum window size', async () => {
+  const { app, window: page } = launched;
+  await app.evaluate(({ BrowserWindow }) => {
+    BrowserWindow.getAllWindows()[0]?.setSize(720, 480);
+  });
+  const status = page.getByRole('status', { name: 'Editör durumu' });
+  await expect(status).toBeInViewport({ ratio: 1 });
+  await expect(status).toContainText('Aktif dosya Dosya seçilmedi');
+  await expect(status).toContainText('Ajan Çalışma alanı seçilmedi');
+  await expect(status).toHaveAttribute('aria-atomic', 'true');
+
+  await chooseWorkspace(page);
+  await expect(status).toContainText('Ajan Kullanılamıyor');
+  await openWithKeyboard(page, HELLO_PATH);
+  await expect(status).toContainText(HELLO_PATH);
+  await replaceEditorText(page, '// Durum çubuğu testi\n');
+  await expect(status).toContainText(HELLO_PATH);
+  await expect(status).toContainText('Ajan Kullanılamıyor');
+  await page.keyboard.press('ControlOrMeta+s');
+  await expect
+    .poll(() => fs.readFileSync(path.join(fixture.workspace, HELLO_PATH), 'utf8'))
+    .toBe('// Durum çubuğu testi\n');
+
+  await openWithKeyboard(page, 'README.md');
+  await expect(status).toContainText('README.md');
+  await page.getByRole('button', { name: 'README.md dosyasını kapat', exact: true }).click();
+  await expect(status).toContainText(HELLO_PATH);
+  await page.getByRole('button', { name: 'hello.ts dosyasını kapat', exact: true }).click();
+  await expect(status).toContainText('Aktif dosya Dosya seçilmedi');
+  await expect(status).toBeInViewport({ ratio: 1 });
+});
+
+test('#32 tutorial status identifies the simulated agent and restores the local file status', async () => {
+  const { window: page } = launched;
+  await chooseWorkspace(page);
+  await openWithKeyboard(page, HELLO_PATH);
+  const status = page.getByRole('status', { name: 'Editör durumu' });
+
+  await page.getByRole('button', { name: 'Yardım', exact: true }).click();
+  await page.getByRole('button', { name: 'İlk Göreve başla', exact: true }).click();
+  await expect(status).toContainText('Ajan Deneme · Hazır');
+  await expect(status).toContainText('Aktif dosya Dosya seçilmedi');
+  await openWithKeyboard(page, SESSION_PATH);
+  await expect(status).toContainText(SESSION_PATH);
+
+  await page.getByRole('button', { name: 'Başlangıç', exact: true }).click();
+  await expect(status).toContainText('Ajan Deneme · Geçmiş görüntüleniyor');
+  await page.getByRole('button', { name: 'Yerel projeye dön', exact: true }).click();
+  await expect(status).toContainText(HELLO_PATH);
+  await expect(status).toContainText('Ajan Kullanılamıyor');
+});
+
 test('#44 drafts stay in the workset until explicitly saved with Ctrl+S', async () => {
   const { window: page } = launched;
   await chooseWorkspace(page);
