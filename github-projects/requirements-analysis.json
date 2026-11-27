@@ -2686,6 +2686,10 @@
       "deliverySlice": "S2",
       "testTarget": "tests/e2e/workspace.e2e.ts (#32 acceptance and regression cases)",
       "thesisEvidence": "Runtime acceptance report docs/evidence/S2-issue-32-acceptance.md (PR #126, Windows Electron CI)",
+      "completionEvidence": [
+        "docs/evidence/S2-issue-32-acceptance.md",
+        "https://github.com/TurkishKEBAB/Agentic-Ide/pull/126"
+      ],
       "risk": "Kullanici hangi baglamda calistigini kaybetmemeli.",
       "readiness": "Validated"
     },
@@ -2737,6 +2741,10 @@
       "deliverySlice": "S2",
       "testTarget": "tests/security/setup-broker.test.ts and tests/e2e/onboarding.e2e.ts",
       "thesisEvidence": "Runtime acceptance report docs/evidence/S2-issue-52-onboarding.md (PR #128, Windows Electron DPAPI and setup IPC)",
+      "completionEvidence": [
+        "docs/evidence/S2-issue-52-onboarding.md",
+        "https://github.com/TurkishKEBAB/Agentic-Ide/pull/128"
+      ],
       "risk": "Onboarding akisi olmadan workspace boundary, model secimi ve gizlilik varsayimlari kullanici tarafindan gorunur ve denetlenebilir olmaz.",
       "readiness": "Validated"
     },
@@ -3253,6 +3261,10 @@
       "deliverySlice": "S1",
       "testTarget": "tests/safety/issue-45/protected-content.test.ts",
       "thesisEvidence": "Runtime acceptance report docs/evidence/S1-issue-45-protected-content.md (PR #127, workspace policy and synthetic consumers)",
+      "completionEvidence": [
+        "docs/evidence/S1-issue-45-protected-content.md",
+        "https://github.com/TurkishKEBAB/Agentic-Ide/pull/127"
+      ],
       "risk": "Hassas dosyalarda ajan davranisinin sinirlanmasi arastirma icin zorunlu bir guvenlik kosuludur.",
       "readiness": "Validated"
     },
