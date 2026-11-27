@@ -225,6 +225,17 @@ test('#52 keeps local setup available when secure storage cannot start', async (
   await expect(page.getByTestId('workspace-name')).toHaveText(firstName);
 });
 
+test('#52 keeps app-managed setup state inside the main process', async () => {
+  const page = await launch();
+  await setFolderPicker(base);
+  await page.getByTestId('open-folder').click();
+  await expect(page.getByTestId('workspace-name')).toHaveText(path.basename(base));
+  const result = await page.evaluate(() =>
+    window.agentIde.readFile('isolated-profile/onboarding.json'),
+  );
+  expect(result).toMatchObject({ ok: false, error: { code: 'PROTECTED_PATH' } });
+});
+
 test('#52 disables the cloud form if encryption fails during setup', async () => {
   test.skip(process.platform !== 'win32', 'Cloud credential storage targets the Windows demo.');
   const page = await launch();

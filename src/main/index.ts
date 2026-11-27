@@ -1,3 +1,4 @@
+import { homedir } from 'node:os';
 import path from 'node:path';
 
 import type { BrowserWindow, IpcMainInvokeEvent } from 'electron';
@@ -45,13 +46,20 @@ function bootstrap(): void {
       delivery: 'header',
     }),
   });
+  const privateDataRoots = [
+    ...new Set([
+      app.getPath('userData'),
+      app.getPath('sessionData'),
+      path.join(homedir(), '.agentide'),
+    ]),
+  ];
+  const workspace = new WorkspaceBroker(pickWorkspaceFolder, undefined, privateDataRoots);
   const isAuthorized = (event: IpcMainInvokeEvent): boolean =>
     isAuthorizedSender(event, {
       source: rendererSource,
       appWebContentsId: () =>
         mainWindow === null || mainWindow.isDestroyed() ? null : mainWindow.webContents.id,
     });
-  const workspace = new WorkspaceBroker(pickWorkspaceFolder);
   const setup = new SetupBroker(
     new SetupStore(path.join(app.getPath('userData'), 'onboarding.json')),
     safeStorage,

@@ -7,8 +7,10 @@ import type {
   IpcResult,
   WorkspaceSummary,
 } from '../../shared/ipc-contract';
+import { listAgentWorkspace, readAgentWorkspaceFile } from '../workspace/agent-workspace';
 import { DEFAULT_LIST_LIMITS, listWorkspace, type ListLimits } from '../workspace/list-workspace';
 import { policyFail, type WorkspacePolicyError } from '../workspace/policy-result';
+import { checkEditorDataAccess, checkWorkspaceProtection } from '../workspace/protected-paths';
 import { readWorkspaceTextSnapshot, type VerifiedTextFile } from '../workspace/verified-read';
 import {
   hasWritableMode,
@@ -16,7 +18,6 @@ import {
   saveVerifiedTextFile,
 } from '../workspace/verified-save';
 import { openWorkspaceRoot, sameIdentity, type WorkspaceRoot } from '../workspace/workspace-root';
-import { checkWriteProtection } from '../workspace/write-protection';
 
 /** Opens the native folder picker; resolves to an absolute path or `null` when cancelled. */
 export type FolderPicker = () => Promise<string | null>;
@@ -59,6 +60,7 @@ export class WorkspaceBroker {
   constructor(
     private readonly pickFolder: FolderPicker,
     private readonly listLimits: ListLimits = DEFAULT_LIST_LIMITS,
+    private readonly privateDataRoots: readonly string[] = [],
   ) {}
 
   /** Lets the user pick a folder; an invalid choice keeps the previous workspace. */
@@ -130,17 +132,48 @@ export class WorkspaceBroker {
     if (!file.ok) {
       return failure(file.error);
     }
+    const accessible = await checkEditorDataAccess(
+      file.value.resolved.canonicalPath,
+      this.privateDataRoots,
+    );
+    if (!accessible.ok) return failure(accessible.error);
     const readOnly =
       workspace.root.identity.ino === 0n ||
       file.value.resolved.followedLink ||
       !hasWritableMode(file.value.stats) ||
-      !(await checkWriteProtection(workspace.root, file.value.relativePath)).ok;
+      !(
+        await checkWorkspaceProtection(
+          workspace.root,
+          file.value.relativePath,
+          this.privateDataRoots,
+        )
+      ).ok;
     if (workspace !== this.#workspace) return policyFail('ROOT_CHANGED');
     return presentFile(
       file.value,
       revisionForSnapshot(workspace.revisionKey, file.value),
       readOnly,
     );
+  }
+
+  /** Main-process context and index discovery. This capability is not registered over IPC. */
+  async listAgentFiles(): Promise<IpcResult<FileListing>> {
+    const workspace = this.#workspace;
+    if (workspace === null) return { ok: false, error: NO_WORKSPACE };
+    const result = await listAgentWorkspace(workspace.root, this.listLimits, this.privateDataRoots);
+    return workspace === this.#workspace ? result : policyFail('ROOT_CHANGED');
+  }
+
+  /** Main-process agent source access. Explicit or pinned requests receive the same checks. */
+  async readAgentFile(relativePath: unknown): Promise<IpcResult<VerifiedTextFile>> {
+    const workspace = this.#workspace;
+    if (workspace === null) return { ok: false, error: NO_WORKSPACE };
+    const result = await readAgentWorkspaceFile(
+      workspace.root,
+      relativePath,
+      this.privateDataRoots,
+    );
+    return workspace === this.#workspace ? result : policyFail('ROOT_CHANGED');
   }
 
   /** The sole write capability: replaces an existing, writable file at its opened revision. */
@@ -169,6 +202,7 @@ export class WorkspaceBroker {
         relativePath,
         content,
         expectedRevision,
+        this.privateDataRoots,
       );
       if (!saved.ok) return failure(saved.error);
       return presentFile(saved.value, saved.value.revision, false);

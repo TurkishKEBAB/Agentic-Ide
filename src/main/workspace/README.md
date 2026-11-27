@@ -20,7 +20,8 @@ and a manual save calls `revalidateResolvedPath` before replacing the file.
 | `resolve-path.ts` | `resolveWorkspacePath(root, input, intent)`, `revalidateResolvedPath(root, resolved)`. |
 | `verified-read.ts` | `readVerifiedTextFile(root, input, maxBytes?)`: validated, identity-checked UTF-8 read. |
 | `verified-save.ts` | Revision checking, bounded UTF-8 encoding, and same-directory staging for manual saves. |
-| `write-protection.ts` | Immutable protected paths and additional exclusions from the root `.agentignore`. |
+| `protected-paths.ts` | Immutable protected paths, application-private roots and additional exclusions from the root `.agentignore`. |
+| `agent-workspace.ts` | Guarded source discovery and verified text reads for agent context and indexing. |
 
 ## Lexical rules (`parseWorkspaceRelativePath`)
 
@@ -121,9 +122,13 @@ replacement preserves the original owner, group and ordinary permission bits; fi
 write bits or special mode bits are read-only. If metadata cannot be set or the rename fails,
 the original file remains in place and the broker attempts to remove its verified temporary file.
 
-Built-in write protections apply to canonical path components, case insensitively. They
-include `.git`, `.ssh`, `.env` and `.env.*`, key and secret extensions, SSH key names, `.npmrc`,
-`credentials.json`, `.aws/credentials`, `secrets`, `private`, `keys` and `.agentignore` itself.
+Built-in protections apply case insensitively to canonical path components through the selected
+root and its descendants. They include `.git`, `.ssh`, `.env` and `.env.*`, key and secret
+extensions, SSH key names, `.npmrc`,
+`credentials.json`, `.aws/credentials`, `secrets`, `private`, `keys`, `.agentignore` itself,
+`.agentide`, `.agentbackup` and the temporary manual-save namespace. The main process supplies the
+Electron application and session data directories and the app's home directory store as private roots.
+On macOS, the canonical system prefix `/private` is normalized for `/tmp` and `/var`.
 The root `.agentignore` adds exclusions with case-insensitive `*` and `?` within segments,
 `**` across segments, a leading `/` to anchor a basename at the root, and a trailing `/` for
 directories. A basename pattern without a leading slash matches at any depth. Blank lines,
@@ -137,11 +142,19 @@ Breadth-first, name-ordered, bounded by `maxEntries`/`maxDepth` (reported as `tr
 junctions, FIFOs/sockets/devices, `.git`, `node_modules`, names containing `\` and names the
 lexical rules reject are never listed, so every listed path is a valid read request.
 
+## Agent source access
+
+Use the main-process broker's `listAgentFiles` to build the candidate tree for context and indexing,
+then use `readAgentFile` for each file's content. This includes active-file and explicit pinned-file
+requests. Discovery prunes protected directories before descending and rechecks exclusions before
+returning paths. Text reads enforce the same policy around an identity-checked snapshot and return
+only the relative path, text and size. Both operations reject linked entries and unusable policy files.
+
 ## Limits (stated, not hidden)
 
 - Policy errors carry generic messages and never include absolute paths.
-- The write protections do not hide files from the local editor. Agent context and indexing
-  must apply their own protected-file checks if introduced.
+- The local editor can show protected files as read-only. Agent context and indexing use the
+  agent source-access methods for derived content.
 - Hardlinked files are rejected rather than analysed; reparse points that Node does not report as
   links (e.g. volume-GUID junctions) are caught only through the canonical-path checks (steps 4–5).
 - Network shares (UNC, mapped drives that canonicalize to UNC) are unsupported workspace roots.
