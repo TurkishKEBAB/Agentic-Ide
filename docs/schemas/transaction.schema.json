@@ -1,0 +1,252 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/TurkishKEBAB/Agentic-Ide/schemas/transaction.schema.json",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "transactionId",
+    "runId",
+    "workspaceId",
+    "patchSetId",
+    "fingerprint",
+    "condition",
+    "authorization",
+    "state",
+    "journalRef",
+    "createdAt",
+    "files"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "const": 2
+    },
+    "transactionId": {
+      "$ref": "contract-types.schema.json#/$defs/id"
+    },
+    "runId": {
+      "$ref": "contract-types.schema.json#/$defs/id"
+    },
+    "workspaceId": {
+      "$ref": "contract-types.schema.json#/$defs/id"
+    },
+    "patchSetId": {
+      "$ref": "contract-types.schema.json#/$defs/id"
+    },
+    "fingerprint": {
+      "$ref": "contract-types.schema.json#/$defs/hash"
+    },
+    "condition": {
+      "type": "string",
+      "enum": [
+        "B",
+        "C",
+        "not-applicable"
+      ]
+    },
+    "authorization": {
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "kind",
+            "approvalId"
+          ],
+          "properties": {
+            "kind": {
+              "const": "human-approval"
+            },
+            "approvalId": {
+              "$ref": "contract-types.schema.json#/$defs/id"
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "kind",
+            "fixtureId",
+            "capabilityId"
+          ],
+          "properties": {
+            "kind": {
+              "const": "experimental-fixture"
+            },
+            "fixtureId": {
+              "$ref": "contract-types.schema.json#/$defs/id"
+            },
+            "capabilityId": {
+              "$ref": "contract-types.schema.json#/$defs/id"
+            }
+          }
+        }
+      ]
+    },
+    "state": {
+      "type": "string",
+      "enum": [
+        "prepared",
+        "applying",
+        "committed",
+        "recovering",
+        "restored",
+        "recovery-required",
+        "rolled-back",
+        "rollback-conflict"
+      ]
+    },
+    "journalRef": {
+      "type": "string",
+      "minLength": 1
+    },
+    "createdAt": {
+      "type": "string",
+      "minLength": 1,
+      "format": "date-time"
+    },
+    "files": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "path",
+          "beforeHash",
+          "afterHash",
+          "state",
+          "backupRef"
+        ],
+        "properties": {
+          "path": {
+            "$ref": "contract-types.schema.json#/$defs/relativePath"
+          },
+          "beforeHash": {
+            "anyOf": [
+              {
+                "$ref": "contract-types.schema.json#/$defs/hash"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "afterHash": {
+            "$ref": "contract-types.schema.json#/$defs/hash"
+          },
+          "state": {
+            "type": "string",
+            "enum": [
+              "staged",
+              "applied",
+              "restored",
+              "conflict"
+            ]
+          },
+          "backupRef": {
+            "anyOf": [
+              {
+                "type": "string",
+                "minLength": 1
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        }
+      },
+      "minItems": 1
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "condition": {
+            "const": "B"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "authorization": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "kind",
+              "fixtureId",
+              "capabilityId"
+            ],
+            "properties": {
+              "kind": {
+                "const": "experimental-fixture"
+              },
+              "fixtureId": {
+                "$ref": "contract-types.schema.json#/$defs/id"
+              },
+              "capabilityId": {
+                "$ref": "contract-types.schema.json#/$defs/id"
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "condition": {
+            "enum": [
+              "C",
+              "not-applicable"
+            ]
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "authorization": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "kind",
+              "approvalId"
+            ],
+            "properties": {
+              "kind": {
+                "const": "human-approval"
+              },
+              "approvalId": {
+                "$ref": "contract-types.schema.json#/$defs/id"
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "state": {
+            "const": "committed"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "files": {
+            "items": {
+              "properties": {
+                "state": {
+                  "const": "applied"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  ]
+}

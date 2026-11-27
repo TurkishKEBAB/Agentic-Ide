@@ -1,0 +1,169 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/TurkishKEBAB/Agentic-Ide/schemas/plan-v2.schema.json",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "planId",
+    "planRevision",
+    "runId",
+    "workspaceId",
+    "createdAt",
+    "condition",
+    "model",
+    "versions",
+    "goal",
+    "requirementIds",
+    "steps",
+    "affectedFiles",
+    "contextSources",
+    "riskLevel",
+    "requiresApproval",
+    "verificationRequired"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "const": 2
+    },
+    "planId": {
+      "$ref": "contract-types.schema.json#/$defs/id"
+    },
+    "planRevision": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "runId": {
+      "$ref": "contract-types.schema.json#/$defs/id"
+    },
+    "workspaceId": {
+      "$ref": "contract-types.schema.json#/$defs/id"
+    },
+    "createdAt": {
+      "type": "string",
+      "minLength": 1,
+      "format": "date-time"
+    },
+    "condition": {
+      "$ref": "contract-types.schema.json#/$defs/condition"
+    },
+    "model": {
+      "$ref": "contract-types.schema.json#/$defs/model"
+    },
+    "versions": {
+      "$ref": "contract-types.schema.json#/$defs/versions"
+    },
+    "goal": {
+      "type": "string",
+      "minLength": 1
+    },
+    "requirementIds": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "minItems": 1,
+      "uniqueItems": true
+    },
+    "steps": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "stepId",
+          "summary",
+          "dependsOn"
+        ],
+        "properties": {
+          "stepId": {
+            "type": "string",
+            "minLength": 1
+          },
+          "summary": {
+            "type": "string",
+            "minLength": 1
+          },
+          "dependsOn": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            },
+            "uniqueItems": true
+          }
+        }
+      },
+      "minItems": 1
+    },
+    "affectedFiles": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "path",
+          "operation",
+          "reason"
+        ],
+        "properties": {
+          "path": {
+            "$ref": "contract-types.schema.json#/$defs/relativePath"
+          },
+          "operation": {
+            "type": "string",
+            "enum": [
+              "read",
+              "modify",
+              "create"
+            ]
+          },
+          "reason": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    "contextSources": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "path",
+          "contentHash",
+          "reason"
+        ],
+        "properties": {
+          "path": {
+            "$ref": "contract-types.schema.json#/$defs/relativePath"
+          },
+          "contentHash": {
+            "$ref": "contract-types.schema.json#/$defs/hash"
+          },
+          "reason": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    "riskLevel": {
+      "type": "string",
+      "enum": [
+        "low",
+        "medium",
+        "high",
+        "blocked"
+      ]
+    },
+    "requiresApproval": {
+      "const": true
+    },
+    "verificationRequired": {
+      "const": true
+    }
+  }
+}

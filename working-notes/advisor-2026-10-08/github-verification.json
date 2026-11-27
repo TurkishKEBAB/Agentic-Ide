@@ -1,0 +1,30 @@
+{
+  "verified_date": "2026-10-07 Europe/Istanbul",
+  "issues": 95,
+  "seed_issues": 95,
+  "project_items": 95,
+  "native_parent_links": 78,
+  "native_dependencies": 193,
+  "comments_sent": 0,
+  "milestones": [
+    {
+      "number": 2,
+      "title": "Faz 1 - Implementation Readiness",
+      "due_on": null,
+      "open_issues": 36
+    },
+    {
+      "number": 3,
+      "title": "Faz 2 - MVP",
+      "due_on": null,
+      "open_issues": 39
+    },
+    {
+      "number": 4,
+      "title": "Faz 3 - Evaluation & Thesis",
+      "due_on": null,
+      "open_issues": 20
+    }
+  ],
+  "errors": []
+}

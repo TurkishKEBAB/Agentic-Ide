@@ -11,6 +11,7 @@ planning, so some gates are armed as workflow placeholders and become blocking o
 |-------|------------------------------------------|---------------------------------------|-------------|--------------------------------------------|
 | G0    | Repository governance validation         | Yes                                   | Yes         | Always                                     |
 | G0    | Markdown link and PlantUML validation    | Yes                                   | Yes         | Always                                     |
+| G0    | Strict schemas, cross-record negative cases and requirement DAG | Yes | Yes | Always, via pinned planning validator |
 | G0    | Secret scan                              | Yes                                   | Yes         | Always                                     |
 | G1    | App lint, format, typecheck, test, build | Yes                                   | Armed       | `package.json` + `package-lock.json` exist |
 | G1    | Dependency review                        | Yes                                   | PR only     | Dependency manifest changes                |
@@ -24,6 +25,9 @@ planning, so some gates are armed as workflow placeholders and become blocking o
 ## Required npm Scripts
 
 Once application code exists, `package.json` should expose these scripts:
+
+These scripts are mandatory. A missing script fails the app gate; a planning-only job success does not mean
+that application tests ran. Integration/E2E gates activate as their related implementation slices are introduced.
 
 ```json
 {
@@ -59,10 +63,10 @@ Protect `main` before the first implementation PR:
 - require conversation resolution
 - require up-to-date branch before merge
 - require these checks:
-  - `Repository Governance / Validate repository governance`
-  - `Documentation Checks / Validate documentation and diagrams`
-  - `Security Checks / Secret scan`
-  - `Application CI / App quality gate`
+  - `Validate repository governance`
+  - `Validate documentation and diagrams`
+  - `Secret scan`
+  - `App quality gate`
 - add later, after app scaffold:
   - `CodeQL Analysis / Analyze JavaScript and TypeScript`
   - `Supply Chain Checks / npm audit and SBOM`
