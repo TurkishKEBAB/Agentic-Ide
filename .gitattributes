@@ -5,6 +5,7 @@
 *.yml text eol=lf
 *.yaml text eol=lf
 *.ps1 text eol=crlf
+*.cmd text eol=crlf
 *.puml text eol=lf
 *.html text eol=lf
 
@@ -14,3 +15,12 @@
 *.gif binary
 *.webp binary
 *.ico binary
+
+# Application sources are LF everywhere so Prettier/ESLint agree on Windows checkouts.
+*.ts text eol=lf
+*.mts text eol=lf
+*.cts text eol=lf
+*.js text eol=lf
+*.mjs text eol=lf
+*.cjs text eol=lf
+*.css text eol=lf

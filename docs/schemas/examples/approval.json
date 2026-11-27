@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 2,
+  "approvalId": "approval-example",
+  "actor": "user",
+  "workspaceId": "workspace-example",
+  "patchSetId": "patch-example",
+  "fingerprint": "63bd122f6d02f747340456b248dd6ad49e0190ed5305ddd61623997193cd08c7",
+  "selectedPaths": [
+    "src/total.ts"
+  ],
+  "decision": "approved",
+  "decidedAt": "2026-11-04T12:00:00Z",
+  "expiresAt": "2026-11-04T12:10:00Z"
+}
