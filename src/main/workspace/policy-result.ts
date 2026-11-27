@@ -30,7 +30,7 @@ export type WorkspacePolicyCode =
   /** File bytes or identity changed since it was opened or during validation. */
   | 'TARGET_CHANGED'
   | 'PROTECTED_PATH'
-  /** The write policy could not be safely loaded. */
+  /** The protected-file policy could not be safely loaded. */
   | 'PROTECTION_UNAVAILABLE'
   | 'READ_ONLY'
   /** The workspace root is unusable (filesystem root, UNC/device path, not a directory). */
@@ -66,8 +66,8 @@ const MESSAGES: Readonly<Record<WorkspacePolicyCode, string>> = {
   NON_CANONICAL_PATH: 'The path does not match its canonical file system name.',
   NOT_FOUND: 'The path does not exist.',
   TARGET_CHANGED: 'The file changed since it was opened or during validation.',
-  PROTECTED_PATH: 'The workspace policy prevents saving this file.',
-  PROTECTION_UNAVAILABLE: 'The workspace write policy could not be read safely.',
+  PROTECTED_PATH: 'The workspace policy prevents this operation on the path.',
+  PROTECTION_UNAVAILABLE: 'The workspace protected-file policy could not be read safely.',
   READ_ONLY: 'The file cannot be saved because it is read-only.',
   ROOT_UNSUPPORTED: 'This folder cannot be used as a workspace.',
   ROOT_CHANGED: 'The workspace folder changed after it was opened.',

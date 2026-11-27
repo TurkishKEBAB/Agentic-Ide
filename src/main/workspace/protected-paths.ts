@@ -1,4 +1,8 @@
-import { policyFail, policyOk, type PolicyResult } from './policy-result';
+import { realpath } from 'node:fs/promises';
+import path from 'node:path';
+
+import { isWithinRoot } from './containment';
+import { policyFail, policyFailFromFsError, policyOk, type PolicyResult } from './policy-result';
 import { resolveWorkspacePath } from './resolve-path';
 import { readResolvedTextSnapshot } from './verified-read';
 import type { WorkspaceRoot } from './workspace-root';
@@ -7,8 +11,8 @@ const IGNORE_FILE = '.agentignore';
 const MAX_IGNORE_BYTES = 16 * 1024;
 const MAX_RULES = 128;
 const MAX_RULE_LENGTH = 256;
-const PROTECTED_SEGMENT =
-  /^(?:\.git|\.ssh|\.agentignore|\.npmrc|credentials\.json|secrets|private|keys)$/;
+const PRIVATE_NAMESPACE = /^(?:\.git|\.ssh|\.agentide|\.agentbackup)$/;
+const PROTECTED_SEGMENT = /^(?:\.agentignore|\.npmrc|credentials\.json|secrets|private|keys)$/;
 const SENSITIVE_NAME = /^(?:\.env(?:\..*)?|id_(?:rsa|dsa|ed25519|ecdsa)(?:\.pub)?)$/;
 const SENSITIVE_EXTENSION = /\.(?:key|pem|p12|pfx|secret)$/;
 
@@ -17,29 +21,58 @@ interface IgnoreRule {
   readonly directoryOnly: boolean;
 }
 
-/** Checks the canonical path against immutable defaults and the current root .agentignore. */
-export async function checkWriteProtection(
+export const SAVE_STAGING_PREFIX = '.agentide-save-';
+
+type EntryKind = 'file' | 'directory';
+
+type PathExclusion = (relativePath: string, kind: EntryKind) => boolean;
+
+/** Checks a canonical file path against immutable defaults and the current root .agentignore. */
+export async function checkWorkspaceProtection(
   root: WorkspaceRoot,
   canonicalRelativePath: string,
+  privateRoots: readonly string[] = [],
 ): Promise<PolicyResult<true>> {
   const parts = canonicalRelativePath.toLowerCase().split('/');
-  if (
-    parts.some(
-      (part, index) =>
-        PROTECTED_SEGMENT.test(part) ||
-        SENSITIVE_NAME.test(part) ||
-        SENSITIVE_EXTENSION.test(part) ||
-        (part === 'credentials' && parts[index - 1] === '.aws'),
-    )
-  ) {
-    return policyFail('PROTECTED_PATH');
-  }
+  if (isBuiltInProtected(parts)) return policyFail('PROTECTED_PATH');
 
+  const excludes = await loadWorkspaceProtection(root, privateRoots);
+  if (!excludes.ok) return excludes;
+  return excludes.value(canonicalRelativePath, 'file')
+    ? policyFail('PROTECTED_PATH')
+    : policyOk(true);
+}
+
+/** Loads a bounded snapshot of the additive policy for one discovery operation. */
+export async function loadWorkspaceProtection(
+  root: WorkspaceRoot,
+  privateRoots: readonly string[],
+): Promise<PolicyResult<PathExclusion>> {
+  if (root.canonicalPath.toLowerCase().split(path.sep).some(isPrivateNamespace)) {
+    return policyOk(() => true);
+  }
+  const rules = await readIgnoreRules(root);
+  if (!rules.ok) return rules;
+  const canonical = await canonicalPrivateRoots(privateRoots);
+  if (!canonical.ok) return canonical;
+
+  return policyOk((relativePath, kind) => {
+    if (canonical.value.length > 0) {
+      const candidate = path.join(root.canonicalPath, relativePath);
+      if (canonical.value.some((privateRoot) => isWithinRoot(privateRoot, candidate))) return true;
+    }
+    if (relativePath === '') return false;
+    const parts = relativePath.toLowerCase().split('/');
+    return isBuiltInProtected(parts) || rules.value.some((rule) => matchesRule(parts, kind, rule));
+  });
+}
+
+async function readIgnoreRules(root: WorkspaceRoot): Promise<PolicyResult<IgnoreRule[]>> {
   // Use write-intent resolution even though the policy file is only read: configuration
   // through a link is ambiguous and must never weaken the protections.
   const resolved = await resolveWorkspacePath(root, IGNORE_FILE, 'write');
   if (!resolved.ok) {
-    if (resolved.error.code === 'NOT_FOUND') return policyOk(true);
+    if (resolved.error.code === 'NOT_FOUND') return policyOk([]);
     return policyFail(
       resolved.error.code === 'ROOT_CHANGED' ? 'ROOT_CHANGED' : 'PROTECTION_UNAVAILABLE',
     );
@@ -49,9 +82,38 @@ export async function checkWriteProtection(
 
   const rules = parseIgnoreRules(snapshot.value.content);
   if (rules === null) return policyFail('PROTECTION_UNAVAILABLE');
-  return rules.some((rule) => matchesRule(parts, rule))
-    ? policyFail('PROTECTED_PATH')
-    : policyOk(true);
+  return policyOk(rules);
+}
+
+async function canonicalPrivateRoots(
+  privateRoots: readonly string[],
+): Promise<PolicyResult<readonly string[]>> {
+  const paths = new Set(privateRoots);
+  for (const privateRoot of privateRoots) {
+    try {
+      paths.add(await realpath(privateRoot));
+    } catch (error) {
+      const failure = policyFailFromFsError(error);
+      if (!failure.ok && failure.error.code === 'NOT_FOUND') continue;
+      return policyFail('PROTECTION_UNAVAILABLE');
+    }
+  }
+  return policyOk([...paths]);
+}
+
+function isBuiltInProtected(parts: readonly string[]): boolean {
+  return parts.some(
+    (part, index) =>
+      isPrivateNamespace(part) ||
+      PROTECTED_SEGMENT.test(part) ||
+      SENSITIVE_NAME.test(part) ||
+      SENSITIVE_EXTENSION.test(part) ||
+      (part === 'credentials' && parts[index - 1] === '.aws'),
+  );
+}
+
+function isPrivateNamespace(part: string): boolean {
+  return PRIVATE_NAMESPACE.test(part) || part.startsWith(SAVE_STAGING_PREFIX);
 }
 
 function parseIgnoreRules(content: string): IgnoreRule[] | null {
@@ -74,8 +136,8 @@ function parseIgnoreRules(content: string): IgnoreRule[] | null {
 }
 
 /** A matched prefix also protects everything under it. No regular-expression backtracking. */
-function matchesRule(path: readonly string[], rule: IgnoreRule): boolean {
-  const limit = path.length - (rule.directoryOnly ? 1 : 0);
+function matchesRule(path: readonly string[], kind: EntryKind, rule: IgnoreRule): boolean {
+  const limit = path.length - (rule.directoryOnly && kind === 'file' ? 1 : 0);
   const offsets = new Uint8Array(limit + 1);
   offsets[0] = 1;
   for (const part of rule.parts) {

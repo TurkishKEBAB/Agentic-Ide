@@ -1,3 +1,4 @@
+import { homedir } from 'node:os';
 import path from 'node:path';
 
 import type { BrowserWindow } from 'electron';
@@ -42,7 +43,15 @@ function bootstrap(): void {
       delivery: 'header',
     }),
   });
-  registerWorkspaceIpc(ipcMain, new WorkspaceBroker(pickWorkspaceFolder), (event) =>
+  const privateDataRoots = [
+    ...new Set([
+      app.getPath('userData'),
+      app.getPath('sessionData'),
+      path.join(homedir(), '.agentide'),
+    ]),
+  ];
+  const workspace = new WorkspaceBroker(pickWorkspaceFolder, undefined, privateDataRoots);
+  registerWorkspaceIpc(ipcMain, workspace, (event) =>
     isAuthorizedSender(event, {
       source: rendererSource,
       appWebContentsId: () =>

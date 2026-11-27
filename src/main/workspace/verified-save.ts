@@ -4,6 +4,7 @@ import { open, rename, unlink, type FileHandle } from 'node:fs/promises';
 import path from 'node:path';
 
 import { policyFail, policyFailFromFsError, policyOk, type PolicyResult } from './policy-result';
+import { checkWorkspaceProtection, SAVE_STAGING_PREFIX } from './protected-paths';
 import { parseWorkspaceRelativePath } from './relative-path';
 import { resolveWorkspacePath, revalidateResolvedPath } from './resolve-path';
 import {
@@ -16,7 +17,6 @@ import {
   type VerifiedTextSnapshot,
 } from './verified-read';
 import { sameIdentity, type FileIdentity, type WorkspaceRoot } from './workspace-root';
-import { checkWriteProtection } from './write-protection';
 
 const UTF8_BOM = Buffer.from([0xef, 0xbb, 0xbf]);
 const STAGING_FLAGS = constants.O_CREAT | constants.O_EXCL | constants.O_WRONLY | SAFE_OPEN_FLAGS;
@@ -48,10 +48,11 @@ export async function saveVerifiedTextFile(
   input: string,
   content: string,
   expectedRevision: string,
+  privateRoots: readonly string[] = [],
 ): Promise<PolicyResult<RevisionedTextFile>> {
   const target = await resolveWorkspacePath(root, input, 'write');
   if (!target.ok) return target;
-  const protection = await checkWriteProtection(root, target.value.relativePath);
+  const protection = await checkWorkspaceProtection(root, target.value.relativePath, privateRoots);
   if (!protection.ok) return protection;
   if (root.identity.ino === 0n) return policyFail('READ_ONLY');
 
@@ -74,7 +75,7 @@ export async function saveVerifiedTextFile(
       revision: expectedRevision,
     });
   }
-  const replacement = await replaceFile(root, original.value, bytes);
+  const replacement = await replaceFile(root, original.value, bytes, privateRoots);
   if (!replacement.ok) return replacement;
   return policyOk({
     relativePath,
@@ -130,9 +131,10 @@ async function replaceFile(
   root: WorkspaceRoot,
   original: VerifiedTextSnapshot,
   bytes: Buffer,
+  privateRoots: readonly string[],
 ): Promise<PolicyResult<FileIdentity>> {
   const target = original.resolved;
-  const name = `.agentide-save-${randomUUID()}`;
+  const name = `${SAVE_STAGING_PREFIX}${randomUUID()}`;
   const tempPath = path.join(path.dirname(target.canonicalPath), name);
   const tempRelative = path.posix.join(path.posix.dirname(target.relativePath), name);
   const tempRequest = parseWorkspaceRelativePath(tempRelative);
@@ -182,7 +184,7 @@ async function replaceFile(
     await handle.close();
     handle = undefined;
 
-    const protection = await checkWriteProtection(root, target.relativePath);
+    const protection = await checkWorkspaceProtection(root, target.relativePath, privateRoots);
     if (!protection.ok) return protection;
     const stageCurrent = await revalidateResolvedPath(root, staged.value);
     if (!stageCurrent.ok) return stageCurrent;

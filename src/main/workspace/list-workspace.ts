@@ -4,6 +4,7 @@ import path from 'node:path';
 
 import { policyOk, type PolicyResult } from './policy-result';
 import { parseWorkspaceRelativePath } from './relative-path';
+import { resolveWorkspacePath } from './resolve-path';
 import { verifyWorkspaceRoot, type WorkspaceRoot } from './workspace-root';
 
 export interface ListLimits {
@@ -44,6 +45,7 @@ interface PendingDirectory {
 export async function listWorkspace(
   root: WorkspaceRoot,
   limits: ListLimits = DEFAULT_LIST_LIMITS,
+  include?: (relativePath: string, kind: 'file' | 'directory') => boolean,
 ): Promise<PolicyResult<WorkspaceListing>> {
   const rootCheck = await verifyWorkspaceRoot(root);
   if (!rootCheck.ok) {
@@ -56,7 +58,18 @@ export async function listWorkspace(
   ];
 
   for (let next = queue.shift(); next !== undefined; next = queue.shift()) {
+    if (include !== undefined) {
+      // Filtered discovery never descends through a directory replaced by a link.
+      const checked = await resolveWorkspacePath(root, next.relativePath || '.', 'list');
+      if (!checked.ok) {
+        if (checked.error.code === 'ROOT_CHANGED') return checked;
+        continue;
+      }
+      if (checked.value.followedLink || checked.value.canonicalPath !== next.canonicalPath)
+        continue;
+    }
     for (const child of await readChildren(next)) {
+      if (include !== undefined && !include(child.relativePath, child.kind)) continue;
       if (entries.length >= limits.maxEntries) {
         return policyOk({ entries, truncated: true });
       }
