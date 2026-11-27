@@ -6,7 +6,7 @@ for agent source discovery, explicit content reads and manual saves.
 
 | Requirement | Verification |
 | --- | --- |
-| Exclude sensitive files from read, context, index and write | [The #45 boundary tests](../../tests/safety/issue-45/protected-content.test.ts) cover protected names, mixed-case extensions, nested paths, alternative separators, application data, backup and save-staging files, and linked directories. Local editor reads present protected files as read-only. Manual saves report a policy denial. |
+| Exclude sensitive files from read, context, index and write | [The #45 boundary tests](../../tests/safety/issue-45/protected-content.test.ts) cover protected names, mixed-case extensions, nested paths, alternative separators, application data, backup and save-staging files, linked directories and hard-linked files. Local editor reads present protected files as read-only. Manual saves report a policy denial. |
 | Keep user rules additive | The same tests cover root `.agentignore` rules, directory patterns, ignored negations, updated policies and parse errors. A policy error stops agent source discovery and content reads. |
 | Keep protected bytes out of downstream input | Synthetic fixtures exercise both broker methods. Provider and embedding test doubles receive only the allowed file's text. The audit test double receives generic denial messages without the path or bytes. |
 

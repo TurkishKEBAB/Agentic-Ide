@@ -1,10 +1,10 @@
 import type { Dirent } from 'node:fs';
-import { readdir } from 'node:fs/promises';
+import { lstat, readdir } from 'node:fs/promises';
 import path from 'node:path';
 
 import { policyOk, type PolicyResult } from './policy-result';
 import { parseWorkspaceRelativePath } from './relative-path';
-import { resolveWorkspacePath } from './resolve-path';
+import { resolveWorkspacePath, revalidateResolvedPath } from './resolve-path';
 import { verifyWorkspaceRoot, type WorkspaceRoot } from './workspace-root';
 
 export interface ListLimits {
@@ -34,6 +34,8 @@ interface PendingDirectory {
   readonly depth: number;
 }
 
+type IncludeEntry = (relativePath: string, kind: ListedEntry['kind']) => boolean;
+
 /**
  * Breadth-first listing of the workspace for the file tree (#33/#49).
  *
@@ -45,7 +47,7 @@ interface PendingDirectory {
 export async function listWorkspace(
   root: WorkspaceRoot,
   limits: ListLimits = DEFAULT_LIST_LIMITS,
-  include?: (relativePath: string, kind: 'file' | 'directory') => boolean,
+  include?: IncludeEntry,
 ): Promise<PolicyResult<WorkspaceListing>> {
   const rootCheck = await verifyWorkspaceRoot(root);
   if (!rootCheck.ok) {
@@ -58,18 +60,12 @@ export async function listWorkspace(
   ];
 
   for (let next = queue.shift(); next !== undefined; next = queue.shift()) {
-    if (include !== undefined) {
-      // Filtered discovery never descends through a directory replaced by a link.
-      const checked = await resolveWorkspacePath(root, next.relativePath || '.', 'list');
-      if (!checked.ok) {
-        if (checked.error.code === 'ROOT_CHANGED') return checked;
-        continue;
-      }
-      if (checked.value.followedLink || checked.value.canonicalPath !== next.canonicalPath)
-        continue;
-    }
-    for (const child of await readChildren(next)) {
-      if (include !== undefined && !include(child.relativePath, child.kind)) continue;
+    const children =
+      include === undefined
+        ? policyOk(await readChildren(next))
+        : await readFilteredChildren(root, next, include, limits.maxEntries - entries.length + 1);
+    if (!children.ok) return children;
+    for (const child of children.value) {
       if (entries.length >= limits.maxEntries) {
         return policyOk({ entries, truncated: true });
       }
@@ -95,6 +91,43 @@ interface ListableChild {
   readonly name: string;
   readonly relativePath: string;
   readonly kind: 'file' | 'directory';
+}
+
+/** Agent discovery verifies the directory before and after scanning it and omits linked files. */
+async function readFilteredChildren(
+  root: WorkspaceRoot,
+  directory: PendingDirectory,
+  include: IncludeEntry,
+  limit: number,
+): Promise<PolicyResult<ListableChild[]>> {
+  const checked = await resolveWorkspacePath(root, directory.relativePath || '.', 'list');
+  if (!checked.ok) return checked.error.code === 'ROOT_CHANGED' ? checked : policyOk([]);
+  if (checked.value.followedLink || checked.value.canonicalPath !== directory.canonicalPath) {
+    return policyOk([]);
+  }
+
+  const included: ListableChild[] = [];
+  for (const child of await readChildren(directory)) {
+    if (!include(child.relativePath, child.kind)) continue;
+    if (!(await isDiscoverableEntry(path.join(directory.canonicalPath, child.name), child.kind))) {
+      continue;
+    }
+    included.push(child);
+    if (included.length >= limit) break;
+  }
+
+  const current = await revalidateResolvedPath(root, checked.value);
+  if (!current.ok) return current.error.code === 'ROOT_CHANGED' ? current : policyOk([]);
+  return policyOk(current.value.followedLink ? [] : included);
+}
+
+async function isDiscoverableEntry(candidate: string, kind: ListedEntry['kind']): Promise<boolean> {
+  try {
+    const stats = await lstat(candidate);
+    return kind === 'directory' ? stats.isDirectory() : stats.isFile() && stats.nlink === 1;
+  } catch {
+    return false;
+  }
 }
 
 /** Listable children of one directory in deterministic (code unit) name order. */

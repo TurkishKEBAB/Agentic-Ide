@@ -146,7 +146,7 @@ Use the main-process broker's `listAgentFiles` to build the candidate tree for c
 then use `readAgentFile` for each file's content. This includes active-file and explicit pinned-file
 requests. Discovery prunes protected directories before descending and rechecks exclusions before
 returning paths. Text reads enforce the same policy around an identity-checked snapshot and return
-only the relative path, text and size. Both operations reject links and unusable policy files.
+only the relative path, text and size. Both operations reject linked entries and unusable policy files.
 
 ## Limits (stated, not hidden)
 

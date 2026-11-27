@@ -1,4 +1,4 @@
-import { mkdir, mkdtemp, rm, symlink, writeFile } from 'node:fs/promises';
+import { link, mkdir, mkdtemp, rm, symlink, writeFile } from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
 
@@ -215,6 +215,21 @@ describe('#45 protected agent content', () => {
     await expect(broker.readAgentFile('alias/fixture.txt')).resolves.toMatchObject({
       ok: false,
       error: { code: 'LINK_NOT_ALLOWED' },
+    });
+  });
+
+  it('omits hard-linked file names and refuses to read their contents', async () => {
+    await addFile('.env');
+    await addFile('source.ts', PUBLIC_CONTENT);
+    await link(path.join(workspace, '.env'), path.join(workspace, 'linked.ts'));
+    const broker = await openBroker();
+    await expect(broker.listAgentFiles()).resolves.toMatchObject({
+      ok: true,
+      value: { entries: [{ kind: 'file', path: 'source.ts' }] },
+    });
+    await expect(broker.readAgentFile('linked.ts')).resolves.toMatchObject({
+      ok: false,
+      error: { code: 'HARDLINK_UNSUPPORTED' },
     });
   });
 
