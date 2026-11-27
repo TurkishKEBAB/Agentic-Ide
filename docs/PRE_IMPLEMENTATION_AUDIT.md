@@ -1,11 +1,10 @@
 # Pre-Implementation Audit
 
-Status: Updated before first app scaffold
+Status: 4 November 2026 staged baseline; technical document completion is separate from runtime evidence.
 
 ## Verdict
 
-The repository is strong as a thesis planning repository, but implementation should not start until the P0 gates below
-are either complete or explicitly accepted as risk.
+S1 safe scaffold/pure workspace policy may start under IMPLEMENTATION_READINESS.md. Agent write and formal research have later independent gates; they are not enabled by a planning document. Main protection was read back on 5 November: required PR, preserved review/admin settings, and the four documented CI contexts are enforced. See the [verification record](../working-notes/planning-2026-11-04/VERIFICATION.json).
 
 ## P0 Before First App Scaffold
 
@@ -18,7 +17,7 @@ are either complete or explicitly accepted as risk.
 | Code scanning           | CodeQL workflow exists and activates when app code exists                 | Done   |
 | Supply chain            | npm audit and SBOM workflow exists and activates when lockfile exists     | Done   |
 | Issue intake            | ADR, spike, research, security, and quality gate templates exist          | Done   |
-| Branch protection       | Main branch ruleset configured in GitHub UI                               | Manual |
+| Branch protection       | Existing main protection verified with four required CI checks             | Verified 2026-11-05 |
 | Prompt/model versioning | ADR exists                                                                | Done   |
 | Threat model            | MVP threat model exists                                                   | Done   |
 

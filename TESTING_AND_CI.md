@@ -5,6 +5,8 @@
 
 ---
 
+Aktif workflow kaynağı [QUALITY_GATES](docs/QUALITY_GATES.md) ve .github/workflows/ci.yml'dir. Manifest varsa altı required script eksik olamaz; planlama reposunda uygulama gate'i armed'dır. Test adedi hedefleri ölçülmüş sonuç veya kapsam kanıtı değildir.
+
 ## 1. Test Piramidi
 
 ```
@@ -156,11 +158,12 @@ test('should open project and display file tree', async () => {
 ### 6.1 PR Açıldığında
 
 ```
-1. npm ci (bağımlılık yükleme)
-2. npm run lint (ESLint)
-3. npm run typecheck (TypeScript derlemesi)
-4. npm test (birim + güvenlik testleri)
-5. npm run test:integration (entegrasyon testleri)
+1. npm ci (kilitli bağımlılıklar)
+2. npm run format:check ve npm run lint
+3. npm run typecheck
+4. npm test ve npm run test:security
+5. npm run build
+6. İlgili modüller eklendikçe integration/E2E gate'leri
 ```
 
 ### 6.2 Main Branch'e Merge'de

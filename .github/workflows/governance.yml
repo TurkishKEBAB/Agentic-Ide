@@ -24,3 +24,20 @@ jobs:
       - name: Validate project metadata and seed data
         shell: pwsh
         run: ./scripts/validate-github-governance.ps1 -Owner TurkishKEBAB
+
+      - name: Setup planning validator runtime
+        uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
+        with:
+          python-version: '3.13'
+          cache: pip
+          cache-dependency-path: scripts/requirements-planning.txt
+
+      - name: Install pinned schema validator
+        run: python -m pip install -r scripts/requirements-planning.txt
+
+      - name: Validate planning contracts and negative cases
+        run: python scripts/validate-planning-contracts.py
+
+      - name: Validate sync identity and state semantics
+        shell: pwsh
+        run: ./scripts/test-planning-sync.ps1
